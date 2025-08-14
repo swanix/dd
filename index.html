@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta charset="UTF-8" />
-  <meta name="robots" content="noindex, nofollow, noarchive" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <link rel="shortcut icon" href="img/favicon.ico">
-  <meta name="llm-context" content="data/context.md">
-  <meta name="ai-context" content="data/context.md">
-  <link rel="context" href="data/context.md" type="text/markdown">
-  <meta name="description" content="Diagrama interactivo de secciones. Contexto completo en data/context.md">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Diagram</title>
   <link href="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.css" rel="stylesheet" />
   <style>
-    .auth-container {
+    .login-container {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -34,6 +26,9 @@
     .user-info {
       text-align: center;
       margin-bottom: 20px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 4px;
     }
     .logout-btn {
       padding: 8px 16px;
@@ -44,524 +39,104 @@
       cursor: pointer;
       margin-left: 10px;
     }
-    .debug-info {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-      max-width: 300px;
-      z-index: 1000;
-    }
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #007bff;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
-<body class="custom-theme">
+<body>
 
 <div id="app"></div>
-
-<script>
-  console.log('🔧 Configurando xDiagrams...');
-  window.$xDiagrams = {
-    url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
-    title: "Inspector",
-    clustersPerRow: "6 3 7 6 3",
-    showThemeToggle: false 
-  };
-  console.log('✅ xDiagrams configurado:', window.$xDiagrams);
-</script>
 
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
 <script>
   let auth0 = null;
-  let debugInfo = null;
-  let xDiagramsLoaded = false;
 
-  const showDebugInfo = (message) => {
-    console.log('🔍 DEBUG:', message);
-    if (!debugInfo) {
-      debugInfo = document.createElement('div');
-      debugInfo.className = 'debug-info';
-      document.body.appendChild(debugInfo);
-    }
-    debugInfo.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
-  };
-
-  const loadXDiagramsScript = () => {
-    return new Promise((resolve, reject) => {
-      showDebugInfo('📥 Cargando script de xDiagrams...');
-      
-      // Asegurar que $xDiagrams esté disponible antes de cargar el script
-      if (!window.$xDiagrams) {
-        showDebugInfo('⚠️ $xDiagrams no está disponible, restaurando configuración...');
-        window.$xDiagrams = {
-          url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
-          title: "Inspector",
-          clustersPerRow: "6 3 7 6 3",
-          showThemeToggle: false 
-        };
-        showDebugInfo('✅ Configuración de $xDiagrams restaurada');
-      }
-      
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js?v=' + Date.now();
-      
-      script.onload = () => {
-        showDebugInfo('✅ Script de xDiagrams cargado');
-        resolve();
-      };
-      
-      script.onerror = () => {
-        showDebugInfo('❌ Error cargando script de xDiagrams');
-        reject(new Error('No se pudo cargar el script de xDiagrams'));
-      };
-      
-      document.head.appendChild(script);
+  // Configurar Auth0
+  const configureAuth0 = async () => {
+    auth0 = await createAuth0Client({
+      domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
+      client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+      redirect_uri: window.location.origin
     });
   };
 
-  const checkXDiagrams = () => {
-    showDebugInfo('🔍 Verificando xDiagrams...');
-    
-    // Verificar diferentes formas de detectar xDiagrams
-    if (window.xDiagrams) {
-      showDebugInfo('✅ xDiagrams encontrado en window.xDiagrams');
-      xDiagramsLoaded = true;
-      return true;
-    }
-    
-    // ¡NUEVO! Verificar XDiagrams con X mayúscula
-    if (window.XDiagrams) {
-      showDebugInfo('✅ XDiagrams encontrado en window.XDiagrams');
-      xDiagramsLoaded = true;
-      return true;
-    }
-    
-    if (window.$xDiagrams) {
-      showDebugInfo('✅ $xDiagrams encontrado en window.$xDiagrams');
-    }
-    
-    if (typeof xDiagrams !== 'undefined') {
-      showDebugInfo('✅ xDiagrams encontrado como variable global');
-      xDiagramsLoaded = true;
-      return true;
-    }
-    
-    // Verificar si hay elementos del diagrama en el DOM
-    const diagramElements = document.querySelectorAll('[data-xdiagrams], .xdiagrams, #xdiagrams');
-    if (diagramElements.length > 0) {
-      showDebugInfo(`✅ Elementos de diagrama encontrados: ${diagramElements.length}`);
-      xDiagramsLoaded = true;
-      return true;
-    }
-    
-    // Verificar si el script se cargó
-    const scripts = document.querySelectorAll('script');
-    const xDiagramsScript = Array.from(scripts).find(script => 
-      script.src && script.src.includes('xdiagrams')
-    );
-    
-    if (xDiagramsScript) {
-      showDebugInfo('✅ Script de xDiagrams encontrado en DOM');
-    } else {
-      showDebugInfo('❌ Script de xDiagrams no encontrado en DOM');
-    }
-    
-    showDebugInfo('❌ xDiagrams no está disponible como objeto');
-    return false;
+  // Mostrar pantalla de login
+  const showLogin = () => {
+    document.body.innerHTML = `
+      <div class="login-container">
+        <h2>Acceso requerido</h2>
+        <button class="login-btn" onclick="login()">Iniciar sesión</button>
+      </div>
+    `;
   };
 
-  const initializeDiagram = () => {
-    showDebugInfo('🚀 Inicializando diagrama...');
+  // Mostrar diagrama
+  const showDiagram = (user) => {
+    // Configurar xDiagrams
+    window.$xDiagrams = {
+      url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
+      title: "Inspector",
+      clustersPerRow: "6 3 7 6 3",
+      showThemeToggle: false 
+    };
+
+    // Mostrar información del usuario
+    const userInfo = document.createElement('div');
+    userInfo.className = 'user-info';
+    userInfo.innerHTML = `
+      <p>Bienvenido, ${user.name || user.email}</p>
+      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+    `;
     
-    try {
-      // Verificar si XDiagrams tiene un método de inicialización
-      if (window.XDiagrams && typeof window.XDiagrams.init === 'function') {
-        showDebugInfo('✅ Llamando XDiagrams.init()');
-        window.XDiagrams.init();
-        return true;
-      }
-      
-      // Verificar si XDiagrams tiene un método render
-      if (window.XDiagrams && typeof window.XDiagrams.render === 'function') {
-        showDebugInfo('✅ Llamando XDiagrams.render()');
-        window.XDiagrams.render();
-        return true;
-      }
-      
-      // Verificar si XDiagrams tiene un método start
-      if (window.XDiagrams && typeof window.XDiagrams.start === 'function') {
-        showDebugInfo('✅ Llamando XDiagrams.start()');
-        window.XDiagrams.start();
-        return true;
-      }
-      
-      // Verificar si el script se ejecuta automáticamente
-      showDebugInfo('🔍 Verificando si el script se ejecuta automáticamente...');
-      
-      // Esperar un poco más para ver si el script se inicializa solo
-      setTimeout(() => {
-        showDebugInfo('⏳ Esperando inicialización automática...');
-        
-        // Verificar si aparecieron elementos del diagrama
-        const diagramElements = document.querySelectorAll('[data-xdiagrams], .xdiagrams, #xdiagrams, .diagram, [class*="diagram"]');
-        if (diagramElements.length > 0) {
-          showDebugInfo(`✅ Elementos de diagrama aparecieron automáticamente: ${diagramElements.length}`);
-          diagramElements.forEach((el, index) => {
-            showDebugInfo(`Elemento ${index + 1}: ${el.tagName} - ${el.className || el.id}`);
-          });
-        } else {
-          showDebugInfo('❌ No aparecieron elementos automáticamente');
-        }
-      }, 3000);
-      
-      // Si no hay métodos específicos, intentar crear el diagrama manualmente
-      showDebugInfo('🔧 Intentando crear diagrama manualmente...');
-      
-      // Verificar si hay un div app donde renderizar
-      const appDiv = document.getElementById('app');
-      if (appDiv) {
-        showDebugInfo('✅ Div app encontrado, intentando renderizar diagrama');
-        
-        // Intentar diferentes formas de inicializar
-        if (window.XDiagrams && window.XDiagrams.create) {
-          showDebugInfo('✅ Usando XDiagrams.create()');
-          window.XDiagrams.create(appDiv);
-          return true;
-        }
-        
-        if (window.XDiagrams && window.XDiagrams.mount) {
-          showDebugInfo('✅ Usando XDiagrams.mount()');
-          window.XDiagrams.mount(appDiv);
-          return true;
-        }
-        
-        // Si nada funciona, intentar forzar la inicialización
-        showDebugInfo('🔧 Forzando inicialización del diagrama...');
-        
-        // Crear un elemento para el diagrama
-        const diagramDiv = document.createElement('div');
-        diagramDiv.id = 'xdiagrams-container';
-        diagramDiv.className = 'xdiagrams';
-        appDiv.appendChild(diagramDiv);
-        
-        showDebugInfo('✅ Elemento de diagrama creado');
-        
-        // Intentar disparar un evento de inicialización
-        const initEvent = new CustomEvent('xdiagrams-init', {
-          detail: { container: diagramDiv }
-        });
-        document.dispatchEvent(initEvent);
-        
-        showDebugInfo('✅ Evento de inicialización disparado');
-        return true;
-      }
-      
-      showDebugInfo('❌ No se pudo inicializar el diagrama');
-      return false;
-      
-    } catch (error) {
-      showDebugInfo(`❌ Error inicializando diagrama: ${error.message}`);
-      console.error('Error inicializando diagrama:', error);
-      return false;
-    }
+    document.body.insertBefore(userInfo, document.getElementById('app'));
+
+    // Cargar script de xDiagrams
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js';
+    document.head.appendChild(script);
   };
 
-  const investigateScript = () => {
-    showDebugInfo('🔬 Investigando script de xDiagrams...');
-    
-    // Verificar todas las propiedades de window que podrían ser xDiagrams
-    const possibleNames = [
-      'xDiagrams', 'XDiagrams', 'xdiagrams', 'XDIAGRAMS',
-      'diagrams', 'Diagrams', 'DIAGRAMS',
-      'swanix', 'Swanix', 'SWANIX'
-    ];
-    
-    for (const name of possibleNames) {
-      if (window[name]) {
-        showDebugInfo(`✅ Encontrado: window.${name}`);
-        console.log(`window.${name}:`, window[name]);
-        
-        // Si es XDiagrams, investigar sus métodos
-        if (name === 'XDiagrams') {
-          showDebugInfo('🔍 Investigando métodos de XDiagrams...');
-          const methods = Object.getOwnPropertyNames(window[name]).filter(prop => 
-            typeof window[name][prop] === 'function'
-          );
-          showDebugInfo(`Métodos disponibles: ${methods.join(', ')}`);
-          console.log('Métodos de XDiagrams:', methods);
-          
-          // Mostrar propiedades del objeto
-          const properties = Object.getOwnPropertyNames(window[name]);
-          showDebugInfo(`Propiedades disponibles: ${properties.join(', ')}`);
-          console.log('Propiedades de XDiagrams:', properties);
-        }
-      }
-    }
-    
-    // Verificar si hay algún evento o callback que se haya disparado
-    showDebugInfo('🔍 Verificando si hay eventos de xDiagrams...');
-    
-    // Verificar si el script creó algún elemento en el DOM
-    const allElements = document.querySelectorAll('*');
-    const xDiagramsElements = Array.from(allElements).filter(el => 
-      el.className && el.className.includes('xdiagrams') ||
-      el.id && el.id.includes('xdiagrams') ||
-      el.getAttribute('data-xdiagrams')
-    );
-    
-    if (xDiagramsElements.length > 0) {
-      showDebugInfo(`✅ Elementos relacionados con xDiagrams encontrados: ${xDiagramsElements.length}`);
-      xDiagramsElements.forEach((el, index) => {
-        showDebugInfo(`Elemento ${index + 1}: ${el.tagName} - ${el.className || el.id}`);
-      });
-    }
-    
-    // Verificar si hay algún error en la consola relacionado con xDiagrams
-    showDebugInfo('🔍 Verificando errores en consola...');
-  };
-
-  const waitForXDiagrams = async (maxAttempts = 15) => {
-    showDebugInfo('⏳ Esperando carga de xDiagrams...');
-    
-    for (let i = 0; i < maxAttempts; i++) {
-      showDebugInfo(`Intento ${i + 1}/${maxAttempts} para cargar xDiagrams`);
-      
-      if (checkXDiagrams()) {
-        showDebugInfo('🎉 xDiagrams cargado exitosamente!');
-        
-        // Investigar inmediatamente cuando se detecte XDiagrams
-        showDebugInfo('🔬 Investigando XDiagrams inmediatamente...');
-        investigateScript();
-        
-        // Intentar inicializar el diagrama
-        const initSuccess = initializeDiagram();
-        if (initSuccess) {
-          showDebugInfo('✅ Diagrama inicializado correctamente');
-        } else {
-          showDebugInfo('⚠️ Diagrama cargado pero no se pudo inicializar');
-        }
-        
-        return true;
-      }
-      
-      // En el intento 5, investigar más a fondo
-      if (i === 4) {
-        investigateScript();
-      }
-      
-      // Esperar 1 segundo antes del siguiente intento
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-    
-    showDebugInfo('❌ xDiagrams no se cargó después de todos los intentos');
-    return false;
-  };
-
-  const configureClient = async () => {
-    try {
-      showDebugInfo('Iniciando configuración de Auth0...');
-      auth0 = await createAuth0Client({
-        domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-        client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-        redirect_uri: window.location.origin,
-        cacheLocation: 'localstorage'
-      });
-      showDebugInfo('✅ Auth0 configurado correctamente');
-    } catch (error) {
-      showDebugInfo(`❌ Error configurando Auth0: ${error.message}`);
-      console.error('Error configurando Auth0:', error);
-    }
-  };
-
-  const updateUI = async () => {
-    try {
-      showDebugInfo('Verificando estado de autenticación...');
-      const isAuthenticated = await auth0.isAuthenticated();
-      showDebugInfo(`Estado de autenticación: ${isAuthenticated}`);
-      
-      if (isAuthenticated) {
-        showDebugInfo('Usuario autenticado, obteniendo datos...');
-        const user = await auth0.getUser();
-        const token = await auth0.getTokenSilently();
-        
-        showDebugInfo(`Usuario obtenido: ${user.email || user.name}`);
-        showDebugInfo('Token obtenido correctamente');
-        
-        // Mostrar información del usuario
-        const userInfo = document.createElement('div');
-        userInfo.className = 'user-info';
-        userInfo.innerHTML = `
-          <p>Bienvenido, ${user.name || user.email}</p>
-          <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-        `;
-        
-        // Insertar antes del div app
-        const appDiv = document.getElementById('app');
-        if (appDiv) {
-          appDiv.parentNode.insertBefore(userInfo, appDiv);
-          showDebugInfo('✅ UI actualizada con información de usuario');
-        } else {
-          showDebugInfo('❌ No se encontró el div app');
-        }
-        
-        console.log('Usuario autenticado:', user);
-        console.log('Token:', token);
-        
-        // Mostrar loading mientras esperamos xDiagrams
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading';
-        loadingDiv.innerHTML = `
-          <div class="spinner"></div>
-          <p>Cargando diagrama...</p>
-        `;
-        appDiv.appendChild(loadingDiv);
-        
-        // Cargar el script de xDiagrams dinámicamente
-        try {
-          await loadXDiagramsScript();
-          showDebugInfo('✅ Script cargado, esperando inicialización...');
-        } catch (error) {
-          showDebugInfo(`❌ Error cargando script: ${error.message}`);
-        }
-        
-        // Esperar a que xDiagrams se cargue
-        const xDiagramsSuccess = await waitForXDiagrams();
-        
-        if (xDiagramsSuccess) {
-          showDebugInfo('✅ Diagrama listo para mostrar');
-          loadingDiv.remove();
-        } else {
-          showDebugInfo('❌ Error: No se pudo cargar xDiagrams');
-          loadingDiv.innerHTML = `
-            <p>❌ Error al cargar el diagrama</p>
-            <p>El script se cargó pero no se inicializó correctamente</p>
-            <p>Revisa la consola para más detalles</p>
-            <button onclick="location.reload()">Reintentar</button>
-          `;
-        }
-        
-      } else {
-        showDebugInfo('Usuario no autenticado, mostrando login...');
-        // Mostrar botón de login
-        const authContainer = document.createElement('div');
-        authContainer.className = 'auth-container';
-        authContainer.innerHTML = `
-          <h2>Acceso requerido</h2>
-          <button class="login-btn" onclick="login()">Iniciar sesión</button>
-        `;
-        
-        document.body.innerHTML = '';
-        document.body.appendChild(authContainer);
-        showDebugInfo('✅ Pantalla de login mostrada');
-      }
-    } catch (error) {
-      showDebugInfo(`❌ Error en updateUI: ${error.message}`);
-      console.error('Error en updateUI:', error);
-    }
-  };
-
+  // Login
   const login = async () => {
-    try {
-      showDebugInfo('Iniciando proceso de login...');
-      await auth0.loginWithRedirect();
-    } catch (error) {
-      showDebugInfo(`❌ Error en login: ${error.message}`);
-      console.error('Error in login:', error);
-    }
+    await auth0.loginWithRedirect();
   };
 
+  // Logout
   const logout = async () => {
-    try {
-      showDebugInfo('Iniciando logout...');
-      await auth0.logout({
-        returnTo: window.location.origin
-      });
-    } catch (error) {
-      showDebugInfo(`❌ Error en logout: ${error.message}`);
-      console.error('Error en logout:', error);
+    await auth0.logout({
+      returnTo: window.location.origin
+    });
+  };
+
+  // Manejar redirección de Auth0
+  const handleRedirect = async () => {
+    const query = window.location.search;
+    if (query.includes("code=") && query.includes("state=")) {
+      await auth0.handleRedirectCallback();
+      window.history.replaceState({}, document.title, "/");
     }
   };
 
-  const handleRedirectCallback = async () => {
-    try {
-      const query = window.location.search;
-      showDebugInfo(`URL actual: ${window.location.href}`);
-      showDebugInfo(`Query params: ${query}`);
-      
-      if (query.includes("code=") && query.includes("state=")) {
-        showDebugInfo('Detectados parámetros de Auth0, procesando callback...');
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/");
-        showDebugInfo('✅ Callback procesado correctamente');
-      } else {
-        showDebugInfo('No hay parámetros de Auth0 en la URL');
-      }
-    } catch (error) {
-      showDebugInfo(`❌ Error en handleRedirectCallback: ${error.message}`);
-      console.error('Error en handleRedirectCallback:', error);
-    }
-  };
-
+  // Inicializar aplicación
   const init = async () => {
-    try {
-      showDebugInfo('🚀 Iniciando aplicación...');
-      showDebugInfo(`URL actual: ${window.location.href}`);
-      showDebugInfo(`User agent: ${navigator.userAgent}`);
-      
-      await configureClient();
-      await handleRedirectCallback();
-      await updateUI();
-      
-      showDebugInfo('✅ Inicialización completada');
-    } catch (error) {
-      showDebugInfo(`❌ Error en init: ${error.message}`);
-      console.error('Error en init:', error);
+    await configureAuth0();
+    await handleRedirect();
+    
+    const isAuthenticated = await auth0.isAuthenticated();
+    
+    if (isAuthenticated) {
+      const user = await auth0.getUser();
+      showDiagram(user);
+    } else {
+      showLogin();
     }
   };
 
+  // Hacer funciones globales
   window.login = login;
   window.logout = logout;
 
-  // Agregar listener para errores globales
-  window.addEventListener('error', (event) => {
-    showDebugInfo(`❌ Error global: ${event.error?.message || event.message}`);
-    console.error('Error global:', event);
-  });
-
-  // Agregar listener para errores no capturados
-  window.addEventListener('unhandledrejection', (event) => {
-    showDebugInfo(`❌ Promesa rechazada: ${event.reason}`);
-    console.error('Promesa rechazada:', event.reason);
-  });
-
+  // Iniciar
   init();
 </script>
 </body>
 </html>
-
-<!-- VERSION: 2.2 - Added timestamp to script URL to avoid cache -->
