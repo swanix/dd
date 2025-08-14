@@ -142,6 +142,13 @@
       return true;
     }
     
+    // ¡NUEVO! Verificar XDiagrams con X mayúscula
+    if (window.XDiagrams) {
+      showDebugInfo('✅ XDiagrams encontrado en window.XDiagrams');
+      xDiagramsLoaded = true;
+      return true;
+    }
+    
     if (window.$xDiagrams) {
       showDebugInfo('✅ $xDiagrams encontrado en window.$xDiagrams');
     }
