@@ -114,6 +114,18 @@
     return new Promise((resolve, reject) => {
       showDebugInfo('📥 Cargando script de xDiagrams...');
       
+      // Asegurar que $xDiagrams esté disponible antes de cargar el script
+      if (!window.$xDiagrams) {
+        showDebugInfo('⚠️ $xDiagrams no está disponible, restaurando configuración...');
+        window.$xDiagrams = {
+          url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
+          title: "Inspector",
+          clustersPerRow: "6 3 7 6 3",
+          showThemeToggle: false 
+        };
+        showDebugInfo('✅ Configuración de $xDiagrams restaurada');
+      }
+      
       const script = document.createElement('script');
       script.type = 'module';
       script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js?v=' + Date.now();
@@ -207,6 +219,25 @@
         window.XDiagrams.start();
         return true;
       }
+      
+      // Verificar si el script se ejecuta automáticamente
+      showDebugInfo('🔍 Verificando si el script se ejecuta automáticamente...');
+      
+      // Esperar un poco más para ver si el script se inicializa solo
+      setTimeout(() => {
+        showDebugInfo('⏳ Esperando inicialización automática...');
+        
+        // Verificar si aparecieron elementos del diagrama
+        const diagramElements = document.querySelectorAll('[data-xdiagrams], .xdiagrams, #xdiagrams, .diagram, [class*="diagram"]');
+        if (diagramElements.length > 0) {
+          showDebugInfo(`✅ Elementos de diagrama aparecieron automáticamente: ${diagramElements.length}`);
+          diagramElements.forEach((el, index) => {
+            showDebugInfo(`Elemento ${index + 1}: ${el.tagName} - ${el.className || el.id}`);
+          });
+        } else {
+          showDebugInfo('❌ No aparecieron elementos automáticamente');
+        }
+      }, 3000);
       
       // Si no hay métodos específicos, intentar crear el diagrama manualmente
       showDebugInfo('🔧 Intentando crear diagrama manualmente...');
@@ -322,6 +353,10 @@
       
       if (checkXDiagrams()) {
         showDebugInfo('🎉 xDiagrams cargado exitosamente!');
+        
+        // Investigar inmediatamente cuando se detecte XDiagrams
+        showDebugInfo('🔬 Investigando XDiagrams inmediatamente...');
+        investigateScript();
         
         // Intentar inicializar el diagrama
         const initSuccess = initializeDiagram();
