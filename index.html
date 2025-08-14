@@ -44,6 +44,19 @@
       cursor: pointer;
       margin-left: 10px;
     }
+    .debug-info {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-width: 300px;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body class="custom-theme">
@@ -51,12 +64,14 @@
 <div id="app"></div>
 
 <script>
+  console.log('🔧 Configurando xDiagrams...');
   window.$xDiagrams = {
     url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
     title: "Inspector",
     clustersPerRow: "6 3 7 6 3",
     showThemeToggle: false 
   };
+  console.log('✅ xDiagrams configurado:', window.$xDiagrams);
 </script>
 
 <script type="module" src="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js"></script>
@@ -64,78 +79,171 @@
 <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
 <script>
   let auth0 = null;
+  let debugInfo = null;
+
+  const showDebugInfo = (message) => {
+    console.log('🔍 DEBUG:', message);
+    if (!debugInfo) {
+      debugInfo = document.createElement('div');
+      debugInfo.className = 'debug-info';
+      document.body.appendChild(debugInfo);
+    }
+    debugInfo.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+  };
 
   const configureClient = async () => {
-    auth0 = await createAuth0Client({
-      domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-      client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-      redirect_uri: window.location.origin,
-      cacheLocation: 'localstorage'
-    });
+    try {
+      showDebugInfo('Iniciando configuración de Auth0...');
+      auth0 = await createAuth0Client({
+        domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
+        client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+        redirect_uri: window.location.origin,
+        cacheLocation: 'localstorage'
+      });
+      showDebugInfo('✅ Auth0 configurado correctamente');
+    } catch (error) {
+      showDebugInfo(`❌ Error configurando Auth0: ${error.message}`);
+      console.error('Error configurando Auth0:', error);
+    }
   };
 
   const updateUI = async () => {
-    const isAuthenticated = await auth0.isAuthenticated();
-    
-    if (isAuthenticated) {
-      const user = await auth0.getUser();
-      const token = await auth0.getTokenSilently();
+    try {
+      showDebugInfo('Verificando estado de autenticación...');
+      const isAuthenticated = await auth0.isAuthenticated();
+      showDebugInfo(`Estado de autenticación: ${isAuthenticated}`);
       
-      // Mostrar información del usuario
-      const userInfo = document.createElement('div');
-      userInfo.className = 'user-info';
-      userInfo.innerHTML = `
-        <p>Bienvenido, ${user.name || user.email}</p>
-        <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-      `;
-      
-      // Insertar antes del div app
-      const appDiv = document.getElementById('app');
-      appDiv.parentNode.insertBefore(userInfo, appDiv);
-      
-      console.log('Usuario autenticado:', user);
-      console.log('Token:', token);
-      
-    } else {
-      // Mostrar botón de login
-      const authContainer = document.createElement('div');
-      authContainer.className = 'auth-container';
-      authContainer.innerHTML = `
-        <h2>Acceso requerido</h2>
-        <button class="login-btn" onclick="login()">Iniciar sesión</button>
-      `;
-      
-      document.body.innerHTML = '';
-      document.body.appendChild(authContainer);
+      if (isAuthenticated) {
+        showDebugInfo('Usuario autenticado, obteniendo datos...');
+        const user = await auth0.getUser();
+        const token = await auth0.getTokenSilently();
+        
+        showDebugInfo(`Usuario obtenido: ${user.email || user.name}`);
+        showDebugInfo('Token obtenido correctamente');
+        
+        // Mostrar información del usuario
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
+        userInfo.innerHTML = `
+          <p>Bienvenido, ${user.name || user.email}</p>
+          <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
+        `;
+        
+        // Insertar antes del div app
+        const appDiv = document.getElementById('app');
+        if (appDiv) {
+          appDiv.parentNode.insertBefore(userInfo, appDiv);
+          showDebugInfo('✅ UI actualizada con información de usuario');
+        } else {
+          showDebugInfo('❌ No se encontró el div app');
+        }
+        
+        console.log('Usuario autenticado:', user);
+        console.log('Token:', token);
+        
+        // Verificar si xDiagrams está disponible
+        setTimeout(() => {
+          showDebugInfo('Verificando carga de xDiagrams...');
+          if (window.xDiagrams) {
+            showDebugInfo('✅ xDiagrams cargado correctamente');
+          } else {
+            showDebugInfo('❌ xDiagrams no está disponible');
+          }
+        }, 2000);
+        
+      } else {
+        showDebugInfo('Usuario no autenticado, mostrando login...');
+        // Mostrar botón de login
+        const authContainer = document.createElement('div');
+        authContainer.className = 'auth-container';
+        authContainer.innerHTML = `
+          <h2>Acceso requerido</h2>
+          <button class="login-btn" onclick="login()">Iniciar sesión</button>
+        `;
+        
+        document.body.innerHTML = '';
+        document.body.appendChild(authContainer);
+        showDebugInfo('✅ Pantalla de login mostrada');
+      }
+    } catch (error) {
+      showDebugInfo(`❌ Error en updateUI: ${error.message}`);
+      console.error('Error en updateUI:', error);
     }
   };
 
   const login = async () => {
-    await auth0.loginWithRedirect();
+    try {
+      showDebugInfo('Iniciando proceso de login...');
+      await auth0.loginWithRedirect();
+    } catch (error) {
+      showDebugInfo(`❌ Error en login: ${error.message}`);
+      console.error('Error en login:', error);
+    }
   };
 
   const logout = async () => {
-    await auth0.logout({
-      returnTo: window.location.origin
-    });
+    try {
+      showDebugInfo('Iniciando logout...');
+      await auth0.logout({
+        returnTo: window.location.origin
+      });
+    } catch (error) {
+      showDebugInfo(`❌ Error en logout: ${error.message}`);
+      console.error('Error en logout:', error);
+    }
   };
 
   const handleRedirectCallback = async () => {
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
+    try {
+      const query = window.location.search;
+      showDebugInfo(`URL actual: ${window.location.href}`);
+      showDebugInfo(`Query params: ${query}`);
+      
+      if (query.includes("code=") && query.includes("state=")) {
+        showDebugInfo('Detectados parámetros de Auth0, procesando callback...');
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+        showDebugInfo('✅ Callback procesado correctamente');
+      } else {
+        showDebugInfo('No hay parámetros de Auth0 en la URL');
+      }
+    } catch (error) {
+      showDebugInfo(`❌ Error en handleRedirectCallback: ${error.message}`);
+      console.error('Error en handleRedirectCallback:', error);
     }
   };
 
   const init = async () => {
-    await configureClient();
-    await handleRedirectCallback();
-    await updateUI();
+    try {
+      showDebugInfo('🚀 Iniciando aplicación...');
+      showDebugInfo(`URL actual: ${window.location.href}`);
+      showDebugInfo(`User agent: ${navigator.userAgent}`);
+      
+      await configureClient();
+      await handleRedirectCallback();
+      await updateUI();
+      
+      showDebugInfo('✅ Inicialización completada');
+    } catch (error) {
+      showDebugInfo(`❌ Error en init: ${error.message}`);
+      console.error('Error en init:', error);
+    }
   };
 
   window.login = login;
   window.logout = logout;
+
+  // Agregar listener para errores globales
+  window.addEventListener('error', (event) => {
+    showDebugInfo(`❌ Error global: ${event.error?.message || event.message}`);
+    console.error('Error global:', event);
+  });
+
+  // Agregar listener para errores no capturados
+  window.addEventListener('unhandledrejection', (event) => {
+    showDebugInfo(`❌ Promesa rechazada: ${event.reason}`);
+    console.error('Promesa rechazada:', event.reason);
+  });
 
   init();
 </script>
