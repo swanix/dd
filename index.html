@@ -29,5 +29,20 @@
 
 <script type="module" src="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js"></script>
 
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+<script>
+  const auth0 = await createAuth0Client({
+    domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
+    client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+    redirect_uri: window.location.origin
+  });
+
+  // Para mostrar login
+  await auth0.loginWithRedirect();
+
+  // Para obtener token y datos de usuario
+  const token = await auth0.getTokenSilently();
+  const user = await auth0.getUser();
+</script>
 </body>
 </html>
