@@ -183,6 +183,83 @@
     return false;
   };
 
+  const initializeDiagram = () => {
+    showDebugInfo('🚀 Inicializando diagrama...');
+    
+    try {
+      // Verificar si XDiagrams tiene un método de inicialización
+      if (window.XDiagrams && typeof window.XDiagrams.init === 'function') {
+        showDebugInfo('✅ Llamando XDiagrams.init()');
+        window.XDiagrams.init();
+        return true;
+      }
+      
+      // Verificar si XDiagrams tiene un método render
+      if (window.XDiagrams && typeof window.XDiagrams.render === 'function') {
+        showDebugInfo('✅ Llamando XDiagrams.render()');
+        window.XDiagrams.render();
+        return true;
+      }
+      
+      // Verificar si XDiagrams tiene un método start
+      if (window.XDiagrams && typeof window.XDiagrams.start === 'function') {
+        showDebugInfo('✅ Llamando XDiagrams.start()');
+        window.XDiagrams.start();
+        return true;
+      }
+      
+      // Si no hay métodos específicos, intentar crear el diagrama manualmente
+      showDebugInfo('🔧 Intentando crear diagrama manualmente...');
+      
+      // Verificar si hay un div app donde renderizar
+      const appDiv = document.getElementById('app');
+      if (appDiv) {
+        showDebugInfo('✅ Div app encontrado, intentando renderizar diagrama');
+        
+        // Intentar diferentes formas de inicializar
+        if (window.XDiagrams && window.XDiagrams.create) {
+          showDebugInfo('✅ Usando XDiagrams.create()');
+          window.XDiagrams.create(appDiv);
+          return true;
+        }
+        
+        if (window.XDiagrams && window.XDiagrams.mount) {
+          showDebugInfo('✅ Usando XDiagrams.mount()');
+          window.XDiagrams.mount(appDiv);
+          return true;
+        }
+        
+        // Si nada funciona, intentar forzar la inicialización
+        showDebugInfo('🔧 Forzando inicialización del diagrama...');
+        
+        // Crear un elemento para el diagrama
+        const diagramDiv = document.createElement('div');
+        diagramDiv.id = 'xdiagrams-container';
+        diagramDiv.className = 'xdiagrams';
+        appDiv.appendChild(diagramDiv);
+        
+        showDebugInfo('✅ Elemento de diagrama creado');
+        
+        // Intentar disparar un evento de inicialización
+        const initEvent = new CustomEvent('xdiagrams-init', {
+          detail: { container: diagramDiv }
+        });
+        document.dispatchEvent(initEvent);
+        
+        showDebugInfo('✅ Evento de inicialización disparado');
+        return true;
+      }
+      
+      showDebugInfo('❌ No se pudo inicializar el diagrama');
+      return false;
+      
+    } catch (error) {
+      showDebugInfo(`❌ Error inicializando diagrama: ${error.message}`);
+      console.error('Error inicializando diagrama:', error);
+      return false;
+    }
+  };
+
   const investigateScript = () => {
     showDebugInfo('🔬 Investigando script de xDiagrams...');
     
@@ -197,6 +274,21 @@
       if (window[name]) {
         showDebugInfo(`✅ Encontrado: window.${name}`);
         console.log(`window.${name}:`, window[name]);
+        
+        // Si es XDiagrams, investigar sus métodos
+        if (name === 'XDiagrams') {
+          showDebugInfo('🔍 Investigando métodos de XDiagrams...');
+          const methods = Object.getOwnPropertyNames(window[name]).filter(prop => 
+            typeof window[name][prop] === 'function'
+          );
+          showDebugInfo(`Métodos disponibles: ${methods.join(', ')}`);
+          console.log('Métodos de XDiagrams:', methods);
+          
+          // Mostrar propiedades del objeto
+          const properties = Object.getOwnPropertyNames(window[name]);
+          showDebugInfo(`Propiedades disponibles: ${properties.join(', ')}`);
+          console.log('Propiedades de XDiagrams:', properties);
+        }
       }
     }
     
@@ -230,6 +322,15 @@
       
       if (checkXDiagrams()) {
         showDebugInfo('🎉 xDiagrams cargado exitosamente!');
+        
+        // Intentar inicializar el diagrama
+        const initSuccess = initializeDiagram();
+        if (initSuccess) {
+          showDebugInfo('✅ Diagrama inicializado correctamente');
+        } else {
+          showDebugInfo('⚠️ Diagrama cargado pero no se pudo inicializar');
+        }
+        
         return true;
       }
       
