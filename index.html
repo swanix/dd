@@ -116,7 +116,7 @@
       
       const script = document.createElement('script');
       script.type = 'module';
-      script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js';
+      script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js?v=' + Date.now();
       
       script.onload = () => {
         showDebugInfo('✅ Script de xDiagrams cargado');
@@ -176,6 +176,45 @@
     return false;
   };
 
+  const investigateScript = () => {
+    showDebugInfo('🔬 Investigando script de xDiagrams...');
+    
+    // Verificar todas las propiedades de window que podrían ser xDiagrams
+    const possibleNames = [
+      'xDiagrams', 'XDiagrams', 'xdiagrams', 'XDIAGRAMS',
+      'diagrams', 'Diagrams', 'DIAGRAMS',
+      'swanix', 'Swanix', 'SWANIX'
+    ];
+    
+    for (const name of possibleNames) {
+      if (window[name]) {
+        showDebugInfo(`✅ Encontrado: window.${name}`);
+        console.log(`window.${name}:`, window[name]);
+      }
+    }
+    
+    // Verificar si hay algún evento o callback que se haya disparado
+    showDebugInfo('🔍 Verificando si hay eventos de xDiagrams...');
+    
+    // Verificar si el script creó algún elemento en el DOM
+    const allElements = document.querySelectorAll('*');
+    const xDiagramsElements = Array.from(allElements).filter(el => 
+      el.className && el.className.includes('xdiagrams') ||
+      el.id && el.id.includes('xdiagrams') ||
+      el.getAttribute('data-xdiagrams')
+    );
+    
+    if (xDiagramsElements.length > 0) {
+      showDebugInfo(`✅ Elementos relacionados con xDiagrams encontrados: ${xDiagramsElements.length}`);
+      xDiagramsElements.forEach((el, index) => {
+        showDebugInfo(`Elemento ${index + 1}: ${el.tagName} - ${el.className || el.id}`);
+      });
+    }
+    
+    // Verificar si hay algún error en la consola relacionado con xDiagrams
+    showDebugInfo('🔍 Verificando errores en consola...');
+  };
+
   const waitForXDiagrams = async (maxAttempts = 15) => {
     showDebugInfo('⏳ Esperando carga de xDiagrams...');
     
@@ -185,6 +224,11 @@
       if (checkXDiagrams()) {
         showDebugInfo('🎉 xDiagrams cargado exitosamente!');
         return true;
+      }
+      
+      // En el intento 5, investigar más a fondo
+      if (i === 4) {
+        investigateScript();
       }
       
       // Esperar 1 segundo antes del siguiente intento
@@ -273,6 +317,7 @@
           loadingDiv.innerHTML = `
             <p>❌ Error al cargar el diagrama</p>
             <p>El script se cargó pero no se inicializó correctamente</p>
+            <p>Revisa la consola para más detalles</p>
             <button onclick="location.reload()">Reintentar</button>
           `;
         }
@@ -303,7 +348,7 @@
       await auth0.loginWithRedirect();
     } catch (error) {
       showDebugInfo(`❌ Error en login: ${error.message}`);
-      console.error('Error en login:', error);
+      console.error('Error in login:', error);
     }
   };
 
@@ -376,4 +421,4 @@
 </body>
 </html>
 
-<!-- VERSION: 2.0 - Updated with dynamic script loading -->
+<!-- VERSION: 2.2 - Added timestamp to script URL to avoid cache -->
