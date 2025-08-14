@@ -1,108 +1,209 @@
 // Configuración de Auth0
 const AUTH0_CONFIG = {
-  domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-  client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-  redirect_uri: window.location.origin
+  domain: "dev-7kj3jxtxwirocri.us.auth0.com",
+  clientId: "BORj4AB79Rho5yP5uSavuP4sern8pemZ",
+  redirect_uri: window.location.origin,
+  audience: "https://dev-7kj3jxtxwirocri.us.auth0.com/api/v2/"
 };
 
-let auth0 = null;
+let auth0Client = null;
 
-// Configurar Auth0
-const configureAuth0 = async () => {
-  auth0 = await createAuth0Client(AUTH0_CONFIG);
+       // Configurar Auth0
+       const configureAuth0 = async () => {
+         if (auth0Client) return auth0Client;
+
+         // Esperar a que createAuth0Client esté disponible
+         if (typeof createAuth0Client === 'undefined') {
+           console.log('⏳ createAuth0Client no disponible, esperando...');
+           await new Promise(resolve => setTimeout(resolve, 100));
+           return configureAuth0();
+         }
+
+         try {
+           auth0Client = await createAuth0Client(AUTH0_CONFIG);
+           console.log('✅ Auth0 configurado correctamente');
+           return auth0Client;
+         } catch (error) {
+           console.error('❌ Error configurando Auth0:', error);
+           throw error;
+         }
+       };
+
+// Obtener token de acceso
+const getAccessToken = async () => {
+  try {
+    const token = await auth0Client.getTokenSilently();
+    return token;
+  } catch (error) {
+    console.error('❌ Error obteniendo token:', error);
+    throw error;
+  }
+};
+
+// Obtener datos protegidos desde Netlify Function
+const fetchProtectedData = async () => {
+  try {
+    const token = await getAccessToken();
+    
+    const response = await fetch('/.netlify/functions/sheetbest-proxy', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Datos protegidos obtenidos:', data.length, 'elementos');
+    return data;
+  } catch (error) {
+    console.error('❌ Error obteniendo datos protegidos:', error);
+    throw error;
+  }
+};
+
+// Actualizar xDiagrams con datos seguros
+const updateXDiagramsWithSecureData = async () => {
+  try {
+    console.log('🔄 Actualizando xDiagrams con datos seguros...');
+    
+    // Obtener datos desde el proxy seguro
+    const data = await fetchProtectedData();
+    
+    // Transformar datos al formato esperado por xDiagrams
+    const transformedData = data.map(item => ({
+      id: item.ID,
+      parent: item.Parent || '',
+      name: item.Name,
+      type: item.Type,
+      layout: item.Layout || '',
+      url: item.URL || '',
+      country: item.Country || '',
+      technology: item.Technology || '',
+      responsive: item.Responsive || '',
+      description: item.Description || '',
+      img: item.Img || ''
+    }));
+
+    // Actualizar configuración global de xDiagrams
+    window.$xDiagrams = {
+      data: transformedData, // Usar datos en lugar de URL
+      title: "Inspector",
+      clustersPerRow: "6 3 7 6 3",
+      showThemeToggle: false
+    };
+
+    console.log('✅ xDiagrams actualizado con datos seguros');
+    console.log('📊 Datos cargados:', transformedData.length, 'elementos');
+    
+  } catch (error) {
+    console.error('❌ Error actualizando xDiagrams:', error);
+    throw error;
+  }
 };
 
 // Mostrar overlay de autenticación
 const showAuthOverlay = () => {
-  const overlay = document.createElement('div');
-  overlay.className = 'auth-overlay';
-  overlay.id = 'auth-overlay';
-  overlay.innerHTML = `
-    <div class="login-container">
-      <h2>Acceso requerido</h2>
-      <p>Necesitas iniciar sesión para ver este contenido</p>
-      <button class="login-btn" onclick="login()">Iniciar sesión</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
+  const overlay = document.getElementById('auth-overlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+  }
+  
+  // Configurar botón de login
+  const loginBtn = document.getElementById('login-btn');
+  if (loginBtn) {
+    loginBtn.onclick = login;
+  }
 };
 
 // Ocultar overlay de autenticación
 const hideAuthOverlay = () => {
   const overlay = document.getElementById('auth-overlay');
   if (overlay) {
-    overlay.remove();
+    overlay.style.display = 'none';
   }
 };
 
-// Mostrar información del usuario
-const showUserInfo = (user) => {
-  const userInfo = document.createElement('div');
-  userInfo.className = 'user-info';
-  userInfo.id = 'user-info';
-  userInfo.innerHTML = `
-    <span>Bienvenido, ${user.name || user.email}</span>
-    <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-  `;
-  document.body.appendChild(userInfo);
-};
-
-// Ocultar información del usuario
-const hideUserInfo = () => {
-  const userInfo = document.getElementById('user-info');
-  if (userInfo) {
-    userInfo.remove();
-  }
-};
-
-// Login
+// Función de login
 const login = async () => {
-  await auth0.loginWithRedirect();
+  try {
+    await auth0Client.loginWithRedirect();
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+  }
 };
 
-// Logout
+// Función de logout
 const logout = async () => {
-  await auth0.logout({
-    returnTo: window.location.origin
-  });
+  try {
+    await auth0Client.logout({
+      logoutParams: {
+        returnTo: window.location.origin
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error en logout:', error);
+  }
 };
 
-// Manejar redirección de Auth0
+// Manejar redirect después del login
 const handleRedirect = async () => {
-  const query = window.location.search;
-  if (query.includes("code=") && query.includes("state=")) {
-    await auth0.handleRedirectCallback();
-    window.history.replaceState({}, document.title, "/");
+  try {
+    if (window.location.search.includes('code=')) {
+      await auth0Client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
+      console.log('✅ Redirect manejado correctamente');
+    }
+  } catch (error) {
+    console.error('❌ Error manejando redirect:', error);
   }
 };
 
 // Verificar autenticación
 const checkAuth = async () => {
-  const isAuthenticated = await auth0.isAuthenticated();
-  
-  if (isAuthenticated) {
-    const user = await auth0.getUser();
-    hideAuthOverlay();
-    showUserInfo(user);
-    return true;
-  } else {
-    showAuthOverlay();
-    hideUserInfo();
+  try {
+    const isAuthenticated = await auth0Client.isAuthenticated();
+    
+    if (isAuthenticated) {
+      console.log('✅ Usuario autenticado');
+      hideAuthOverlay();
+      
+      // Actualizar xDiagrams con datos seguros
+      await updateXDiagramsWithSecureData();
+      
+      return true;
+    } else {
+      console.log('⚠️ Usuario no autenticado');
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Error verificando autenticación:', error);
     return false;
   }
 };
 
 // Inicializar autenticación
 const initAuth = async () => {
+  console.log('🚀 Inicializando Auth0...');
   await configureAuth0();
   await handleRedirect();
   await checkAuth();
 };
 
 // Hacer funciones globales
+window.configureAuth0 = configureAuth0;
+window.getAccessToken = getAccessToken;
+window.fetchProtectedData = fetchProtectedData;
+window.updateXDiagramsWithSecureData = updateXDiagramsWithSecureData;
+window.showAuthOverlay = showAuthOverlay;
+window.hideAuthOverlay = hideAuthOverlay;
 window.login = login;
 window.logout = logout;
+window.handleRedirect = handleRedirect;
 window.checkAuth = checkAuth;
+window.initAuth = initAuth;
 
 // Iniciar cuando el DOM esté listo
 if (document.readyState === 'loading') {
