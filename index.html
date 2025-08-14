@@ -57,6 +57,26 @@
       max-width: 300px;
       z-index: 1000;
     }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="custom-theme">
@@ -80,6 +100,7 @@
 <script>
   let auth0 = null;
   let debugInfo = null;
+  let xDiagramsLoaded = false;
 
   const showDebugInfo = (message) => {
     console.log('🔍 DEBUG:', message);
@@ -89,6 +110,61 @@
       document.body.appendChild(debugInfo);
     }
     debugInfo.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+  };
+
+  const checkXDiagrams = () => {
+    showDebugInfo('🔍 Verificando xDiagrams...');
+    
+    // Verificar diferentes formas de detectar xDiagrams
+    if (window.xDiagrams) {
+      showDebugInfo('✅ xDiagrams encontrado en window.xDiagrams');
+      xDiagramsLoaded = true;
+      return true;
+    }
+    
+    if (window.$xDiagrams) {
+      showDebugInfo('✅ $xDiagrams encontrado en window.$xDiagrams');
+    }
+    
+    if (typeof xDiagrams !== 'undefined') {
+      showDebugInfo('✅ xDiagrams encontrado como variable global');
+      xDiagramsLoaded = true;
+      return true;
+    }
+    
+    // Verificar si el script se cargó
+    const scripts = document.querySelectorAll('script');
+    const xDiagramsScript = Array.from(scripts).find(script => 
+      script.src && script.src.includes('xdiagrams')
+    );
+    
+    if (xDiagramsScript) {
+      showDebugInfo('✅ Script de xDiagrams encontrado en DOM');
+    } else {
+      showDebugInfo('❌ Script de xDiagrams no encontrado en DOM');
+    }
+    
+    showDebugInfo('❌ xDiagrams no está disponible como objeto');
+    return false;
+  };
+
+  const waitForXDiagrams = async (maxAttempts = 10) => {
+    showDebugInfo('⏳ Esperando carga de xDiagrams...');
+    
+    for (let i = 0; i < maxAttempts; i++) {
+      showDebugInfo(`Intento ${i + 1}/${maxAttempts} para cargar xDiagrams`);
+      
+      if (checkXDiagrams()) {
+        showDebugInfo('🎉 xDiagrams cargado exitosamente!');
+        return true;
+      }
+      
+      // Esperar 1 segundo antes del siguiente intento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    showDebugInfo('❌ xDiagrams no se cargó después de todos los intentos');
+    return false;
   };
 
   const configureClient = async () => {
@@ -141,15 +217,28 @@
         console.log('Usuario autenticado:', user);
         console.log('Token:', token);
         
-        // Verificar si xDiagrams está disponible
-        setTimeout(() => {
-          showDebugInfo('Verificando carga de xDiagrams...');
-          if (window.xDiagrams) {
-            showDebugInfo('✅ xDiagrams cargado correctamente');
-          } else {
-            showDebugInfo('❌ xDiagrams no está disponible');
-          }
-        }, 2000);
+        // Mostrar loading mientras esperamos xDiagrams
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.innerHTML = `
+          <div class="spinner"></div>
+          <p>Cargando diagrama...</p>
+        `;
+        appDiv.appendChild(loadingDiv);
+        
+        // Esperar a que xDiagrams se cargue
+        const xDiagramsSuccess = await waitForXDiagrams();
+        
+        if (xDiagramsSuccess) {
+          showDebugInfo('✅ Diagrama listo para mostrar');
+          loadingDiv.remove();
+        } else {
+          showDebugInfo('❌ Error: No se pudo cargar xDiagrams');
+          loadingDiv.innerHTML = `
+            <p>❌ Error al cargar el diagrama</p>
+            <button onclick="location.reload()">Reintentar</button>
+          `;
+        }
         
       } else {
         showDebugInfo('Usuario no autenticado, mostrando login...');
