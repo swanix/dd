@@ -6,13 +6,24 @@
   <title>Diagram</title>
   <link href="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.css" rel="stylesheet" />
   <style>
-    .login-container {
+    .auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      gap: 20px;
+      z-index: 1000;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .login-btn {
       padding: 12px 24px;
@@ -22,22 +33,27 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      margin: 10px;
     }
     .user-info {
-      text-align: center;
-      margin-bottom: 20px;
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: white;
       padding: 10px;
-      background: #f8f9fa;
       border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1001;
     }
     .logout-btn {
-      padding: 8px 16px;
+      padding: 6px 12px;
       background: #dc3545;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       margin-left: 10px;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -45,98 +61,22 @@
 
 <div id="app"></div>
 
-<script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+<!-- Configuración de xDiagrams -->
 <script>
-  let auth0 = null;
-
-  // Configurar Auth0
-  const configureAuth0 = async () => {
-    auth0 = await createAuth0Client({
-      domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-      client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-      redirect_uri: window.location.origin
-    });
+  window.$xDiagrams = {
+    url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
+    title: "Inspector",
+    clustersPerRow: "6 3 7 6 3",
+    showThemeToggle: false 
   };
-
-  // Mostrar pantalla de login
-  const showLogin = () => {
-    document.body.innerHTML = `
-      <div class="login-container">
-        <h2>Acceso requerido</h2>
-        <button class="login-btn" onclick="login()">Iniciar sesión</button>
-      </div>
-    `;
-  };
-
-  // Mostrar diagrama
-  const showDiagram = (user) => {
-    // Configurar xDiagrams
-    window.$xDiagrams = {
-      url: "https://api.sheetbest.com/sheets/28f15681-b2ab-47a0-bbcb-205d142d9ef7/tabs/All",
-      title: "Inspector",
-      clustersPerRow: "6 3 7 6 3",
-      showThemeToggle: false 
-    };
-
-    // Mostrar información del usuario
-    const userInfo = document.createElement('div');
-    userInfo.className = 'user-info';
-    userInfo.innerHTML = `
-      <p>Bienvenido, ${user.name || user.email}</p>
-      <button class="logout-btn" onclick="logout()">Cerrar sesión</button>
-    `;
-    
-    document.body.insertBefore(userInfo, document.getElementById('app'));
-
-    // Cargar script de xDiagrams
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js';
-    document.head.appendChild(script);
-  };
-
-  // Login
-  const login = async () => {
-    await auth0.loginWithRedirect();
-  };
-
-  // Logout
-  const logout = async () => {
-    await auth0.logout({
-      returnTo: window.location.origin
-    });
-  };
-
-  // Manejar redirección de Auth0
-  const handleRedirect = async () => {
-    const query = window.location.search;
-    if (query.includes("code=") && query.includes("state=")) {
-      await auth0.handleRedirectCallback();
-      window.history.replaceState({}, document.title, "/");
-    }
-  };
-
-  // Inicializar aplicación
-  const init = async () => {
-    await configureAuth0();
-    await handleRedirect();
-    
-    const isAuthenticated = await auth0.isAuthenticated();
-    
-    if (isAuthenticated) {
-      const user = await auth0.getUser();
-      showDiagram(user);
-    } else {
-      showLogin();
-    }
-  };
-
-  // Hacer funciones globales
-  window.login = login;
-  window.logout = logout;
-
-  // Iniciar
-  init();
 </script>
+
+<!-- Script de xDiagrams -->
+<script type="module" src="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js"></script>
+
+<!-- Script de autenticación Auth0 -->
+<script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+<script src="auth.js"></script>
+
 </body>
 </html>
