@@ -60,7 +60,7 @@ function main() {
     // Archivos a actualizar
     const files = [
         'index.html',
-        'pages/login.html',
+        'login.html',
         'pages/app.html'
     ];
     
@@ -71,7 +71,7 @@ function main() {
     console.log(`${config[env].base_url}/pages/app.html`);
     
     console.log(`\n🔗 Allowed Logout URLs:`);
-    console.log(`${config[env].base_url}/pages/login.html`);
+    console.log(`${config[env].base_url}/login.html`);
     
     console.log(`\n🔗 Allowed Web Origins:`);
     console.log(`${config[env].base_url}`);

@@ -53,8 +53,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 ```
 dd/
 ├── index.html              # Página de redirección principal
-├── pages/                  # Carpeta de páginas de la aplicación
-│   ├── login.html          # Página de login dedicada
+├── login.html              # Página de login (pública)
+├── pages/                  # Carpeta de páginas protegidas
 │   ├── app.html            # Aplicación principal
 │   ├── dashboard.html      # Dashboard de métricas
 │   └── README.md           # Guía para agregar nuevas páginas
@@ -94,7 +94,7 @@ Allowed Callback URLs:
 http://localhost:8888/pages/app.html, https://swanixdd.netlify.app/pages/app.html
 
 Allowed Logout URLs:
-http://localhost:8888/pages/login.html, https://swanixdd.netlify.app/pages/login.html
+http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html
 
 Allowed Web Origins:
 http://localhost:8888, https://swanixdd.netlify.app
@@ -156,10 +156,10 @@ node update-urls.js production
 - **Propósito**: Verificar estado de autenticación y redirigir
 - **Comportamiento**: 
   - Si autenticado → redirige a `/pages/app.html`
-  - Si no autenticado → redirige a `/pages/login.html`
+  - Si no autenticado → redirige a `/login.html`
 - **Características**: Loading spinner y manejo de errores
 
-### `pages/login.html` - Página de Login
+### `login.html` - Página de Login (Pública)
 - **Propósito**: Interfaz de autenticación dedicada
 - **Características**:
   - Formulario de login (deshabilitado, solo Auth0)

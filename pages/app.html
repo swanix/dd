@@ -501,7 +501,7 @@
         // Configurar event listeners
         function setupEventListeners() {
             loginButton.onclick = () => auth0.loginWithRedirect();
-            logoutButton.onclick = () => auth0.logout({ returnTo: window.location.origin + '/pages/login.html' });
+            logoutButton.onclick = () => auth0.logout({ returnTo: window.location.origin + '/login.html' });
             
             // Toggle user dropdown
             userButton.onclick = () => {

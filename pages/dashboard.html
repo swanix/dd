@@ -556,7 +556,7 @@
                 const isAuthenticated = await auth0.isAuthenticated();
                 
                 if (!isAuthenticated) {
-                    window.location.href = '/pages/login.html';
+                    window.location.href = '/login.html';
                     return;
                 }
 
@@ -636,7 +636,7 @@
 
             // Logout
             logoutButton.onclick = () => auth0.logout({ 
-                returnTo: window.location.origin + '/pages/login.html' 
+                returnTo: window.location.origin + '/login.html' 
             });
         }
 

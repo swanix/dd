@@ -4,9 +4,9 @@ Esta carpeta contiene todas las páginas HTML de la aplicación. Cada página es
 
 ## 📋 Páginas Actuales
 
-### `login.html`
+### `login.html` (en la raíz)
 - **Propósito**: Página de autenticación dedicada
-- **URL**: `/pages/login.html`
+- **URL**: `/login.html`
 - **Características**: 
   - Formulario de login con Auth0
   - Redirección automática si ya autenticado
@@ -152,7 +152,7 @@ Allowed Callback URLs:
 http://localhost:8888/pages/app.html, https://swanixdd.netlify.app/pages/app.html
 
 Allowed Logout URLs:
-http://localhost:8888/pages/login.html, https://swanixdd.netlify.app/pages/login.html
+http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html
 ```
 
 ### Script de Actualización

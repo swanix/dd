@@ -88,8 +88,8 @@
     <div class="error-container" id="errorContainer">
         <h2>Error de Conexión</h2>
         <p>No se pudo verificar tu estado de autenticación.</p>
-                   <button class="error-button" onclick="window.location.href='/pages/login.html'">
-               Ir a la página de login
+                                       <button class="error-button" onclick="window.location.href='/login.html'">
+                        Ir a la página de login
         </button>
     </div>
 
@@ -131,7 +131,7 @@
                     window.location.href = '/pages/app.html';
                 } else {
                     // Usuario no autenticado - redirigir al login
-                    window.location.href = '/pages/login.html';
+                    window.location.href = '/login.html';
                 }
                 
             } catch (error) {
