@@ -69,6 +69,7 @@ function main() {
     
     console.log('\n📋 URLs para configurar en Auth0:');
     console.log(`\n🔗 Allowed Callback URLs:`);
+    console.log(`${config[env].base_url}/`);
     console.log(`${config[env].base_url}/app/`);
     console.log(`${config[env].base_url}/access-denied.html`);
     
