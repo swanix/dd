@@ -63,9 +63,7 @@ dd/
 │   ├── css/
 │   ├── js/
 │   └── img/
-├── netlify/
-│   └── functions/
-│       └── auth-protect.js # Función de verificación de tokens
+├── auth-protect.js         # Función de verificación de tokens (Netlify Function)
 ├── update-urls.js          # Script para cambiar entre entornos
 ├── package.json            # Dependencias del proyecto
 ├── netlify.toml           # Configuración de Netlify
@@ -84,9 +82,10 @@ dd/
   - **Producción**: `https://swanixdd.netlify.app`
 
 ### Netlify Functions
-- **Función**: `auth-protect.js`
+- **Función**: `auth-protect.js` (en la raíz del proyecto)
 - **Verificación**: JWT tokens de Auth0
 - **CORS**: Configurado para desarrollo local y producción
+- **Estructura**: Función única y limpia en la raíz
 
 ### URLs Configuradas en Auth0
 ```

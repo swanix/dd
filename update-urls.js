@@ -39,7 +39,7 @@ function updateFile(filePath, env) {
     
     content = content.replace(
         /redirect_uri:\s*window\.location\.origin\s*\+\s*['"][^'"]*['"]/g,
-        `redirect_uri: window.location.origin + '/app.html'`
+        `redirect_uri: window.location.origin + '/app/'`
     );
     
     fs.writeFileSync(filePath, content);

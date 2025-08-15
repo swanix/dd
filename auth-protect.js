@@ -56,7 +56,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-        // Verificar el token JWT (ID token)
+    // Verificar el token JWT (ID token)
     const decodedToken = await new Promise((resolve, reject) => {
       jwt.verify(token, getKey, {
         issuer: `https://${AUTH0_DOMAIN}/`,
