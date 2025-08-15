@@ -28,6 +28,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 - **Página de login dedicada** con formulario y características de seguridad
 - **Foto de perfil** automática desde Google/Auth0
 - **Menú de usuario** con información completa del perfil
+- **CSS modular** organizado en archivos separados
+- **JavaScript modular** con funciones reutilizables
 
 ### ⚙️ Backend Serverless
 - **Netlify Functions** para verificación de tokens
@@ -60,13 +62,26 @@ dd/
 │   ├── index.html          # Dashboard principal
 │   ├── dashboard.html      # Dashboard de métricas
 │   └── README.md           # Guía para agregar nuevas páginas
-├── components/             # Componentes reutilizables (futuro)
-├── assets/                 # Recursos estáticos (futuro)
+
+├── assets/                 # Recursos estáticos
 │   ├── css/
+│   │   ├── main.css        # Estilos globales y reset
+│   │   ├── layout.css      # Sidebar, topbar, layout principal
+│   │   ├── components.css  # Botones, dropdowns, cards
+│   │   ├── auth.css        # Estilos de autenticación
+│   │   ├── index.css       # Estilos específicos de index.html
+│   │   └── login.css       # Estilos específicos de login.html
 │   ├── js/
-│   └── img/
-├── auth-protect.js         # Función de verificación de tokens (Netlify Function)
-├── update-urls.js          # Script para cambiar entre entornos
+│   │   ├── auth.js         # Lógica de Auth0
+│   │   ├── utils.js        # Utilidades y helpers
+│   │   ├── index.js        # Lógica específica de index.html
+│   │   └── login.js        # Lógica específica de login.html
+│   └── img/                # Imágenes (futuro)
+├── netlify/                # Configuración y funciones de Netlify
+│   └── functions/
+│       └── auth-protect.js # Función de verificación de tokens
+├── scripts/                # Scripts de utilidad
+│   └── update-urls.js      # Script para cambiar entre entornos
 ├── package.json            # Dependencias del proyecto
 ├── netlify.toml           # Configuración de Netlify
 ├── .gitignore             # Archivos ignorados por Git

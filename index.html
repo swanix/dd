@@ -4,79 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Aplicación - Auth0 + Netlify Functions</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        .loading-container {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .loading-subtext {
-            opacity: 0.8;
-            font-size: 0.9rem;
-        }
-
-        .error-container {
-            text-align: center;
-            padding: 40px;
-            display: none;
-        }
-
-        .error-container.show {
-            display: block;
-        }
-
-        .error-button {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .error-button:hover {
-            background: rgba(255,255,255,0.3);
-        }
-    </style>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/index.css">
 </head>
 <body>
     <div class="loading-container" id="loadingContainer">
@@ -88,73 +19,13 @@
     <div class="error-container" id="errorContainer">
         <h2>Error de Conexión</h2>
         <p>No se pudo verificar tu estado de autenticación.</p>
-                                       <button class="error-button" onclick="window.location.href='/login.html'">
-                        Ir a la página de login
+        <button class="error-button" onclick="window.location.href='/login.html'">
+          Ir a la página de login
         </button>
     </div>
 
-    <!-- Scripts de Auth0 -->
+    <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
-    
-    <script>
-        // Configuración de Auth0
-        const auth0Config = {
-            domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-            client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-            redirect_uri: window.location.origin + '/app/',
-            cacheLocation: 'localstorage'
-        };
-
-        let auth0 = null;
-
-        // Elementos del DOM
-        const loadingContainer = document.getElementById('loadingContainer');
-        const errorContainer = document.getElementById('errorContainer');
-
-        // Inicializar Auth0 y verificar autenticación
-        async function initAuth0() {
-            try {
-                auth0 = await createAuth0Client(auth0Config);
-                
-                // Manejar redirección después del login
-                if (window.location.search.includes('code=')) {
-                                                                   await auth0.handleRedirectCallback();
-                        window.location.href = '/app/';
-                    return;
-                }
-
-                // Verificar estado de autenticación
-                const isAuthenticated = await auth0.isAuthenticated();
-                
-                if (isAuthenticated) {
-                    // Usuario autenticado - redirigir a la app
-                    window.location.href = '/app/';
-                } else {
-                    // Usuario no autenticado - redirigir al login
-                    window.location.href = '/login.html';
-                }
-                
-            } catch (error) {
-                console.error('Error verificando autenticación:', error);
-                showError();
-            }
-        }
-
-        // Mostrar error
-        function showError() {
-            loadingContainer.style.display = 'none';
-            errorContainer.classList.add('show');
-        }
-
-        // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', initAuth0);
-
-        // Timeout de seguridad
-        setTimeout(() => {
-            if (loadingContainer.style.display !== 'none') {
-                showError();
-            }
-        }, 10000); // 10 segundos
-    </script>
+    <script src="/assets/js/index.js"></script>
 </body>
 </html>
