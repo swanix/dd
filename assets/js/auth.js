@@ -19,16 +19,35 @@ async function initAuth0() {
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
+            console.log('🔍 Detectado código de autorización en URL');
+            console.log('📍 URL actual:', window.location.href);
+            console.log('🔍 Parámetros de URL:', window.location.search);
+            
             try {
+                console.log('🔄 Procesando callback de Auth0...');
                 await auth0.handleRedirectCallback();
+                console.log('✅ Callback procesado exitosamente');
                 window.history.replaceState({}, document.title, window.location.pathname);
             } catch (error) {
-                console.error('Error en callback:', error);
+                console.error('❌ Error en callback:', error);
+                console.log('🔍 Tipo de error:', typeof error);
+                console.log('🔍 Propiedades del error:', Object.keys(error));
+                
                 // Verificar si es error de acceso denegado
                 if (error.error === 'access_denied') {
+                    console.log('🚫 Error de acceso denegado detectado, redirigiendo a /access-denied.html');
                     window.location.href = '/access-denied.html';
                     return;
                 }
+                
+                // Verificar otros tipos de errores
+                if (error.message && error.message.includes('access_denied')) {
+                    console.log('🚫 Error de acceso denegado en mensaje, redirigiendo a /access-denied.html');
+                    window.location.href = '/access-denied.html';
+                    return;
+                }
+                
+                console.log('❌ Error no reconocido, lanzando error original');
                 throw error;
             }
         }
@@ -78,12 +97,16 @@ function setupEventListeners() {
 
 // ===== VERIFICAR ESTADO DE AUTENTICACIÓN =====
 async function checkAuthState() {
+    console.log('🔍 Verificando estado de autenticación...');
     const isAuthenticated = await auth0.isAuthenticated();
+    console.log('🔍 Estado de autenticación:', isAuthenticated);
     
     if (isAuthenticated) {
+        console.log('✅ Usuario autenticado, mostrando UI autenticada');
         showAuthenticatedUI();
         await fetchProtectedData();
     } else {
+        console.log('❌ Usuario no autenticado, mostrando UI no autenticada');
         showUnauthenticatedUI();
     }
 }

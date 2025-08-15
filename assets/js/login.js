@@ -4,7 +4,7 @@
 const auth0Config = {
     domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
     client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-    redirect_uri: window.location.origin + '/app/',
+    redirect_uri: window.location.origin + '/login.html',
     cacheLocation: 'localstorage'
 };
 
@@ -16,22 +16,61 @@ let auth0Login, loading, errorMessage;
 // ===== INICIALIZAR AUTH0 =====
 async function initAuth0() {
     try {
+        console.log('🔍 [LOGIN] Inicializando Auth0...');
+        console.log('📍 [LOGIN] URL actual:', window.location.href);
+        console.log('🔍 [LOGIN] Parámetros de URL:', window.location.search);
+        
         auth0 = await createAuth0Client(auth0Config);
+        
+        // Verificar si hay errores en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+        
+        if (error) {
+            console.log('🚫 [LOGIN] Error detectado en URL:', error);
+            console.log('📝 [LOGIN] Descripción del error:', errorDescription);
+            
+            if (error === 'access_denied') {
+                console.log('🚫 [LOGIN] Error de acceso denegado, redirigiendo a /access-denied.html');
+                window.location.href = '/access-denied.html';
+                return;
+            }
+        }
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
+            console.log('🔍 [LOGIN] Detectado código de autorización en URL');
+            console.log('📍 [LOGIN] URL actual:', window.location.href);
+            console.log('🔍 [LOGIN] Parámetros de URL:', window.location.search);
+            
             showLoading();
             try {
+                console.log('🔄 [LOGIN] Procesando callback de Auth0...');
                 await auth0.handleRedirectCallback();
+                console.log('✅ [LOGIN] Callback procesado exitosamente');
                 window.location.href = '/app/';
                 return;
             } catch (error) {
-                console.error('Error en callback:', error);
+                console.error('❌ [LOGIN] Error en callback:', error);
+                console.log('🔍 [LOGIN] Tipo de error:', typeof error);
+                console.log('🔍 [LOGIN] Propiedades del error:', Object.keys(error));
+                
                 // Verificar si es error de acceso denegado
                 if (error.error === 'access_denied') {
+                    console.log('🚫 [LOGIN] Error de acceso denegado detectado, redirigiendo a /access-denied.html');
                     window.location.href = '/access-denied.html';
                     return;
                 }
+                
+                // Verificar otros tipos de errores
+                if (error.message && error.message.includes('access_denied')) {
+                    console.log('🚫 [LOGIN] Error de acceso denegado en mensaje, redirigiendo a /access-denied.html');
+                    window.location.href = '/access-denied.html';
+                    return;
+                }
+                
+                console.log('❌ [LOGIN] Error no reconocido, lanzando error original');
                 throw error;
             }
         }
