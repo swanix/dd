@@ -12,20 +12,28 @@ let auth0 = null;
 let authOverlay, loginButton, userButton, userDropdown, logoutButton;
 let userName, userEmail, userId, userVerified, serverData, serverDataContent;
 
+// ===== VERIFICAR ERRORES ANTES DE INICIALIZAR =====
+function checkForErrors() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    
+    if (error === 'access_denied') {
+        console.log('🚫 Error de acceso denegado detectado ANTES de inicializar, redirigiendo inmediatamente');
+        window.location.replace('/access-denied.html');
+        return true; // Indica que hay error
+    }
+    return false; // No hay error
+}
+
 // ===== INICIALIZACIÓN =====
 async function initAuth0() {
     try {
-        auth0 = await createAuth0Client(auth0Config);
-        
-        // Verificar errores de acceso denegado (REDIRECCIÓN INMEDIATA)
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        
-        if (error === 'access_denied') {
-            console.log('🚫 Error de acceso denegado detectado, redirigiendo inmediatamente');
-            window.location.replace('/access-denied.html');
-            return;
+        // Verificar errores ANTES de cualquier inicialización
+        if (checkForErrors()) {
+            return; // Salir si hay error
         }
+        
+        auth0 = await createAuth0Client(auth0Config);
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {

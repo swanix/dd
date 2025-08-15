@@ -13,24 +13,29 @@ let auth0 = null;
 // ===== ELEMENTOS DEL DOM =====
 let auth0Login, loading, errorMessage;
 
+// ===== VERIFICAR ERRORES ANTES DE INICIALIZAR =====
+function checkForErrors() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    
+    if (error === 'access_denied') {
+        console.log('🚫 [LOGIN] Error de acceso denegado detectado ANTES de inicializar, redirigiendo inmediatamente');
+        window.location.replace('/access-denied.html');
+        return true; // Indica que hay error
+    }
+    return false; // No hay error
+}
+
 // ===== INICIALIZAR AUTH0 =====
 async function initAuth0() {
     try {
-        console.log('🔍 [LOGIN] Inicializando Auth0...');
-        console.log('📍 [LOGIN] URL actual:', window.location.href);
-        console.log('🔍 [LOGIN] Parámetros de URL:', window.location.search);
-        
-        auth0 = await createAuth0Client(auth0Config);
-        
-        // Verificar si hay errores en la URL (REDIRECCIÓN INMEDIATA)
-        const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-        
-        if (error === 'access_denied') {
-            console.log('🚫 [LOGIN] Error de acceso denegado detectado, redirigiendo inmediatamente');
-            window.location.replace('/access-denied.html');
-            return;
+        // Verificar errores ANTES de cualquier inicialización
+        if (checkForErrors()) {
+            return; // Salir si hay error
         }
+        
+        console.log('🔍 [LOGIN] Inicializando Auth0...');
+        auth0 = await createAuth0Client(auth0Config);
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
