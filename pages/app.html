@@ -351,7 +351,8 @@
                 <h2>🚀 Mi App</h2>
             </div>
             <ul class="sidebar-nav">
-                <li><a href="#" class="active"><i>📊</i> Aplicación</a></li>
+                <li><a href="/pages/app.html" class="active"><i>📊</i> Aplicación</a></li>
+                <li><a href="/pages/dashboard.html"><i>📈</i> Dashboard</a></li>
                 <li><a href="#"><i>📝</i> Artículos</a></li>
                 <li><a href="#"><i>👥</i> Usuarios</a></li>
                 <li><a href="#"><i>⚙️</i> Configuración</a></li>
@@ -500,7 +501,7 @@
         // Configurar event listeners
         function setupEventListeners() {
             loginButton.onclick = () => auth0.loginWithRedirect();
-            logoutButton.onclick = () => auth0.logout({ returnTo: window.location.origin + '/login.html' });
+            logoutButton.onclick = () => auth0.logout({ returnTo: window.location.origin + '/pages/login.html' });
             
             // Toggle user dropdown
             userButton.onclick = () => {

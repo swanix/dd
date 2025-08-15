@@ -53,8 +53,16 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 ```
 dd/
 ├── index.html              # Página de redirección principal
-├── login.html              # Página de login dedicada
-├── app.html                # Aplicación principal (antes dashboard.html)
+├── pages/                  # Carpeta de páginas de la aplicación
+│   ├── login.html          # Página de login dedicada
+│   ├── app.html            # Aplicación principal
+│   ├── dashboard.html      # Dashboard de métricas
+│   └── README.md           # Guía para agregar nuevas páginas
+├── components/             # Componentes reutilizables (futuro)
+├── assets/                 # Recursos estáticos (futuro)
+│   ├── css/
+│   ├── js/
+│   └── img/
 ├── netlify/
 │   └── functions/
 │       └── auth-protect.js # Función de verificación de tokens
@@ -83,10 +91,10 @@ dd/
 ### URLs Configuradas en Auth0
 ```
 Allowed Callback URLs:
-http://localhost:8888/app.html, https://swanixdd.netlify.app/app.html
+http://localhost:8888/pages/app.html, https://swanixdd.netlify.app/pages/app.html
 
 Allowed Logout URLs:
-http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html
+http://localhost:8888/pages/login.html, https://swanixdd.netlify.app/pages/login.html
 
 Allowed Web Origins:
 http://localhost:8888, https://swanixdd.netlify.app
@@ -147,11 +155,11 @@ node update-urls.js production
 ### `index.html` - Página de Redirección
 - **Propósito**: Verificar estado de autenticación y redirigir
 - **Comportamiento**: 
-  - Si autenticado → redirige a `/app.html`
-  - Si no autenticado → redirige a `/login.html`
+  - Si autenticado → redirige a `/pages/app.html`
+  - Si no autenticado → redirige a `/pages/login.html`
 - **Características**: Loading spinner y manejo de errores
 
-### `login.html` - Página de Login
+### `pages/login.html` - Página de Login
 - **Propósito**: Interfaz de autenticación dedicada
 - **Características**:
   - Formulario de login (deshabilitado, solo Auth0)
@@ -159,13 +167,21 @@ node update-urls.js production
   - Lista de características de seguridad
   - Redirección automática si ya autenticado
 
-### `app.html` - Aplicación Principal
+### `pages/app.html` - Aplicación Principal
 - **Propósito**: Contenido protegido y funcionalidad principal
 - **Características**:
   - Layout completo con sidebar y topbar
   - Información del usuario autenticado
   - Datos del servidor obtenidos via Netlify Functions
   - Botón de logout funcional
+
+### `pages/dashboard.html` - Dashboard de Métricas
+- **Propósito**: Vista de estadísticas y métricas
+- **Características**:
+  - Cards con métricas visuales
+  - Estado detallado de autenticación
+  - Navegación entre páginas
+  - Datos de ejemplo para demostración
 
 ## 🔒 Seguridad y Variables de Entorno
 

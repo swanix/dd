@@ -306,7 +306,7 @@
         const auth0Config = {
             domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
             client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-                           redirect_uri: window.location.origin + '/app.html',
+                           redirect_uri: window.location.origin + '/pages/app.html',
             cacheLocation: 'localstorage'
         };
 
@@ -327,14 +327,14 @@
                 if (window.location.search.includes('code=')) {
                     showLoading();
                                            await auth0.handleRedirectCallback();
-                       window.location.href = '/app.html';
+                       window.location.href = '/pages/app.html';
                     return;
                 }
 
                 // Verificar si ya está autenticado
                 const isAuthenticated = await auth0.isAuthenticated();
                                    if (isAuthenticated) {
-                       window.location.href = '/app.html';
+                       window.location.href = '/pages/app.html';
                     return;
                 }
 

@@ -60,18 +60,18 @@ function main() {
     // Archivos a actualizar
     const files = [
         'index.html',
-        'login.html',
-        'app.html'
+        'pages/login.html',
+        'pages/app.html'
     ];
     
     files.forEach(file => updateFile(file, env));
     
     console.log('\n📋 URLs para configurar en Auth0:');
     console.log(`\n🔗 Allowed Callback URLs:`);
-    console.log(`${config[env].base_url}/app.html`);
+    console.log(`${config[env].base_url}/pages/app.html`);
     
     console.log(`\n🔗 Allowed Logout URLs:`);
-    console.log(`${config[env].base_url}/login.html`);
+    console.log(`${config[env].base_url}/pages/login.html`);
     
     console.log(`\n🔗 Allowed Web Origins:`);
     console.log(`${config[env].base_url}`);
