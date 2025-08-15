@@ -20,9 +20,19 @@ async function initAuth0() {
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
-            await auth0.handleRedirectCallback();
-            window.location.href = '/app/';
-            return;
+            try {
+                await auth0.handleRedirectCallback();
+                window.location.href = '/app/';
+                return;
+            } catch (error) {
+                console.error('Error en callback:', error);
+                // Verificar si es error de acceso denegado
+                if (error.error === 'access_denied') {
+                    window.location.href = '/access-denied.html';
+                    return;
+                }
+                throw error;
+            }
         }
 
         // Verificar estado de autenticación

@@ -127,7 +127,7 @@ body {
 
 /* ===== BOTÓN AUTH0 ===== */
 .auth0-button {
-    background: #eb5424;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     padding: 15px;
@@ -144,7 +144,7 @@ body {
 
 .auth0-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(235, 84, 36, 0.4);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
 }
 
 .auth0-button:active {

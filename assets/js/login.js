@@ -11,7 +11,7 @@ const auth0Config = {
 let auth0 = null;
 
 // ===== ELEMENTOS DEL DOM =====
-let loginForm, auth0Login, loading, errorMessage;
+let auth0Login, loading, errorMessage;
 
 // ===== INICIALIZAR AUTH0 =====
 async function initAuth0() {
@@ -21,9 +21,19 @@ async function initAuth0() {
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
             showLoading();
-            await auth0.handleRedirectCallback();
-            window.location.href = '/app/';
-            return;
+            try {
+                await auth0.handleRedirectCallback();
+                window.location.href = '/app/';
+                return;
+            } catch (error) {
+                console.error('Error en callback:', error);
+                // Verificar si es error de acceso denegado
+                if (error.error === 'access_denied') {
+                    window.location.href = '/access-denied.html';
+                    return;
+                }
+                throw error;
+            }
         }
 
         // Verificar si ya está autenticado
@@ -47,7 +57,10 @@ function setupEventListeners() {
     auth0Login.onclick = async () => {
         try {
             showLoading();
-            await auth0.loginWithRedirect();
+            await auth0.loginWithRedirect({
+                connection: 'google-oauth2',
+                prompt: 'select_account'
+            });
         } catch (error) {
             console.error('Error en login:', error);
             hideLoading();
@@ -55,11 +68,7 @@ function setupEventListeners() {
         }
     };
 
-    // Prevenir envío del formulario (solo para mostrar)
-    loginForm.onsubmit = (e) => {
-        e.preventDefault();
-        auth0Login.click();
-    };
+    // El formulario ya no existe, solo el botón directo
 }
 
 // ===== MOSTRAR LOADING =====
@@ -86,7 +95,6 @@ function showError(message) {
 // ===== INICIALIZAR CUANDO EL DOM ESTÉ LISTO =====
 document.addEventListener('DOMContentLoaded', function() {
     // Obtener referencias a elementos del DOM
-    loginForm = document.getElementById('loginForm');
     auth0Login = document.getElementById('auth0Login');
     loading = document.getElementById('loading');
     errorMessage = document.getElementById('errorMessage');

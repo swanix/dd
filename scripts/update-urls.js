@@ -58,11 +58,12 @@ function main() {
     console.log(`📍 URL base: ${config[env].base_url}`);
     
     // Archivos a actualizar
-    const files = [
-        'index.html',
-        'login.html',
-        'app/index.html'
-    ];
+                    const files = [
+                    'index.html',
+                    'login.html',
+                    'app/index.html',
+                    'access-denied.html'
+                ];
     
     files.forEach(file => updateFile(file, env));
     

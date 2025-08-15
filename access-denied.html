@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Denegado - Mi Aplicación</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/access-denied.css">
+</head>
+<body>
+    <div class="access-denied-container">
+        <div class="access-denied-card">
+            <div class="access-denied-icon">
+                🚫
+            </div>
+            
+            <h1>Acceso Denegado</h1>
+            
+            <div class="access-denied-message">
+                <p><strong>Tu correo electrónico no está autorizado</strong> para acceder a esta aplicación.</p>
+                
+                <div class="access-info">
+                    <h3>¿Por qué no puedo acceder?</h3>
+                    <ul>
+                        <li>Tu dominio de correo no está en la lista de dominios autorizados</li>
+                        <li>Tu correo específico no está en la lista de usuarios autorizados</li>
+                        <li>Necesitas permisos especiales para acceder a esta aplicación</li>
+                    </ul>
+                </div>
+                
+                <div class="contact-info">
+                    <h3>¿Necesitas acceso?</h3>
+                    <p>Contacta al administrador del sistema para solicitar acceso:</p>
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <span class="contact-icon">📧</span>
+                            <span>admin@sebastianserna.com</span>
+                        </div>
+                        <div class="contact-method">
+                            <span class="contact-icon">💬</span>
+                            <span>Slack: #admin-support</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="access-denied-actions">
+                <button class="btn-secondary" onclick="window.location.href='/login.html'">
+                    🔄 Intentar con otra cuenta
+                </button>
+                
+                <button class="btn-primary" onclick="window.location.href='/'">
+                    🏠 Volver al inicio
+                </button>
+            </div>
+            
+            <div class="access-denied-footer">
+                <p><small>Si crees que esto es un error, por favor contacta al soporte técnico.</small></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

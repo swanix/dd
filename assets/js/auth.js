@@ -19,8 +19,18 @@ async function initAuth0() {
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
-            await auth0.handleRedirectCallback();
-            window.history.replaceState({}, document.title, window.location.pathname);
+            try {
+                await auth0.handleRedirectCallback();
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (error) {
+                console.error('Error en callback:', error);
+                // Verificar si es error de acceso denegado
+                if (error.error === 'access_denied') {
+                    window.location.href = '/access-denied.html';
+                    return;
+                }
+                throw error;
+            }
         }
         
         // Configurar event listeners
@@ -38,7 +48,10 @@ async function initAuth0() {
 // ===== CONFIGURAR EVENT LISTENERS =====
 function setupEventListeners() {
     if (loginButton) {
-        loginButton.onclick = () => auth0.loginWithRedirect();
+        loginButton.onclick = () => auth0.loginWithRedirect({
+            connection: 'google-oauth2',
+            prompt: 'select_account'
+        });
     }
     
     if (logoutButton) {

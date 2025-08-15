@@ -199,6 +199,15 @@ node update-urls.js production
   - Navegación entre páginas
   - Datos de ejemplo para demostración
 
+### `access-denied.html` - Página de Acceso Denegado
+- **Propósito**: Mostrar cuando un usuario no autorizado intenta acceder
+- **Características**:
+  - Mensaje claro de acceso denegado
+  - Explicación de por qué no puede acceder
+  - Información de contacto para solicitar acceso
+  - Botones para intentar con otra cuenta o volver al inicio
+  - Diseño profesional y responsive
+
 ## 🔒 Seguridad y Variables de Entorno
 
 ### Variables de Entorno
