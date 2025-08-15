@@ -1,10 +1,10 @@
-// ===== AUTH0 ACTION: RESTRICCIÓN DE EMAILS + REDIRECCIÓN DIRECTA =====
+// ===== AUTH0 ACTION: RESTRICCIÓN DE EMAILS =====
 
 /**
  * Trigger: Post Login
  * 
  * Esta Action restringe el acceso basado en dominio y emails específicos.
- * Si el acceso es denegado, redirige directamente a la página de acceso denegado.
+ * Si el acceso es denegado, el frontend manejará la redirección.
  */
 
 exports.onExecutePostLogin = async (event, api) => {
@@ -33,11 +33,9 @@ exports.onExecutePostLogin = async (event, api) => {
         return;
     }
     
-    // Si no cumple ninguna condición, denegar acceso y redirigir directo
+    // Si no cumple ninguna condición, denegar acceso
     console.log('❌ Acceso denegado: Email no autorizado');
-    
-    // Redirigir directamente a la página de acceso denegado
-    api.redirect.sendUserTo('/access-denied.html');
+    api.access.deny('Acceso denegado. Tu correo no está autorizado para esta aplicación.');
 };
 
 // ===== INSTRUCCIONES DE USO =====
@@ -55,12 +53,10 @@ Para usar esta Action en Auth0:
 7. Agrega la Action al flujo de Login
 8. Deploy la Action
 
-IMPORTANTE: Agrega /access-denied.html a las URLs permitidas en Auth0:
-- Allowed Callback URLs: https://swanixdd.netlify.app/access-denied.html
-- Allowed Logout URLs: https://swanixdd.netlify.app/access-denied.html
-
 Esta Action permite:
 ✅ Todos los emails de @sebastianserna.com
 ✅ Emails específicos de partners externos
-❌ Cualquier otro email → Redirige directo a /access-denied.html
+❌ Cualquier otro email → Denegado con mensaje
+
+El frontend manejará la redirección a /access-denied.html cuando reciba el error.
 */

@@ -18,11 +18,19 @@ async function initAuth0() {
     try {
         auth0 = await createAuth0Client(auth0Config);
         
+        // Verificar errores de acceso denegado (REDIRECCIÓN INMEDIATA)
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+        
+        if (error === 'access_denied') {
+            console.log('🚫 [INDEX] Error de acceso denegado detectado, redirigiendo inmediatamente');
+            window.location.replace('/access-denied.html');
+            return;
+        }
+        
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
             console.log('🔍 [INDEX] Detectado código de autorización en URL');
-            console.log('📍 [INDEX] URL actual:', window.location.href);
-            console.log('🔍 [INDEX] Parámetros de URL:', window.location.search);
             
             try {
                 console.log('🔄 [INDEX] Procesando callback de Auth0...');
@@ -32,24 +40,14 @@ async function initAuth0() {
                 return;
             } catch (error) {
                 console.error('❌ [INDEX] Error en callback:', error);
-                console.log('🔍 [INDEX] Tipo de error:', typeof error);
-                console.log('🔍 [INDEX] Propiedades del error:', Object.keys(error));
                 
                 // Verificar si es error de acceso denegado
                 if (error.error === 'access_denied') {
                     console.log('🚫 [INDEX] Error de acceso denegado detectado, redirigiendo a /access-denied.html');
-                    window.location.href = '/access-denied.html';
+                    window.location.replace('/access-denied.html');
                     return;
                 }
                 
-                // Verificar otros tipos de errores
-                if (error.message && error.message.includes('access_denied')) {
-                    console.log('🚫 [INDEX] Error de acceso denegado en mensaje, redirigiendo a /access-denied.html');
-                    window.location.href = '/access-denied.html';
-                    return;
-                }
-                
-                console.log('❌ [INDEX] Error no reconocido, lanzando error original');
                 throw error;
             }
         }

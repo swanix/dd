@@ -22,20 +22,14 @@ async function initAuth0() {
         
         auth0 = await createAuth0Client(auth0Config);
         
-        // Verificar si hay errores en la URL
+        // Verificar si hay errores en la URL (REDIRECCIÓN INMEDIATA)
         const urlParams = new URLSearchParams(window.location.search);
         const error = urlParams.get('error');
-        const errorDescription = urlParams.get('error_description');
         
-        if (error) {
-            console.log('🚫 [LOGIN] Error detectado en URL:', error);
-            console.log('📝 [LOGIN] Descripción del error:', errorDescription);
-            
-            if (error === 'access_denied') {
-                console.log('🚫 [LOGIN] Error de acceso denegado, redirigiendo a /access-denied.html');
-                window.location.href = '/access-denied.html';
-                return;
-            }
+        if (error === 'access_denied') {
+            console.log('🚫 [LOGIN] Error de acceso denegado detectado, redirigiendo inmediatamente');
+            window.location.replace('/access-denied.html');
+            return;
         }
         
         // Manejar redirección después del login
