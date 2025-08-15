@@ -1,26 +1,24 @@
 {
-  "name": "auth0-netlify-protected-content",
+  "name": "swanixdd-secure",
   "version": "1.0.0",
-  "description": "Contenido HTML estático protegido con Auth0 y Netlify Functions",
+  "description": "Aplicación segura con Auth0 y SheetBest",
   "main": "index.html",
   "scripts": {
     "dev": "netlify dev",
-    "build": "echo 'No build step required for static HTML'",
+    "build": "echo 'No build step required'",
     "deploy": "netlify deploy --prod"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
-    "jwks-rsa": "^3.0.1"
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"
   },
   "keywords": [
     "auth0",
+    "sheetbest",
     "netlify",
-    "functions",
-    "authentication",
-    "static-site"
+    "security"
   ],
   "author": "Tu Nombre",
   "license": "MIT"
