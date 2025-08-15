@@ -3,95 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contenido Protegido - Auth0 + Netlify Functions</title>
+    <title>Mi Aplicación - Auth0 + Netlify Functions</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .auth-section {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .content-section {
-            display: none;
-            margin-top: 30px;
-        }
-        button {
-            background: #007bff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            border: none;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .loading-subtext {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .error-container {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .error-container.show {
+            display: block;
+        }
+
+        .error-button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
             padding: 12px 24px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            margin: 0 10px;
+            margin-top: 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
-        button:hover {
-            background: #0056b3;
-        }
-        .protected-content {
-            background: #e8f5e8;
-            padding: 20px;
-            border-radius: 5px;
-            border-left: 4px solid #28a745;
-        }
-        .loading {
-            color: #666;
-            font-style: italic;
-        }
-        .error {
-            color: #dc3545;
-            background: #f8d7da;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+
+        .error-button:hover {
+            background: rgba(255,255,255,0.3);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🔒 Contenido Protegido</h1>
-        <p>Esta página demuestra cómo proteger contenido HTML estático usando Auth0 y Netlify Functions.</p>
-        
-        <!-- Sección de Autenticación -->
-        <div class="auth-section">
-            <button id="login">🔑 Iniciar Sesión</button>
-            <button id="logout" style="display:none;">🚪 Cerrar Sesión</button>
-            <div id="user-info" style="display:none;">
-                <p>Bienvenido, <span id="user-name"></span>!</p>
-            </div>
-        </div>
+    <div class="loading-container" id="loadingContainer">
+        <div class="spinner"></div>
+        <div class="loading-text">Verificando autenticación...</div>
+        <div class="loading-subtext">Redirigiendo automáticamente</div>
+    </div>
 
-        <!-- Contenido Protegido -->
-        <div id="content" class="content-section">
-            <h2>🎉 ¡Acceso Concedido!</h2>
-            <div class="protected-content">
-                <h3>Contenido Protegido</h3>
-                <p>Este contenido solo es visible para usuarios autenticados.</p>
-                <p>Aquí puedes mostrar información sensible, recursos exclusivos, o cualquier contenido que requiera autenticación.</p>
-                
-                <h4>Información del Usuario:</h4>
-                <div id="user-details"></div>
-                
-                <h4>Datos del Servidor:</h4>
-                <div id="server-data">
-                    <p class="loading">Cargando datos del servidor...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mensajes de Estado -->
-        <div id="messages"></div>
+    <div class="error-container" id="errorContainer">
+        <h2>Error de Conexión</h2>
+        <p>No se pudo verificar tu estado de autenticación.</p>
+        <button class="error-button" onclick="window.location.href='/login.html'">
+            Ir a la página de login
+        </button>
     </div>
 
     <!-- Scripts de Auth0 -->
@@ -100,144 +99,62 @@
     <script>
         // Configuración de Auth0
         const auth0Config = {
-            domain: 'dev-7kj3jxtxwwirocri.us.auth0.com', // Cambiar por tu dominio real
-            client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ', // Cambiar por tu client ID real
-            redirect_uri: window.location.origin,
+            domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
+            client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+                           redirect_uri: window.location.origin + '/app.html',
             cacheLocation: 'localstorage'
         };
 
         let auth0 = null;
 
-        // Inicializar Auth0
+        // Elementos del DOM
+        const loadingContainer = document.getElementById('loadingContainer');
+        const errorContainer = document.getElementById('errorContainer');
+
+        // Inicializar Auth0 y verificar autenticación
         async function initAuth0() {
             try {
                 auth0 = await createAuth0Client(auth0Config);
                 
                 // Manejar redirección después del login
                 if (window.location.search.includes('code=')) {
-                    await auth0.handleRedirectCallback();
-                    window.history.replaceState({}, document.title, window.location.pathname);
+                                           await auth0.handleRedirectCallback();
+                       window.location.href = '/app.html';
+                    return;
                 }
 
-                // Configurar botones
-                setupAuthButtons();
-                
                 // Verificar estado de autenticación
-                await checkAuthState();
+                const isAuthenticated = await auth0.isAuthenticated();
                 
-            } catch (error) {
-                console.error('Error inicializando Auth0:', error);
-                showMessage('Error al inicializar la autenticación', 'error');
-            }
-        }
-
-        // Configurar botones de autenticación
-        function setupAuthButtons() {
-            console.log('🔧 Configurando botones de autenticación...');
-            
-            document.getElementById('login').onclick = () => {
-                console.log('🔑 Botón login clickeado');
-                auth0.loginWithRedirect();
-            };
-
-            document.getElementById('logout').onclick = () => {
-                console.log('🚪 Botón logout clickeado');
-                auth0.logout({
-                    returnTo: window.location.origin
-                });
-            };
-        }
-
-        // Verificar estado de autenticación
-        async function checkAuthState() {
-            const isAuthenticated = await auth0.isAuthenticated();
-            
-            if (isAuthenticated) {
-                // Usuario autenticado
-                const user = await auth0.getUser();
-                showAuthenticatedContent(user);
-                await fetchProtectedData();
-            } else {
-                // Usuario no autenticado
-                showUnauthenticatedContent();
-            }
-        }
-
-        // Mostrar contenido para usuarios autenticados
-        function showAuthenticatedContent(user) {
-            document.getElementById('login').style.display = 'none';
-            document.getElementById('logout').style.display = 'inline-block';
-            document.getElementById('content').style.display = 'block';
-            document.getElementById('user-info').style.display = 'block';
-            document.getElementById('user-name').textContent = user.name || user.email;
-            
-            // Mostrar detalles del usuario
-            document.getElementById('user-details').innerHTML = `
-                <p><strong>Email:</strong> ${user.email}</p>
-                <p><strong>ID:</strong> ${user.sub}</p>
-                <p><strong>Email verificado:</strong> ${user.email_verified ? 'Sí' : 'No'}</p>
-            `;
-        }
-
-        // Mostrar contenido para usuarios no autenticados
-        function showUnauthenticatedContent() {
-            document.getElementById('login').style.display = 'inline-block';
-            document.getElementById('logout').style.display = 'none';
-            document.getElementById('content').style.display = 'none';
-            document.getElementById('user-info').style.display = 'none';
-        }
-
-        // Obtener datos protegidos del servidor
-        async function fetchProtectedData() {
-            try {
-                // Obtener el ID token en lugar del access token
-                const token = await auth0.getIdTokenClaims();
-                const idToken = token.__raw;
-                
-                const response = await fetch('/.netlify/functions/auth-protect', {
-                    headers: {
-                        'Authorization': `Bearer ${idToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('server-data').innerHTML = `
-                        <p><strong>Respuesta del servidor:</strong> ${data.message}</p>
-                        <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
-                        <p><strong>Usuario del servidor:</strong> ${data.user?.name || 'N/A'}</p>
-                    `;
+                if (isAuthenticated) {
+                    // Usuario autenticado - redirigir a la app
+                    window.location.href = '/app.html';
                 } else {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+                    // Usuario no autenticado - redirigir al login
+                    window.location.href = '/login.html';
                 }
+                
             } catch (error) {
-                console.error('Error obteniendo datos protegidos:', error);
-                document.getElementById('server-data').innerHTML = `
-                    <p class="error">Error al obtener datos del servidor: ${error.message}</p>
-                `;
+                console.error('Error verificando autenticación:', error);
+                showError();
             }
         }
 
-        // Mostrar mensajes
-        function showMessage(message, type = 'info') {
-            const messagesDiv = document.getElementById('messages');
-            const messageElement = document.createElement('div');
-            messageElement.className = type;
-            messageElement.textContent = message;
-            messagesDiv.appendChild(messageElement);
-            
-            // Remover mensaje después de 5 segundos
-            setTimeout(() => {
-                messageElement.remove();
-            }, 5000);
+        // Mostrar error
+        function showError() {
+            loadingContainer.style.display = 'none';
+            errorContainer.classList.add('show');
         }
 
         // Inicializar cuando el DOM esté listo
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Iniciando aplicación principal...');
-            initAuth0();
-        });
+        document.addEventListener('DOMContentLoaded', initAuth0);
+
+        // Timeout de seguridad
+        setTimeout(() => {
+            if (loadingContainer.style.display !== 'none') {
+                showError();
+            }
+        }, 10000); // 10 segundos
     </script>
 </body>
 </html>

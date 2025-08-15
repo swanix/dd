@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Aplicación - Auth0 + Netlify Functions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* Layout Principal */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #fff;
+        }
+
+        .sidebar-nav a.active {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #fff;
+        }
+
+        .sidebar-nav i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Topbar */
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left h1 {
+            font-size: 1.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-button {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .user-button:hover {
+            background: #f5f5f5;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            padding: 8px 0;
+            margin-top: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            text-decoration: none;
+            transition: background 0.3s ease;
+        }
+
+        .user-dropdown-item:hover {
+            background: #f5f5f5;
+        }
+
+        .user-dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #eee;
+            margin-top: 5px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            margin-bottom: 30px;
+        }
+
+        .content-header h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .content-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Article Content */
+        .article {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            line-height: 1.7;
+        }
+
+        .article h3 {
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .article p {
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .article .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        /* Auth Overlay */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .auth-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .auth-modal h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .auth-modal p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .auth-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .topbar {
+                padding: 15px 20px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Messages */
+        .message {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" class="auth-overlay" style="display: none;">
+        <div class="auth-modal">
+            <h2>🔒 Acceso Requerido</h2>
+            <p>Para acceder a esta aplicación, necesitas iniciar sesión con tu cuenta.</p>
+            <button id="loginButton" class="auth-button">🔑 Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>🚀 Mi App</h2>
+            </div>
+            <ul class="sidebar-nav">
+                <li><a href="#" class="active"><i>📊</i> Aplicación</a></li>
+                <li><a href="#"><i>📝</i> Artículos</a></li>
+                <li><a href="#"><i>👥</i> Usuarios</a></li>
+                <li><a href="#"><i>⚙️</i> Configuración</a></li>
+                <li><a href="#"><i>📈</i> Reportes</a></li>
+                <li><a href="#"><i>💬</i> Mensajes</a></li>
+                <li><a href="#"><i>🔔</i> Notificaciones</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1>Aplicación</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-menu">
+                        <button id="userButton" class="user-button" style="display: none;">
+                            <div class="user-avatar" id="userAvatar">U</div>
+                            <span id="userName">Usuario</span>
+                            <i>▼</i>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-item">
+                                <i>👤</i>
+                                <span id="userEmail">usuario@email.com</span>
+                            </div>
+                            <div class="user-dropdown-item">
+                                <i>🆔</i>
+                                <span id="userId">ID del usuario</span>
+                            </div>
+                            <div class="user-dropdown-item">
+                                <i>✅</i>
+                                <span id="userVerified">Email verificado</span>
+                            </div>
+                            <div class="user-dropdown-item">
+                                <i>⚙️</i>
+                                <span>Configuración</span>
+                            </div>
+                            <a href="#" class="user-dropdown-item logout" id="logoutButton">
+                                <i>🚪</i>
+                                <span>Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <div class="content-header">
+                    <h2>Bienvenido a tu Aplicación</h2>
+                    <p>Aquí puedes gestionar tu contenido y configuraciones.</p>
+                </div>
+
+                <div class="article">
+                    <h3>📰 Artículo de Ejemplo: Protección de Contenido con Auth0</h3>
+                    
+                    <p>Este es un artículo de ejemplo que demuestra cómo funciona la protección de contenido en nuestra aplicación. Solo los usuarios autenticados pueden ver este contenido.</p>
+                    
+                    <div class="highlight">
+                        <strong>🎯 Punto Clave:</strong> La autenticación con Auth0 asegura que solo usuarios autorizados puedan acceder a contenido sensible.
+                    </div>
+                    
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                    
+                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    
+                    <h3>🔧 Características Implementadas</h3>
+                    <ul style="margin: 15px 0; padding-left: 20px;">
+                        <li>Autenticación segura con Auth0</li>
+                        <li>Protección de contenido con JWT tokens</li>
+                        <li>Interfaz moderna y responsive</li>
+                        <li>Manejo de sesiones persistente</li>
+                        <li>Backend serverless con Netlify Functions</li>
+                    </ul>
+                    
+                    <p>Esta implementación demuestra las mejores prácticas para proteger contenido HTML estático usando tecnologías modernas y seguras.</p>
+                </div>
+
+                <!-- Server Data Section -->
+                <div id="serverData" style="margin-top: 30px; display: none;">
+                    <div class="article">
+                        <h3>📡 Datos del Servidor</h3>
+                        <div id="serverDataContent">
+                            <p>Cargando datos del servidor...</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts de Auth0 -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+    
+    <script>
+        // Configuración de Auth0
+        const auth0Config = {
+            domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
+            client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+            redirect_uri: window.location.origin,
+            cacheLocation: 'localstorage'
+        };
+
+        let auth0 = null;
+
+        // Elementos del DOM
+        const authOverlay = document.getElementById('authOverlay');
+        const loginButton = document.getElementById('loginButton');
+        const userButton = document.getElementById('userButton');
+        const userDropdown = document.getElementById('userDropdown');
+        const logoutButton = document.getElementById('logoutButton');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userId = document.getElementById('userId');
+        const userVerified = document.getElementById('userVerified');
+        const serverData = document.getElementById('serverData');
+        const serverDataContent = document.getElementById('serverDataContent');
+
+        // Inicializar Auth0
+        async function initAuth0() {
+            try {
+                auth0 = await createAuth0Client(auth0Config);
+                
+                // Manejar redirección después del login
+                if (window.location.search.includes('code=')) {
+                    await auth0.handleRedirectCallback();
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+
+                // Configurar eventos
+                setupEventListeners();
+                
+                // Verificar estado de autenticación
+                await checkAuthState();
+                
+            } catch (error) {
+                console.error('Error inicializando Auth0:', error);
+                showMessage('Error al inicializar la autenticación', 'error');
+            }
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            loginButton.onclick = () => auth0.loginWithRedirect();
+            logoutButton.onclick = () => auth0.logout({ returnTo: window.location.origin + '/login.html' });
+            
+            // Toggle user dropdown
+            userButton.onclick = () => {
+                userDropdown.classList.toggle('show');
+            };
+
+            // Cerrar dropdown al hacer clic fuera
+            document.addEventListener('click', (e) => {
+                if (!userButton.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+
+        // Verificar estado de autenticación
+        async function checkAuthState() {
+            const isAuthenticated = await auth0.isAuthenticated();
+            
+            if (isAuthenticated) {
+                showAuthenticatedUI();
+                await fetchProtectedData();
+            } else {
+                showUnauthenticatedUI();
+            }
+        }
+
+        // Mostrar UI autenticada
+        async function showAuthenticatedUI() {
+            const user = await auth0.getUser();
+            
+            // Ocultar overlay de auth
+            authOverlay.style.display = 'none';
+            
+            // Mostrar información del usuario
+            userButton.style.display = 'flex';
+            userAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+            userName.textContent = user.name || user.email;
+            userEmail.textContent = user.email || 'N/A';
+            userId.textContent = user.sub || 'N/A';
+            userVerified.textContent = user.email_verified ? 'Sí' : 'No';
+        }
+
+        // Mostrar UI no autenticada
+        function showUnauthenticatedUI() {
+            authOverlay.style.display = 'flex';
+            userButton.style.display = 'none';
+            serverData.style.display = 'none';
+        }
+
+        // Obtener datos protegidos del servidor
+        async function fetchProtectedData() {
+            try {
+                const token = await auth0.getIdTokenClaims();
+                const idToken = token.__raw;
+                
+                const response = await fetch('/.netlify/functions/auth-protect', {
+                    headers: {
+                        'Authorization': `Bearer ${idToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    serverData.style.display = 'block';
+                    serverDataContent.innerHTML = `
+                        <p><strong>✅ Respuesta del servidor:</strong> ${data.message}</p>
+                        <p><strong>⏰ Timestamp:</strong> ${new Date().toLocaleString()}</p>
+                        <p><strong>👤 Usuario del servidor:</strong> ${data.user?.name || 'N/A'}</p>
+                        <p><strong>🔑 Permisos:</strong> ${data.permissions?.length || 0} permisos disponibles</p>
+                    `;
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('Error obteniendo datos protegidos:', error);
+                serverData.style.display = 'block';
+                serverDataContent.innerHTML = `
+                    <p class="message error">Error al obtener datos del servidor: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Mostrar mensajes
+        function showMessage(message, type = 'info') {
+            // Implementar sistema de mensajes si es necesario
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', initAuth0);
+    </script>
+</body>
+</html>
