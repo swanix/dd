@@ -5,6 +5,9 @@ node_modules/
 .env
 .env.local
 .env.development
+
+# Generated configuration files
+assets/js/env-config.js
 .env.production
 .env.test
 

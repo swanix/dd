@@ -1,5 +1,6 @@
 // ===== CONFIGURACIÓN DE AUTH0 =====
-const auth0Config = {
+// La configuración se carga desde env-config.js generado automáticamente
+const auth0Config = window.AUTH0_CONFIG || {
     domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
     client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
     redirect_uri: window.location.origin + '/app/',
@@ -136,11 +137,12 @@ async function showAuthenticatedUI() {
     const userInitial = document.getElementById('userInitial');
     const userPicture = document.getElementById('userPicture');
     
-    console.log('🔍 [AUTH] Datos del usuario:', {
-        name: user.name,
-        email: user.email,
-        picture: user.picture,
-        sub: user.sub
+    // Log seguro - solo información no sensible
+    console.log('🔍 [AUTH] Usuario autenticado:', {
+        hasName: !!user.name,
+        hasEmail: !!user.email,
+        hasPicture: !!user.picture,
+        isVerified: user.email_verified
     });
     
     if (userInitial && userPicture) {

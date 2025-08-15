@@ -4,8 +4,9 @@
   "description": "Contenido HTML estático protegido con Auth0 y Netlify Functions",
   "main": "index.html",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "echo 'No build step required for static HTML'",
+    "dev": "node scripts/inject-env.js development && netlify dev",
+    "build": "node scripts/inject-env.js production",
+    "build:dev": "node scripts/inject-env.js development",
     "deploy": "netlify deploy --prod"
   },
   "dependencies": {

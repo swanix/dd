@@ -1,7 +1,8 @@
 // ===== LÓGICA ESPECÍFICA PARA INDEX.HTML =====
 
 // ===== CONFIGURACIÓN DE AUTH0 =====
-const auth0Config = {
+// La configuración se carga desde env-config.js generado automáticamente
+const auth0Config = window.AUTH0_CONFIG || {
     domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
     client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
     redirect_uri: window.location.origin + '/',

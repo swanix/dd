@@ -1,0 +1,94 @@
+// ===== SCRIPT PARA INYECTAR VARIABLES DE ENTORNO =====
+
+const fs = require('fs');
+const path = require('path');
+
+// Función para leer variables de entorno
+function loadEnvFile(filePath) {
+    if (!fs.existsSync(filePath)) {
+        console.log(`⚠️  Archivo ${filePath} no encontrado`);
+        return {};
+    }
+    
+    const envContent = fs.readFileSync(filePath, 'utf8');
+    const envVars = {};
+    
+    envContent.split('\n').forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine && !trimmedLine.startsWith('#')) {
+            const [key, ...valueParts] = trimmedLine.split('=');
+            if (key && valueParts.length > 0) {
+                envVars[key.trim()] = valueParts.join('=').trim();
+            }
+        }
+    });
+    
+    return envVars;
+}
+
+// Función para crear archivo de configuración
+function createConfigFile(envVars, environment) {
+    const config = {
+        AUTH0_DOMAIN: envVars.AUTH0_DOMAIN || 'dev-7kj3jxtxwwirocri.us.auth0.com',
+        AUTH0_CLIENT_ID: envVars.AUTH0_CLIENT_ID || 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+        BASE_URL: environment === 'production' 
+            ? (envVars.NETLIFY_URL || 'https://swanixdd.netlify.app')
+            : (envVars.LOCAL_URL || 'http://localhost:8888')
+    };
+    
+    const configContent = `// ===== CONFIGURACIÓN GENERADA AUTOMÁTICAMENTE =====
+// NO EDITAR MANUALMENTE - Se genera desde variables de entorno
+
+window.ENV_CONFIG = ${JSON.stringify(config, null, 2)};
+
+// ===== CONFIGURACIÓN DE AUTH0 =====
+window.AUTH0_CONFIG = {
+    domain: window.ENV_CONFIG.AUTH0_DOMAIN,
+    client_id: window.ENV_CONFIG.AUTH0_CLIENT_ID,
+    redirect_uri: window.ENV_CONFIG.BASE_URL + '/',
+    cacheLocation: 'localstorage'
+};
+`;
+    
+    const outputPath = path.join(__dirname, '..', 'assets', 'js', 'env-config.js');
+    fs.writeFileSync(outputPath, configContent);
+    
+    console.log(`✅ Configuración generada para entorno: ${environment}`);
+    console.log(`📍 Archivo: ${outputPath}`);
+    console.log(`🔧 Variables cargadas:`, Object.keys(config));
+    
+    return config;
+}
+
+// Función principal
+function main() {
+    const environment = process.argv[2] || 'development';
+    console.log(`🔄 Generando configuración para entorno: ${environment}`);
+    
+    // Cargar variables de entorno
+    let envVars = {};
+    
+    if (environment === 'production') {
+        // En producción, usar variables de entorno del sistema
+        envVars = {
+            AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+            AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+            NETLIFY_URL: process.env.NETLIFY_URL
+        };
+    } else {
+        // En desarrollo, cargar desde archivo .env.local
+        envVars = loadEnvFile(path.join(__dirname, '..', '.env.local'));
+    }
+    
+    // Crear archivo de configuración
+    const config = createConfigFile(envVars, environment);
+    
+    console.log('✅ Configuración completada');
+}
+
+// Ejecutar si se llama directamente
+if (require.main === module) {
+    main();
+}
+
+module.exports = { loadEnvFile, createConfigFile };
