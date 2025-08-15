@@ -11,6 +11,9 @@ assets/js/env-config.js
 .env.production
 .env.test
 
+# Scripts with sensitive data (solo para uso local)
+scripts/analyze-users.js
+
 # Local Netlify folder
 .netlify/
 
