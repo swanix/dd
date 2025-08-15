@@ -17,6 +17,12 @@ async function initAuth0() {
     try {
         auth0 = await createAuth0Client(auth0Config);
         
+        // Manejar redirección después del login
+        if (window.location.search.includes('code=')) {
+            await auth0.handleRedirectCallback();
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
         // Configurar event listeners
         setupEventListeners();
         
