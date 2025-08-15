@@ -97,7 +97,8 @@ function setupEventListeners() {
             showLoading();
             await auth0.loginWithRedirect({
                 connection: 'google-oauth2',
-                prompt: 'select_account'
+                prompt: 'select_account',
+                scope: 'openid profile email'
             });
         } catch (error) {
             console.error('Error en login:', error);

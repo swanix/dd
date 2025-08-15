@@ -75,7 +75,8 @@ function setupEventListeners() {
     if (loginButton) {
         loginButton.onclick = () => auth0.loginWithRedirect({
             connection: 'google-oauth2',
-            prompt: 'select_account'
+            prompt: 'select_account',
+            scope: 'openid profile email'
         });
     }
     
@@ -135,14 +136,23 @@ async function showAuthenticatedUI() {
     const userInitial = document.getElementById('userInitial');
     const userPicture = document.getElementById('userPicture');
     
+    console.log('🔍 [AUTH] Datos del usuario:', {
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        sub: user.sub
+    });
+    
     if (userInitial && userPicture) {
         if (user.picture) {
             // Si hay foto de perfil, mostrarla
+            console.log('🖼️ [AUTH] Mostrando foto de perfil:', user.picture);
             userPicture.src = user.picture;
             userPicture.style.display = 'block';
             userInitial.style.display = 'none';
         } else {
             // Si no hay foto, mostrar inicial
+            console.log('🔤 [AUTH] No hay foto, mostrando inicial:', user.name ? user.name.charAt(0).toUpperCase() : 'U');
             userInitial.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
             userPicture.style.display = 'none';
             userInitial.style.display = 'flex';
