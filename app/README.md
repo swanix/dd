@@ -12,18 +12,18 @@ Esta carpeta contiene todas las páginas HTML de la aplicación. Cada página es
   - Redirección automática si ya autenticado
   - UI moderna y responsive
 
-### `app.html`
+### `index.html` (Dashboard Principal)
 - **Propósito**: Aplicación principal con contenido protegido
-- **URL**: `/pages/app.html`
+- **URL**: `/app/`
 - **Características**:
   - Layout completo con sidebar y topbar
   - Información del usuario autenticado
   - Contenido protegido de ejemplo
   - Datos del servidor via Netlify Functions
 
-### `dashboard.html`
+### `dashboard.html` (Dashboard de Métricas)
 - **Propósito**: Dashboard de métricas y estadísticas
-- **URL**: `/pages/dashboard.html`
+- **URL**: `/app/dashboard.html`
 - **Características**:
   - Métricas visuales con cards
   - Estado de autenticación detallado
@@ -47,19 +47,19 @@ touch pages/nueva-pagina.html
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nueva Página - Mi Aplicación</title>
     <style>
-        /* Copiar estilos de app.html o dashboard.html */
+        /* Copiar estilos de index.html o dashboard.html */
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- Sidebar (copiar de app.html) -->
+        <!-- Sidebar (copiar de index.html) -->
         <aside class="sidebar">
             <!-- Navegación -->
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Topbar (copiar de app.html) -->
+            <!-- Topbar (copiar de index.html) -->
             <header class="topbar">
                 <!-- Header content -->
             </header>
@@ -73,15 +73,15 @@ touch pages/nueva-pagina.html
 
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script>
-        // Configuración de Auth0 (copiar de app.html)
+        // Configuración de Auth0 (copiar de index.html)
         const auth0Config = {
             domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
             client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-            redirect_uri: window.location.origin + '/pages/app.html',
+            redirect_uri: window.location.origin + '/app/',
             cacheLocation: 'localstorage'
         };
 
-        // Lógica de autenticación (copiar de app.html)
+        // Lógica de autenticación (copiar de index.html)
         async function initAuth0() {
             // Verificar autenticación
             // Cargar datos del usuario
@@ -97,7 +97,7 @@ touch pages/nueva-pagina.html
 ### 3. Actualizar navegación
 Agregar el enlace en el sidebar de todas las páginas:
 ```html
-<li><a href="/pages/nueva-pagina.html"><i>🔗</i> Nueva Página</a></li>
+<li><a href="/app/nueva-pagina.html"><i>🔗</i> Nueva Página</a></li>
 ```
 
 ### 4. Actualizar script de configuración
@@ -105,10 +105,10 @@ Agregar la nueva página al script `update-urls.js`:
 ```javascript
 const files = [
     'index.html',
-    'pages/login.html',
-    'pages/app.html',
-    'pages/dashboard.html',
-    'pages/nueva-pagina.html'  // ← Agregar aquí
+    'login.html',
+    'app/index.html',
+    'app/dashboard.html',
+    'app/nueva-pagina.html'  // ← Agregar aquí
 ];
 ```
 
@@ -149,7 +149,7 @@ Cuando agregues nuevas páginas que requieran autenticación, actualiza las URLs
 
 ```
 Allowed Callback URLs:
-http://localhost:8888/pages/app.html, https://swanixdd.netlify.app/pages/app.html
+http://localhost:8888/app/, https://swanixdd.netlify.app/app/
 
 Allowed Logout URLs:
 http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html

@@ -54,8 +54,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 dd/
 ├── index.html              # Página de redirección principal
 ├── login.html              # Página de login (pública)
-├── pages/                  # Carpeta de páginas protegidas
-│   ├── app.html            # Aplicación principal
+├── app/                    # Aplicación protegida
+│   ├── index.html          # Dashboard principal
 │   ├── dashboard.html      # Dashboard de métricas
 │   └── README.md           # Guía para agregar nuevas páginas
 ├── components/             # Componentes reutilizables (futuro)
@@ -91,7 +91,7 @@ dd/
 ### URLs Configuradas en Auth0
 ```
 Allowed Callback URLs:
-http://localhost:8888/pages/app.html, https://swanixdd.netlify.app/pages/app.html
+http://localhost:8888/app/, https://swanixdd.netlify.app/app/
 
 Allowed Logout URLs:
 http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html
@@ -155,7 +155,7 @@ node update-urls.js production
 ### `index.html` - Página de Redirección
 - **Propósito**: Verificar estado de autenticación y redirigir
 - **Comportamiento**: 
-  - Si autenticado → redirige a `/pages/app.html`
+  - Si autenticado → redirige a `/app/`
   - Si no autenticado → redirige a `/login.html`
 - **Características**: Loading spinner y manejo de errores
 
@@ -167,7 +167,7 @@ node update-urls.js production
   - Lista de características de seguridad
   - Redirección automática si ya autenticado
 
-### `pages/app.html` - Aplicación Principal
+### `app/index.html` - Dashboard Principal
 - **Propósito**: Contenido protegido y funcionalidad principal
 - **Características**:
   - Layout completo con sidebar y topbar
@@ -175,7 +175,7 @@ node update-urls.js production
   - Datos del servidor obtenidos via Netlify Functions
   - Botón de logout funcional
 
-### `pages/dashboard.html` - Dashboard de Métricas
+### `app/dashboard.html` - Dashboard de Métricas
 - **Propósito**: Vista de estadísticas y métricas
 - **Características**:
   - Cards con métricas visuales

@@ -61,14 +61,14 @@ function main() {
     const files = [
         'index.html',
         'login.html',
-        'pages/app.html'
+        'app/index.html'
     ];
     
     files.forEach(file => updateFile(file, env));
     
     console.log('\n📋 URLs para configurar en Auth0:');
     console.log(`\n🔗 Allowed Callback URLs:`);
-    console.log(`${config[env].base_url}/pages/app.html`);
+    console.log(`${config[env].base_url}/app/`);
     
     console.log(`\n🔗 Allowed Logout URLs:`);
     console.log(`${config[env].base_url}/login.html`);

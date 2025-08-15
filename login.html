@@ -325,16 +325,16 @@
                 
                 // Manejar redirección después del login
                 if (window.location.search.includes('code=')) {
-                    showLoading();
-                                           await auth0.handleRedirectCallback();
-                       window.location.href = '/pages/app.html';
+                                          showLoading();
+                                             await auth0.handleRedirectCallback();
+                        window.location.href = '/app/';
                     return;
                 }
 
                 // Verificar si ya está autenticado
                 const isAuthenticated = await auth0.isAuthenticated();
-                                   if (isAuthenticated) {
-                       window.location.href = '/pages/app.html';
+                                                                        if (isAuthenticated) {
+                        window.location.href = '/app/';
                     return;
                 }
 

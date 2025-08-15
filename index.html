@@ -118,8 +118,8 @@
                 
                 // Manejar redirección después del login
                 if (window.location.search.includes('code=')) {
-                                           await auth0.handleRedirectCallback();
-                       window.location.href = '/pages/app.html';
+                                                                   await auth0.handleRedirectCallback();
+                        window.location.href = '/app/';
                     return;
                 }
 
@@ -128,7 +128,7 @@
                 
                 if (isAuthenticated) {
                     // Usuario autenticado - redirigir a la app
-                    window.location.href = '/pages/app.html';
+                    window.location.href = '/app/';
                 } else {
                     // Usuario no autenticado - redirigir al login
                     window.location.href = '/login.html';
