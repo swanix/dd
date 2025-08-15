@@ -10,6 +10,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 - **Manejo de tokens** (ID tokens para verificación)
 - **Persistencia de sesión** con localStorage
 - **Manejo de errores** robusto
+- **Página de login dedicada** con UI moderna
+- **Sistema de redirección inteligente** basado en estado de autenticación
 
 ### 🛡️ Protección de Contenido
 - **Contenido dinámico** que solo se muestra a usuarios autenticados
@@ -22,6 +24,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 - **Estados visuales** claros (autenticado/no autenticado)
 - **Mensajes de estado** informativos
 - **Botones de acción** intuitivos
+- **Layout completo** con sidebar, topbar y área de contenido
+- **Página de login dedicada** con formulario y características de seguridad
 
 ### ⚙️ Backend Serverless
 - **Netlify Functions** para verificación de tokens
@@ -29,31 +33,37 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 - **Manejo de errores** detallado
 - **Respuestas estructuradas** JSON
 
-## 📁 Estructura del Proyecto
+### 🔧 Herramientas de Configuración
+- **Script automatizado** para cambiar entre entornos
+- **Configuración flexible** para desarrollo y producción
+- **Gestión de URLs** automática para Auth0
 
-```
-dd/
-├── index.html              # ✅ Página principal con Auth0
-├── netlify/
-│   └── functions/
-│       └── auth-protect.js # ✅ Función para verificar tokens
-├── package.json            # ✅ Dependencias del proyecto
-├── netlify.toml           # ✅ Configuración de Netlify
-├── config.example.js      # ✅ Ejemplo de configuración
-├── update-config.js       # ✅ Script para actualizar configuración
-├── archive/               # 📦 Proyecto anterior archivado
-└── README.md              # 📖 Este archivo
-```
-
-## 🚀 Estado Actual: FUNCIONANDO
+## 🚀 Estado Actual: FUNCIONANDO EN PRODUCCIÓN
 
 **✅ PROYECTO COMPLETAMENTE OPERATIVO**
-
-- **Autenticación**: ✅ Funcionando
+- **Autenticación**: ✅ Funcionando (local y producción)
 - **Protección de contenido**: ✅ Implementada
 - **Backend**: ✅ Operativo
 - **Interfaz**: ✅ Funcional
 - **Manejo de errores**: ✅ Robusto
+- **Despliegue**: ✅ Funcionando en Netlify
+
+## 📁 Estructura de Archivos
+
+```
+dd/
+├── index.html              # Página de redirección principal
+├── login.html              # Página de login dedicada
+├── app.html                # Aplicación principal (antes dashboard.html)
+├── netlify/
+│   └── functions/
+│       └── auth-protect.js # Función de verificación de tokens
+├── update-urls.js          # Script para cambiar entre entornos
+├── package.json            # Dependencias del proyecto
+├── netlify.toml           # Configuración de Netlify
+├── .gitignore             # Archivos ignorados por Git
+└── README.md              # Este archivo
+```
 
 ## 🛠️ Configuración Actual
 
@@ -61,12 +71,26 @@ dd/
 - **Domain**: `dev-7kj3jxtxwwirocri.us.auth0.com`
 - **Client ID**: `BORj4AB79Rho5yP5uSavuP4sern8pemZ`
 - **Tipo**: Single Page Application (SPA)
-- **URLs permitidas**: `http://localhost:8888`
+- **URLs permitidas**:
+  - **Desarrollo**: `http://localhost:8888`
+  - **Producción**: `https://swanixdd.netlify.app`
 
 ### Netlify Functions
 - **Función**: `auth-protect.js`
 - **Verificación**: JWT tokens de Auth0
-- **CORS**: Configurado para desarrollo local
+- **CORS**: Configurado para desarrollo local y producción
+
+### URLs Configuradas en Auth0
+```
+Allowed Callback URLs:
+http://localhost:8888/app.html, https://swanixdd.netlify.app/app.html
+
+Allowed Logout URLs:
+http://localhost:8888/login.html, https://swanixdd.netlify.app/login.html
+
+Allowed Web Origins:
+http://localhost:8888, https://swanixdd.netlify.app
+```
 
 ## 🧪 Cómo Probar
 
@@ -75,10 +99,6 @@ dd/
 # Instalar dependencias
 npm install
 
-# Configurar variables de entorno (opcional)
-cp env.example .env.local
-# Editar .env.local con tus valores si es necesario
-
 # Iniciar servidor de desarrollo
 npm run dev
 
@@ -86,30 +106,66 @@ npm run dev
 http://localhost:8888
 ```
 
-### Flujo de Prueba
-1. **Abrir** http://localhost:8888
-2. **Hacer clic** en "🔑 Iniciar Sesión"
-3. **Completar** el flujo de Auth0
-4. **Verificar** que aparece el contenido protegido
-5. **Revisar** la información del usuario y datos del servidor
-
-## 🔧 Personalización
-
-### Cambiar Configuración de Auth0
+### Producción
 ```bash
-# Usar el script de actualización
-node update-config.js TU_DOMINIO TU_CLIENT_ID
+# Desplegar a Netlify
+git add .
+git commit -m "Actualización"
+git push
+
+# Acceder a la aplicación
+https://swanixdd.netlify.app
 ```
 
-### Agregar Más Contenido Protegido
-1. **Crear nuevas funciones** en `netlify/functions/`
-2. **Agregar rutas protegidas** en el frontend
-3. **Implementar diferentes niveles de acceso**
+### Flujo de Prueba
+1. **Abrir** la URL correspondiente
+2. **Verificar redirección** automática a login o app
+3. **Hacer clic** en "🔑 Iniciar Sesión con Auth0"
+4. **Completar** el flujo de Auth0
+5. **Verificar** que aparece el contenido protegido
+6. **Revisar** la información del usuario y datos del servidor
 
-### Modificar el Diseño
-- **CSS**: Incluido en `index.html`
-- **Colores**: Modificar variables CSS
-- **Layout**: Ajustar estructura HTML
+## 🔧 Scripts de Configuración
+
+### Cambiar entre Entornos
+```bash
+# Para desarrollo local
+node update-urls.js development
+
+# Para producción
+node update-urls.js production
+```
+
+### Actualizar Configuración de Auth0
+```bash
+# Usar el script de actualización de URLs
+node update-urls.js production
+```
+
+## 🎯 Funcionalidades por Página
+
+### `index.html` - Página de Redirección
+- **Propósito**: Verificar estado de autenticación y redirigir
+- **Comportamiento**: 
+  - Si autenticado → redirige a `/app.html`
+  - Si no autenticado → redirige a `/login.html`
+- **Características**: Loading spinner y manejo de errores
+
+### `login.html` - Página de Login
+- **Propósito**: Interfaz de autenticación dedicada
+- **Características**:
+  - Formulario de login (deshabilitado, solo Auth0)
+  - Botón prominente de Auth0
+  - Lista de características de seguridad
+  - Redirección automática si ya autenticado
+
+### `app.html` - Aplicación Principal
+- **Propósito**: Contenido protegido y funcionalidad principal
+- **Características**:
+  - Layout completo con sidebar y topbar
+  - Información del usuario autenticado
+  - Datos del servidor obtenidos via Netlify Functions
+  - Botón de logout funcional
 
 ## 🔒 Seguridad y Variables de Entorno
 
@@ -120,11 +176,15 @@ node update-config.js TU_DOMINIO TU_CLIENT_ID
 
 ### Archivos Sensibles
 - ✅ `.env.local` - Ignorado por Git
-- ✅ `.env` - Ignorado por Git  
-- ✅ `config.js` - Contiene configuración actual
+- ✅ `.env` - Ignorado por Git
 - ✅ `node_modules/` - Ignorado por Git
+- ✅ `.netlify/` - Ignorado por Git
 
 ## 🐛 Solución de Problemas
+
+### Error: "Callback URL mismatch"
+- **Causa**: URLs no configuradas en Auth0
+- **Solución**: Verificar configuración de URLs en dashboard de Auth0
 
 ### Error: "jwt malformed"
 - **Causa**: Token incorrecto o expirado
@@ -140,53 +200,69 @@ node update-config.js TU_DOMINIO TU_CLIENT_ID
 
 ## 📚 Recursos Adicionales
 
-- [Documentación de Auth0](https://auth0.com/docs)
-- [Netlify Functions](https://docs.netlify.com/functions/overview/)
-- [JWT.io](https://jwt.io/) - Para debuggear tokens
+- [Auth0 SPA SDK Documentation](https://auth0.com/docs/libraries/auth0-spa-js)
+- [Netlify Functions Documentation](https://docs.netlify.com/functions/overview/)
+- [JWT.io](https://jwt.io/) - Para debuggear tokens JWT
+- [Auth0 Dashboard](https://manage.auth0.com/) - Configuración de aplicación
 
 ## 🚀 Próximos Pasos (Opcionales)
-
-### Despliegue en Producción
-1. **Conectar repositorio** a Netlify
-2. **Configurar variables de entorno**
-3. **Actualizar URLs** en Auth0
-4. **Desplegar** con `npm run deploy`
 
 ### Mejoras de Seguridad
 - **Implementar roles** y permisos específicos
 - **Agregar rate limiting**
 - **Configurar CSP headers**
+- **Implementar refresh tokens**
 
 ### Funcionalidades Adicionales
 - **Contenido dinámico** desde APIs externas
 - **Almacenamiento** de preferencias de usuario
 - **Notificaciones** push
 - **Múltiples idiomas**
+- **Temas personalizables**
+
+### Optimizaciones
+- **Lazy loading** de componentes
+- **Caching** de datos del usuario
+- **Progressive Web App** (PWA)
+- **Analytics** de uso
 
 ## 🤝 Contribuir
 
-1. Fork el proyecto
-2. Crear una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abrir un Pull Request
+1. **Fork** el repositorio
+2. **Crear** una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. **Commit** tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. **Push** a la rama (`git push origin feature/nueva-funcionalidad`)
+5. **Crear** un Pull Request
 
-## 📄 Licencia
+## 📝 Historial de Cambios
 
-MIT License - ver archivo LICENSE para detalles.
+### v2.0.0 - Estructura de Páginas Dedicadas
+- ✅ Renombrado `dashboard.html` → `app.html` (más genérico)
+- ✅ Creado `login.html` como página de login dedicada
+- ✅ Creado `index.html` como página de redirección
+- ✅ Script `update-urls.js` para gestión de entornos
+- ✅ Configuración completa para producción
+
+### v1.0.0 - Implementación Base
+- ✅ Autenticación con Auth0 SPA
+- ✅ Protección de contenido con Netlify Functions
+- ✅ Interfaz moderna con sidebar y topbar
+- ✅ Manejo robusto de errores
+
+## 🎯 Logros del Proyecto
+
+✅ **Autenticación completa con Auth0**
+✅ **Protección de contenido HTML estático**
+✅ **Backend serverless con Netlify Functions**
+✅ **Interfaz moderna y responsive**
+✅ **Manejo robusto de errores**
+✅ **Documentación completa**
+✅ **Scripts de configuración automatizados**
+✅ **Funcionamiento en desarrollo y producción**
+✅ **Estructura reutilizable para otros proyectos**
+
+**¡Proyecto listo para producción y reutilización! 🚀**
 
 ---
 
 **Nota**: El proyecto anterior se encuentra en la carpeta `archive/` con toda la documentación y código de referencia.
-
-## 🎯 Logros del Proyecto
-
-✅ **Autenticación completa con Auth0**  
-✅ **Protección de contenido HTML estático**  
-✅ **Backend serverless con Netlify Functions**  
-✅ **Interfaz moderna y responsive**  
-✅ **Manejo robusto de errores**  
-✅ **Documentación completa**  
-✅ **Scripts de configuración automatizados**  
-
-**¡Proyecto listo para producción! 🚀**
