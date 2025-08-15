@@ -144,6 +144,16 @@
             color: white;
             font-weight: 600;
             font-size: 14px;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
         }
 
         .user-dropdown {
@@ -372,7 +382,10 @@
                 <div class="topbar-right">
                     <div class="user-menu">
                         <button id="userButton" class="user-button" style="display: none;">
-                            <div class="user-avatar" id="userAvatar">U</div>
+                            <div class="user-avatar" id="userAvatar">
+                                <span id="userInitial">U</span>
+                                <img id="userPicture" src="" alt="Foto de perfil" style="display: none;">
+                            </div>
                             <span id="userName">Usuario</span>
                             <i>▼</i>
                         </button>
@@ -537,7 +550,23 @@
             
             // Mostrar información del usuario
             userButton.style.display = 'flex';
-            userAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+            
+            // Manejar foto de perfil
+            const userInitial = document.getElementById('userInitial');
+            const userPicture = document.getElementById('userPicture');
+            
+            if (user.picture) {
+                // Si hay foto de perfil, mostrarla
+                userPicture.src = user.picture;
+                userPicture.style.display = 'block';
+                userInitial.style.display = 'none';
+            } else {
+                // Si no hay foto, mostrar inicial
+                userInitial.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                userPicture.style.display = 'none';
+                userInitial.style.display = 'flex';
+            }
+            
             userName.textContent = user.name || user.email;
             userEmail.textContent = user.email || 'N/A';
             userId.textContent = user.sub || 'N/A';

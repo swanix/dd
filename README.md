@@ -26,6 +26,8 @@ Este proyecto demuestra cómo proteger contenido HTML estático usando **Auth0**
 - **Botones de acción** intuitivos
 - **Layout completo** con sidebar, topbar y área de contenido
 - **Página de login dedicada** con formulario y características de seguridad
+- **Foto de perfil** automática desde Google/Auth0
+- **Menú de usuario** con información completa del perfil
 
 ### ⚙️ Backend Serverless
 - **Netlify Functions** para verificación de tokens
