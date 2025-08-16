@@ -3,62 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Prohibido - Mi Aplicación</title>
-    
-    <!-- CSS Files -->
+    <title>Acceso Denegado - Aplicación</title>
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/forbidden.css">
 </head>
 <body>
     <div class="forbidden-container">
         <div class="forbidden-card">
-            <div class="forbidden-icon">
-                🚫
-            </div>
-            
-            <h1>Acceso Prohibido</h1>
-            
-            <div class="forbidden-message">
-                <p><strong>Tu correo electrónico no está autorizado</strong> para acceder a esta aplicación.</p>
-                
-                <div class="access-info">
-                    <h3>¿Por qué no puedo acceder?</h3>
-                    <ul>
-                        <li>Tu dominio de correo no está en la lista de dominios autorizados</li>
-                        <li>Tu correo específico no está en la lista de usuarios autorizados</li>
-                        <li>Necesitas permisos especiales para acceder a esta aplicación</li>
-                    </ul>
-                </div>
-                
-                <div class="contact-info">
-                    <h3>¿Necesitas acceso?</h3>
-                    <p>Contacta al administrador del sistema para solicitar acceso:</p>
-                    <div class="contact-methods">
-                        <div class="contact-method">
-                            <span class="contact-icon">📧</span>
-                            <span>admin@sebastianserna.com</span>
-                        </div>
-                        <div class="contact-method">
-                            <span class="contact-icon">💬</span>
-                            <span>Slack: #admin-support</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="forbidden-actions">
-                <button class="btn-secondary" onclick="window.location.href='/login.html'">
-                    🔄 Intentar con otra cuenta
-                </button>
-                
-                <button class="btn-primary" onclick="window.location.href='/'">
-                    🏠 Volver al inicio
-                </button>
-            </div>
-            
-            <div class="forbidden-footer">
-                <p><small>Si crees que esto es un error, por favor contacta al soporte técnico.</small></p>
-            </div>
+            <h1>Acceso Denegado</h1>
+            <p>No tienes permisos para acceder a este contenido</p>
+            <a href="/login.html" class="forbidden-button">Volver al Login</a>
         </div>
     </div>
 </body>

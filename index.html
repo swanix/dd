@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Aplicación - Auth0 + Netlify Functions</title>
-    
-    <!-- CSS Files -->
+    <title>Redirigiendo...</title>
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/index.css">
+    <style>
+        .redirect-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #ffffff;
+        }
+        .redirect-content {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <div class="loading-container" id="loadingContainer">
-        <div class="spinner"></div>
-        <div class="loading-text">Verificando autenticación...</div>
-        <div class="loading-subtext">Redirigiendo automáticamente</div>
+    <div class="redirect-container">
+        <div class="redirect-content">
+            Redirigiendo...
+        </div>
     </div>
 
-    <div class="error-container" id="errorContainer">
-        <h2>Error de Conexión</h2>
-        <p>No se pudo verificar tu estado de autenticación.</p>
-        <button class="error-button" onclick="window.location.href='/login.html'">
-          Ir a la página de login
-        </button>
-    </div>
-
-    <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js"></script>
     <script src="/assets/js/index.js"></script>

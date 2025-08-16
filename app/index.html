@@ -3,52 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargando... - Mi Aplicación</title>
-    
-    <!-- CSS Files -->
+    <title>Aplicación</title>
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/layout.css">
-    <link rel="stylesheet" href="/assets/css/components.css">
-    <link rel="stylesheet" href="/assets/css/auth.css">
-    
-    <style>
-        .loading-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-        
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid white;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-container">
-        <div style="text-align: center;">
-            <div class="loading-spinner"></div>
-            <h2>🔄 Cargando Contenido Protegido</h2>
-            <p>Verificando autenticación...</p>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Aplicación</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/app/" class="nav-link active">Inicio</a></li>
+                    <li><a href="/app/dashboard.html" class="nav-link">Dashboard</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1>Dashboard</h1>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-menu">
+                        <button id="userButton" class="user-button">
+                            <div class="user-avatar">
+                                <span id="userInitial">U</span>
+                            </div>
+                            <span id="userName">Usuario</span>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <div class="user-dropdown-item">
+                                <span id="userEmail">usuario@email.com</span>
+                            </div>
+                            <div class="user-dropdown-item">
+                                <span id="userId">ID</span>
+                            </div>
+                            <a href="#" class="user-dropdown-item logout" id="logoutButton">
+                                <span>Cerrar Sesión</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <main class="content-area">
+                <div class="content-header">
+                    <h2>Bienvenido</h2>
+                    <p>Contenido protegido de la aplicación</p>
+                </div>
+
+                <div id="contentContainer">
+                    <div class="loading-container">
+                        <div class="loading-content">
+                            <div class="spinner"></div>
+                            <div class="loading-text">Cargando contenido</div>
+                            <div class="loading-subtext">Verificando autenticación</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js"></script>
     <script src="/assets/js/protected-content.js"></script>

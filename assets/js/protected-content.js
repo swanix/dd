@@ -24,7 +24,7 @@ class ProtectedContentLoader {
             const isAuthenticated = await this.auth0.isAuthenticated();
             
             if (!isAuthenticated) {
-                console.log('🚫 Usuario no autenticado, redirigiendo a login');
+                console.log('Usuario no autenticado, redirigiendo a login');
                 window.location.replace('/login.html');
                 return;
             }
@@ -33,156 +33,212 @@ class ProtectedContentLoader {
             await this.loadProtectedContent();
             
         } catch (error) {
-            console.error('❌ Error inicializando contenido protegido:', error);
+            console.error('Error inicializando contenido protegido:', error);
             window.location.replace('/login.html');
         }
     }
 
-    async loadProtectedContent() {
-        try {
-            // Obtener token
-            const token = await this.auth0.getIdTokenClaims();
-            
-            console.log('🔑 Token obtenido:', token.__raw ? 'SÍ' : 'NO');
-            
-            // Cargar contenido desde el servidor
-            const response = await fetch('/.netlify/functions/protect-html', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token.__raw}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+                    async loadProtectedContent() {
+                    try {
+                        // Obtener token
+                        const token = await this.auth0.getIdTokenClaims();
+                        
+                        console.log('Token obtenido:', token.__raw ? 'SÍ' : 'NO');
+                        
+                        // Verificar si hay contenido en caché
+                        const cachedContent = this.getCachedContent();
+                        if (cachedContent) {
+                            console.log('Contenido cargado desde caché local');
+                            this.displayContent(cachedContent);
+                            return;
+                        }
+                        
+                        // Cargar contenido desde el servidor
+                        const response = await fetch('/.netlify/functions/protect-html', {
+                            method: 'GET',
+                            headers: {
+                                'Authorization': `Bearer ${token.__raw}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
 
-            console.log('📡 Response status:', response.status);
-            
-            if (response.ok) {
-                const html = await response.text();
-                
-                console.log('📄 HTML recibido:', html.substring(0, 200) + '...');
-                
-                // Reemplazar el contenido del body
-                document.body.innerHTML = html;
-                
-                // Ejecutar scripts si los hay
-                this.executeScripts();
-                
-                // Inicializar manualmente la interfaz de usuario después de cargar el contenido
-                this.initializeUserInterface();
-                
-                console.log('✅ Contenido protegido cargado exitosamente');
-            } else {
-                const errorData = await response.json();
-                console.error('❌ Error del servidor:', errorData);
-                throw new Error(`Error ${response.status}: ${errorData.message}`);
-            }
-            
-        } catch (error) {
-            console.error('❌ Error cargando contenido protegido:', error);
-            this.showError(`Error cargando contenido protegido: ${error.message}`);
+                        console.log('Response status:', response.status);
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            
+                            console.log('Datos recibidos del servidor:', data);
+                            
+                            // Guardar en caché local
+                            this.cacheContent(data);
+                            
+                            // Mostrar contenido
+                            this.displayContent(data);
+                            
+                            console.log('Contenido protegido cargado exitosamente');
+                        } else {
+                            const errorData = await response.json();
+                            console.error('Error del servidor:', errorData);
+                            throw new Error(`Error ${response.status}: ${errorData.message}`);
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error cargando contenido protegido:', error);
+                        this.showError(`Error cargando contenido: ${error.message}`);
+                    }
+                }
+
+                // Método para obtener contenido del caché
+                getCachedContent() {
+                    try {
+                        const cached = localStorage.getItem('protected_content_cache');
+                        if (!cached) return null;
+                        
+                        const data = JSON.parse(cached);
+                        const cacheTime = data.timestamp || 0;
+                        const now = Date.now();
+                        const cacheAge = now - cacheTime;
+                        
+                        // Caché válido por 5 minutos
+                        if (cacheAge > 5 * 60 * 1000) {
+                            console.log('Caché expirado, cargando desde servidor');
+                            localStorage.removeItem('protected_content_cache');
+                            return null;
+                        }
+                        
+                        return data;
+                    } catch (error) {
+                        console.error('Error leyendo caché:', error);
+                        localStorage.removeItem('protected_content_cache');
+                        return null;
+                    }
+                }
+
+                // Método para guardar contenido en caché
+                cacheContent(data) {
+                    try {
+                        const cacheData = {
+                            ...data,
+                            timestamp: Date.now()
+                        };
+                        localStorage.setItem('protected_content_cache', JSON.stringify(cacheData));
+                        console.log('Contenido guardado en caché local');
+                    } catch (error) {
+                        console.error('Error guardando caché:', error);
+                    }
+                }
+
+                // Método para mostrar contenido
+                displayContent(data) {
+                    // Actualizar contenido
+                    const contentContainer = document.getElementById('contentContainer');
+                    if (contentContainer && data.content) {
+                        contentContainer.innerHTML = data.content;
+                    }
+                    
+                    // Actualizar información del usuario
+                    this.updateUserInfo(data.user);
+                    
+                    // Inicializar la interfaz de usuario
+                    this.initializeUserInterface();
+                }
+
+                // Método para limpiar caché
+                clearCache() {
+                    try {
+                        localStorage.removeItem('protected_content_cache');
+                        console.log('Caché local limpiado');
+                    } catch (error) {
+                        console.error('Error limpiando caché:', error);
+                    }
+                }
+
+    updateUserInfo(token) {
+        // Actualizar información del usuario en la interfaz
+        const userInitial = document.getElementById('userInitial');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const userId = document.getElementById('userId');
+        
+        if (token.name) {
+            userName.textContent = token.name;
+            userInitial.textContent = token.name.charAt(0).toUpperCase();
+        }
+        
+        if (token.email) {
+            userEmail.textContent = token.email;
+        }
+        
+        if (token.sub) {
+            userId.textContent = token.sub;
+        }
+        
+        // Actualizar avatar con foto si está disponible
+        const userAvatar = document.querySelector('.user-avatar');
+        if (token.picture && userAvatar) {
+            userAvatar.innerHTML = `<img src="${token.picture}" alt="${token.name || 'Usuario'}">`;
         }
     }
-
-    executeScripts() {
-        // Buscar y ejecutar scripts en el contenido cargado
-        const scripts = document.querySelectorAll('script');
-        scripts.forEach(script => {
-            if (script.textContent) {
-                // Crear un nuevo script element en lugar de usar eval()
-                const newScript = document.createElement('script');
-                newScript.textContent = script.textContent;
-                document.head.appendChild(newScript);
-                // Remover el script original para evitar duplicados
-                script.remove();
-            }
-        });
-    }
     
-    async initializeUserInterface() {
-        try {
-            // Esperar un poco para que los scripts se carguen
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Obtener referencias a elementos del DOM
-            const userButton = document.getElementById('userButton');
-            const userDropdown = document.getElementById('userDropdown');
-            const logoutButton = document.getElementById('logoutButton');
-            
-            if (!userButton || !userDropdown || !logoutButton) {
-                console.error('❌ Elementos del menú de usuario no encontrados');
-                return;
-            }
-            
-            // Configuración de Auth0
-            const auth0Config = window.AUTH0_CONFIG || {
-                domain: window.AUTH0_CONFIG?.domain || '',
-                client_id: window.AUTH0_CONFIG?.client_id || '',
-                redirect_uri: window.location.origin + '/app/',
-                cacheLocation: 'localstorage'
-            };
-            
-            // Crear cliente Auth0
-            const auth0 = await createAuth0Client(auth0Config);
-            
+    initializeUserInterface() {
+        const userButton = document.getElementById('userButton');
+        const userDropdown = document.getElementById('userDropdown');
+        const logoutButton = document.getElementById('logoutButton');
+        
+        if (userButton && userDropdown && logoutButton) {
             // Toggle del dropdown
-            userButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+            userButton.addEventListener('click', function() {
                 userDropdown.classList.toggle('show');
-                console.log('🔄 Toggle dropdown');
             });
             
             // Cerrar dropdown al hacer clic fuera
             document.addEventListener('click', function(event) {
-                if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                if (!userButton.contains(event.target)) {
                     userDropdown.classList.remove('show');
                 }
             });
             
-            // Logout
-            logoutButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('🚪 Iniciando logout...');
-                auth0.logout({
-                    returnTo: window.location.origin + '/login.html'
-                });
-            });
-            
-            console.log('✅ Interfaz de usuario inicializada correctamente');
-            
-        } catch (error) {
-            console.error('❌ Error inicializando interfaz de usuario:', error);
+                                    // Logout
+                        logoutButton.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            // Limpiar caché antes de cerrar sesión
+                            this.clearCache();
+                            this.auth0.logout({
+                                returnTo: window.location.origin + '/login.html'
+                            });
+                        }.bind(this));
         }
     }
 
-    showError(message) {
-        document.body.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div style="text-align: center; padding: 2rem; border: 1px solid #ccc; border-radius: 8px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <h2 style="color: #dc3545;">❌ Error</h2>
-                    <p style="margin: 1rem 0; color: #666;">${message}</p>
-                    <div style="margin-top: 1.5rem;">
-                        <button id="loginBtn" style="padding: 0.5rem 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;">
-                            🔑 Volver al Login
-                        </button>
-                        <button id="retryBtn" style="padding: 0.5rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            🔄 Reintentar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Agregar event listeners para evitar problemas con CSP
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            window.location.replace('/login.html');
-        });
-        
-        document.getElementById('retryBtn').addEventListener('click', () => {
-            window.location.reload();
-        });
-    }
+                    showError(message) {
+                    const contentContainer = document.getElementById('contentContainer');
+                    if (contentContainer) {
+                        contentContainer.innerHTML = `
+                            <div class="error-container">
+                                <div class="error-content">
+                                    <div class="error-title">Error</div>
+                                    <div class="error-message">${message}</div>
+                                    <button id="loginBtn" class="error-button">Volver al Login</button>
+                                    <button id="retryBtn" class="error-button">Reintentar</button>
+                                    <button id="clearCacheBtn" class="error-button">Limpiar Caché</button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('loginBtn').addEventListener('click', () => {
+                            window.location.replace('/login.html');
+                        });
+                        
+                        document.getElementById('retryBtn').addEventListener('click', () => {
+                            window.location.reload();
+                        });
+                        
+                        document.getElementById('clearCacheBtn').addEventListener('click', () => {
+                            this.clearCache();
+                            window.location.reload();
+                        });
+                    }
+                }
 }
 
 // Inicializar cuando el DOM esté listo

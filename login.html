@@ -3,47 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Mi Aplicación</title>
-    
-    <!-- CSS Files -->
+    <title>Login - Aplicación</title>
     <link rel="stylesheet" href="/assets/css/main.css">
-    <link rel="stylesheet" href="/assets/css/login.css">
 </head>
 <body>
     <div class="login-container">
-        <div class="login-header">
-            <h1>🚀 Mi Aplicación</h1>
+        <div class="login-card">
+            <h1>Iniciar Sesión</h1>
             <p>Accede a tu cuenta para continuar</p>
-        </div>
-
-        <div class="login-body">
-            <div class="error-message" id="errorMessage">
-                Ha ocurrido un error. Por favor, intenta de nuevo.
-            </div>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Iniciando sesión...</p>
-            </div>
-
-            <button class="auth0-button" id="auth0Login">
-                🔑 Iniciar Sesión con Google
-            </button>
-
-            <div class="features">
-                <h3>Características de Seguridad</h3>
-                <ul class="feature-list">
-                    <li>Autenticación segura con Auth0</li>
-                    <li>Protección de contenido con JWT</li>
-                    <li>Verificación de identidad</li>
-                    <li>Sesión persistente</li>
-                    <li>Acceso protegido</li>
-                </ul>
-            </div>
+            <button id="loginButton" class="login-button">Iniciar Sesión</button>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js"></script>
     <script src="/assets/js/login.js"></script>
