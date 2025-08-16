@@ -85,6 +85,12 @@ exports.handler = async (event, context) => {
             }
             decoded = await validateToken(token);
             console.log('✅ Token válido para usuario:', decoded.sub);
+            console.log('📸 Información del usuario:', {
+                name: decoded.name,
+                email: decoded.email,
+                picture: decoded.picture,
+                sub: decoded.sub
+            });
         } catch (error) {
             console.error('❌ Token inválido:', error.message);
             return {
@@ -102,6 +108,9 @@ exports.handler = async (event, context) => {
         const userEmail = decoded.email || 'usuario@email.com';
         const userName = decoded.name || 'Usuario';
         const userInitial = userName.charAt(0).toUpperCase();
+        
+        // Extraer foto de perfil de Google (si está disponible)
+        const userPicture = decoded.picture || null;
         
         // ===== CARGAR CONTENIDO DESDE ARCHIVOS SEPARADOS =====
         // Aquí puedes cargar contenido desde archivos HTML, base de datos, etc.
@@ -224,6 +233,23 @@ exports.handler = async (event, context) => {
         .user-button:hover {
             background-color: rgba(255,255,255,0.1);
         }
+        
+        .user-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .user-avatar img {
+            border: 2px solid rgba(255,255,255,0.3);
+        }
     </style>
 </head>
 <body>
@@ -249,7 +275,7 @@ exports.handler = async (event, context) => {
                     <div class="user-menu">
                         <button id="userButton" class="user-button">
                             <div class="user-avatar">
-                                <span id="userInitial">${userInitial}</span>
+                                ${userPicture ? `<img src="${userPicture}" alt="${userName}" id="userPicture" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">` : `<span id="userInitial">${userInitial}</span>`}
                             </div>
                             <span id="userName">${userName}</span>
                             <i>▼</i>
