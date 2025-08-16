@@ -43,27 +43,18 @@ class ProtectedContentLoader {
 
     // Configurar el user menu flotante
     setupUserMenu() {
-        const userButton = document.getElementById('userButton');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        if (userButton && userDropdown) {
-            // Toggle del dropdown
-            userButton.addEventListener('click', () => {
-                userDropdown.classList.toggle('show');
-            });
+        try {
+            // Inicializar el user menu dinámicamente
+            const userMenu = window.initUserMenu();
             
-            // Cerrar dropdown al hacer clic fuera
-            document.addEventListener('click', (event) => {
-                if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
-                    userDropdown.classList.remove('show');
-                }
-            });
+            // Cargar información del usuario después de que el menu esté listo
+            setTimeout(() => {
+                this.loadUserInfo();
+            }, 100);
             
-            // El logout se maneja directamente en el HTML con onclick
-            console.log('✅ User menu configurado');
-            
-            // Cargar información del usuario
-            this.loadUserInfo();
+            console.log('✅ User menu configurado dinámicamente');
+        } catch (error) {
+            console.error('❌ Error configurando user menu:', error);
         }
     }
 

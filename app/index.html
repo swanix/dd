@@ -7,56 +7,7 @@
     <link rel="stylesheet" href="/assets/css/main.css?v=1755364408331">
 </head>
 <body>
-    <!-- User Menu Flotante -->
-    <div class="floating-user-menu">
-        <div class="user-menu-container">
-            <button id="userButton" class="user-avatar-button" aria-label="Menú de usuario">
-                <div class="user-avatar">
-                    <img id="userPicture" src="" alt="Foto de perfil" class="user-picture">
-                    <span id="userInitial" class="user-initial">U</span>
-                </div>
-            </button>
-            
-            <div class="user-dropdown" id="userDropdown">
-                <div class="user-dropdown-header">
-                    <div class="user-info">
-                        <img id="userPictureDropdown" src="" alt="Foto de perfil" class="user-picture-small">
-                        <span id="userInitialDropdown" class="user-initial-small">U</span>
-                        <div class="user-details">
-                            <div class="user-name" id="userName">Usuario</div>
-                            <div class="user-email" id="userEmail">usuario@email.com</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="user-dropdown-divider"></div>
-                
-                <div class="user-dropdown-content">
-                    <div class="user-dropdown-item">
-                        <span class="user-dropdown-label">ID:</span>
-                        <span class="user-dropdown-value" id="userId">-</span>
-                    </div>
-                    <div class="user-dropdown-item">
-                        <span class="user-dropdown-label">Estado:</span>
-                        <span class="user-dropdown-value verified">Verificado</span>
-                    </div>
-                </div>
-                
-                <div class="user-dropdown-divider"></div>
-                
-                <div class="user-dropdown-actions">
-                    <button class="user-dropdown-action logout-button" onclick="performSimpleLogout()">
-                        <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16,17 21,12 16,7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        <span>Cerrar Sesión</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- User Menu se genera dinámicamente -->
 
     <!-- Canvas en Blanco -->
     <main class="canvas-container">
@@ -68,6 +19,7 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js?v=1755364408331"></script>
     <script src="/assets/js/simple-logout.js?v=1755364408331"></script>
+    <script src="/assets/js/user-menu.js?v=1755364408331"></script>
     <script src="/assets/js/protected-content.js?v=1755364408331"></script>
 </body>
 </html>
