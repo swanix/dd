@@ -12,7 +12,7 @@
 // =============================================================================
 
 function performSimpleLogout() {
-    console.log('🔄 Iniciando logout simple...');
+    console.log('Iniciando logout simple...');
     
     try {
         // 1. Limpiar todos los datos
@@ -31,11 +31,11 @@ function performSimpleLogout() {
         });
         
         // 3. Redirigir a la página principal
-        console.log('✅ Logout simple completado, redirigiendo...');
+        console.log('Logout simple completado, redirigiendo...');
         window.location.replace('/');
         
     } catch (error) {
-        console.error('❌ Error en logout simple:', error);
+        console.error('Error en logout simple:', error);
         // Último recurso: recargar la página
         window.location.reload();
     }
@@ -123,8 +123,6 @@ class UserMenuGenerator {
         // Insertar al inicio del body
         document.body.insertBefore(this.menuContainer, document.body.firstChild);
         
-        console.log('✅ User menu insertado dinámicamente');
-        
         return this.menuContainer;
     }
 
@@ -148,7 +146,7 @@ class UserMenuGenerator {
         const elements = this.getMenuElements();
         
         if (!elements.userButton || !elements.userDropdown) {
-            console.warn('⚠️ Elementos del user menu no encontrados');
+            console.warn('Elementos del user menu no encontrados');
             return;
         }
 
@@ -172,7 +170,6 @@ class UserMenuGenerator {
             }
         });
 
-        console.log('✅ Eventos del user menu configurados');
     }
 
     // Inicializar el user menu completo
@@ -180,9 +177,8 @@ class UserMenuGenerator {
         try {
             this.insertUserMenu();
             this.setupMenuEvents();
-            console.log('✅ User menu inicializado correctamente');
         } catch (error) {
-            console.error('❌ Error inicializando user menu:', error);
+            console.error('Error inicializando user menu:', error);
         }
     }
 }
@@ -251,10 +247,8 @@ class ProtectedContentLoader {
             setTimeout(() => {
                 this.loadUserInfo();
             }, 100);
-            
-            console.log('✅ User menu configurado dinámicamente');
         } catch (error) {
-            console.error('❌ Error configurando user menu:', error);
+            console.error('Error configurando user menu:', error);
         }
     }
 
@@ -313,44 +307,35 @@ class ProtectedContentLoader {
             // Obtener token
             const token = await this.auth0.getIdTokenClaims();
             
-            console.log('Token obtenido:', token.__raw ? 'SÍ' : 'NO');
-            
-            // Verificar si hay contenido en caché
-            const cachedContent = this.getCachedContent();
-            if (cachedContent) {
-                console.log('Contenido cargado desde caché local');
-                this.displayContent(cachedContent);
-                return;
+                    // Verificar si hay contenido en caché
+        const cachedContent = this.getCachedContent();
+        if (cachedContent) {
+            this.displayContent(cachedContent);
+            return;
+        }
+        
+        // Cargar contenido desde el servidor
+        const response = await fetch('/.netlify/functions/protect-html', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token.__raw}`,
+                'Content-Type': 'application/json'
             }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
             
-            // Cargar contenido desde el servidor
-            const response = await fetch('/.netlify/functions/protect-html', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token.__raw}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            console.log('Response status:', response.status);
+            // Guardar en caché local
+            this.cacheContent(data);
             
-            if (response.ok) {
-                const data = await response.json();
-                
-                console.log('Datos recibidos del servidor:', data);
-                
-                // Guardar en caché local
-                this.cacheContent(data);
-                
-                // Mostrar contenido
-                this.displayContent(data);
-                
-                console.log('Contenido protegido cargado exitosamente');
-            } else {
-                const errorData = await response.json();
-                console.error('Error del servidor:', errorData);
-                throw new Error(`Error ${response.status}: ${errorData.message}`);
-            }
+            // Mostrar contenido
+            this.displayContent(data);
+        } else {
+            const errorData = await response.json();
+            console.error('Error del servidor:', errorData);
+            throw new Error(`Error ${response.status}: ${errorData.message}`);
+        }
             
         } catch (error) {
             console.error('Error cargando contenido protegido:', error);
@@ -369,12 +354,11 @@ class ProtectedContentLoader {
             const now = Date.now();
             const cacheAge = now - cacheTime;
             
-            // Caché válido por 5 minutos
-            if (cacheAge > 5 * 60 * 1000) {
-                console.log('Caché expirado, cargando desde servidor');
-                localStorage.removeItem('protected_content_cache');
-                return null;
-            }
+                    // Caché válido por 5 minutos
+        if (cacheAge > 5 * 60 * 1000) {
+            localStorage.removeItem('protected_content_cache');
+            return null;
+        }
             
             return data;
         } catch (error) {
@@ -392,7 +376,6 @@ class ProtectedContentLoader {
                 timestamp: Date.now()
             };
             localStorage.setItem('protected_content_cache', JSON.stringify(cacheData));
-            console.log('Contenido guardado en caché');
         } catch (error) {
             console.error('Error guardando en caché:', error);
         }
@@ -419,7 +402,6 @@ class ProtectedContentLoader {
                 container.innerHTML = '<div class="content-placeholder"><div class="placeholder-text">Contenido no disponible</div></div>';
             }
 
-            console.log('Contenido mostrado correctamente');
         } catch (error) {
             console.error('Error mostrando contenido:', error);
             this.showError('Error mostrando contenido');
@@ -453,8 +435,6 @@ class ProtectedContentLoader {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando Swanix Wall...');
-    
     // Inicializar el cargador de contenido protegido
     new ProtectedContentLoader();
 });

@@ -44,7 +44,7 @@ function checkForErrors() {
     const error = urlParams.get('error');
     
     if (error === 'access_denied') {
-        console.log('🚫 Error de acceso denegado detectado, redirigiendo a /forbidden.html');
+        console.log('Error de acceso denegado detectado, redirigiendo a /forbidden.html');
         window.location.replace('/forbidden.html');
         return true;
     }
@@ -52,7 +52,7 @@ function checkForErrors() {
 }
 
 function showError(message = 'Error de autenticación') {
-    console.error('❌ Error:', message);
+    console.error('Error:', message);
     
     // Mostrar error en la UI si existe
     const errorContainer = document.getElementById('errorContainer');
@@ -70,8 +70,6 @@ function showError(message = 'Error de autenticación') {
 // =============================================================================
 
 async function handleIndexPage() {
-    console.log('🚀 [INDEX] Iniciando verificación de autenticación...');
-    
     try {
         // Verificar errores primero
         if (checkForErrors()) {
@@ -79,25 +77,18 @@ async function handleIndexPage() {
         }
         
         // Crear cliente Auth0
-        console.log('🔄 [INDEX] Creando cliente Auth0...');
         auth0 = await createAuth0Client(auth0Config);
-        console.log('✅ [INDEX] Cliente Auth0 creado exitosamente');
         
         // Manejar callback de Auth0
         if (window.location.search.includes('code=')) {
-            console.log('🔍 [INDEX] Detectado código de autorización en URL');
-            
             try {
-                console.log('🔄 [INDEX] Procesando callback de Auth0...');
                 await auth0.handleRedirectCallback();
-                console.log('✅ [INDEX] Callback procesado exitosamente');
                 window.location.href = '/app/';
                 return;
             } catch (error) {
-                console.error('❌ [INDEX] Error en callback:', error);
+                console.error('[INDEX] Error en callback:', error);
                 
                 if (error.error === 'access_denied') {
-                    console.log('🚫 [INDEX] Error de acceso denegado detectado');
                     window.location.replace('/forbidden.html');
                     return;
                 }
@@ -107,22 +98,18 @@ async function handleIndexPage() {
         }
 
         // Verificar estado de autenticación
-        console.log('🔍 [INDEX] Verificando estado de autenticación...');
         const isAuthenticated = await auth0.isAuthenticated();
-        console.log('📊 [INDEX] Estado de autenticación:', isAuthenticated);
         
         if (isAuthenticated) {
             // Usuario autenticado - redirigir a la app
-            console.log('✅ [INDEX] Usuario autenticado, redirigiendo a /app/');
             window.location.href = '/app/';
         } else {
             // Usuario no autenticado - redirigir al login
-            console.log('🔐 [INDEX] Usuario no autenticado, redirigiendo a /login.html');
             window.location.href = '/login.html';
         }
         
     } catch (error) {
-        console.error('❌ [INDEX] Error verificando autenticación:', error);
+        console.error('[INDEX] Error verificando autenticación:', error);
         showError('Error al verificar autenticación');
     }
 }
@@ -132,8 +119,6 @@ async function handleIndexPage() {
 // =============================================================================
 
 async function handleLoginPage() {
-    console.log('🔐 [LOGIN] Iniciando página de login...');
-    
     try {
         // Verificar errores primero
         if (checkForErrors()) {
@@ -141,25 +126,19 @@ async function handleLoginPage() {
         }
         
         // Crear cliente Auth0
-        console.log('🔄 [LOGIN] Creando cliente Auth0...');
         auth0 = await createAuth0Client(auth0Config);
         
         // Manejar callback de Auth0
         if (window.location.search.includes('code=')) {
-            console.log('🔍 [LOGIN] Detectado código de autorización en URL');
-            
             try {
-                console.log('🔄 [LOGIN] Procesando callback de Auth0...');
                 await auth0.handleRedirectCallback();
-                console.log('✅ [LOGIN] Callback procesado exitosamente');
                 window.location.replace('/app/');
                 return;
             } catch (error) {
-                console.error('❌ [LOGIN] Error en callback:', error);
+                console.error('[LOGIN] Error en callback:', error);
                 
                 if (error.error === 'access_denied' || 
                     (error.message && error.message.includes('access_denied'))) {
-                    console.log('🚫 [LOGIN] Error de acceso denegado detectado');
                     window.location.replace('/forbidden.html');
                     return;
                 }
@@ -171,17 +150,15 @@ async function handleLoginPage() {
         // Verificar si ya está autenticado
         const isAuthenticated = await auth0.isAuthenticated();
         if (isAuthenticated) {
-            console.log('✅ [LOGIN] Usuario ya autenticado, redirigiendo a /app/');
             window.location.replace('/app/');
             return;
         }
 
         // Configurar eventos de login
         setupLoginEvents();
-        console.log('✅ [LOGIN] Página de login configurada correctamente');
         
     } catch (error) {
-        console.error('❌ [LOGIN] Error inicializando Auth0:', error);
+        console.error('[LOGIN] Error inicializando Auth0:', error);
         showError('Error al inicializar la autenticación');
     }
 }
@@ -196,21 +173,18 @@ function setupLoginEvents() {
     if (loginButton) {
         loginButton.addEventListener('click', async () => {
             try {
-                console.log('🔄 [LOGIN] Iniciando proceso de login...');
                 await auth0.loginWithRedirect({
                     connection: 'google-oauth2',
                     prompt: 'select_account',
                     scope: 'openid profile email'
                 });
             } catch (error) {
-                console.error('❌ [LOGIN] Error en login:', error);
+                console.error('[LOGIN] Error en login:', error);
                 showError('Error al iniciar sesión');
             }
         });
-        
-        console.log('✅ [LOGIN] Eventos de login configurados');
     } else {
-        console.warn('⚠️ [LOGIN] Botón de login no encontrado');
+        console.warn('[LOGIN] Botón de login no encontrado');
     }
 }
 
@@ -220,7 +194,6 @@ function setupLoginEvents() {
 
 async function initAuthRouter() {
     const currentPage = getCurrentPage();
-    console.log(`🚀 Inicializando Auth Router para página: ${currentPage}`);
     
     switch (currentPage) {
         case 'index':
@@ -230,7 +203,7 @@ async function initAuthRouter() {
             await handleLoginPage();
             break;
         default:
-            console.warn(`⚠️ Página desconocida: ${currentPage}`);
+            console.warn(`Página desconocida: ${currentPage}`);
             break;
     }
 }
@@ -240,8 +213,6 @@ async function initAuthRouter() {
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Auth Router - DOM listo, iniciando...');
-    
     // Timeout de seguridad para index.html
     if (getCurrentPage() === 'index') {
         setTimeout(() => {
