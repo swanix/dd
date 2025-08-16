@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const jwksClient = require('jwks-rsa');
-const { rateLimitMiddleware } = require('./rate-limiter');
+const { rateLimitMiddleware } = require('../utils/rate-limiter');
 
 // ===== CONFIGURACIÓN DE AUTH0 =====
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
