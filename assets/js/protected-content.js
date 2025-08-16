@@ -29,12 +29,103 @@ class ProtectedContentLoader {
                 return;
             }
 
-            // Cargar contenido protegido
-            await this.loadProtectedContent();
+            // Configurar user menu
+            this.setupUserMenu();
+            
+            // El contenido se cargará dinámicamente según la aplicación
+            console.log('Usuario autenticado, canvas listo para contenido');
             
         } catch (error) {
             console.error('Error inicializando contenido protegido:', error);
             window.location.replace('/login.html');
+        }
+    }
+
+    // Configurar el user menu flotante
+    setupUserMenu() {
+        const userButton = document.getElementById('userButton');
+        const userDropdown = document.getElementById('userDropdown');
+        
+        if (userButton && userDropdown) {
+            // Toggle del dropdown
+            userButton.addEventListener('click', () => {
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Cerrar dropdown al hacer clic fuera
+            document.addEventListener('click', (event) => {
+                if (!userButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+            
+            // El logout se maneja directamente en el HTML con onclick
+            console.log('✅ User menu configurado');
+            
+            // Cargar información del usuario
+            this.loadUserInfo();
+        }
+    }
+
+    // Cargar información del usuario
+    async loadUserInfo() {
+        try {
+            const user = await this.auth0.getUser();
+            
+            // Elementos del avatar principal
+            const userPicture = document.getElementById('userPicture');
+            const userInitial = document.getElementById('userInitial');
+            
+            // Elementos del dropdown
+            const userPictureDropdown = document.getElementById('userPictureDropdown');
+            const userInitialDropdown = document.getElementById('userInitialDropdown');
+            const userName = document.getElementById('userName');
+            const userEmail = document.getElementById('userEmail');
+            const userId = document.getElementById('userId');
+            
+            if (user.picture) {
+                // Mostrar foto de perfil
+                if (userPicture) {
+                    userPicture.src = user.picture;
+                    userPicture.classList.add('show');
+                    userInitial.classList.add('hide');
+                }
+                if (userPictureDropdown) {
+                    userPictureDropdown.src = user.picture;
+                    userPictureDropdown.classList.add('show');
+                    userInitialDropdown.classList.add('hide');
+                }
+            } else {
+                // Mostrar inicial
+                if (userInitial) {
+                    userInitial.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                }
+                if (userInitialDropdown) {
+                    userInitialDropdown.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                }
+            }
+            
+            // Información del usuario
+            if (userName) userName.textContent = user.name || 'Usuario';
+            if (userEmail) userEmail.textContent = user.email || 'usuario@email.com';
+            if (userId) userId.textContent = user.sub || '-';
+            
+        } catch (error) {
+            console.error('Error cargando información del usuario:', error);
+        }
+    }
+
+    // Función de logout usando el manejador robusto
+    async logout() {
+        try {
+            const logoutHandler = new LogoutHandler(this.auth0);
+            await logoutHandler.performLogout();
+        } catch (error) {
+            console.error('Error en logout:', error);
+            // Fallback: limpiar todo y redirigir
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.replace('/');
         }
     }
 
@@ -153,62 +244,7 @@ class ProtectedContentLoader {
                     }
                 }
 
-    updateUserInfo(token) {
-        // Actualizar información del usuario en la interfaz
-        const userInitial = document.getElementById('userInitial');
-        const userName = document.getElementById('userName');
-        const userEmail = document.getElementById('userEmail');
-        const userId = document.getElementById('userId');
-        
-        if (token.name) {
-            userName.textContent = token.name;
-            userInitial.textContent = token.name.charAt(0).toUpperCase();
-        }
-        
-        if (token.email) {
-            userEmail.textContent = token.email;
-        }
-        
-        if (token.sub) {
-            userId.textContent = token.sub;
-        }
-        
-        // Actualizar avatar con foto si está disponible
-        const userAvatar = document.querySelector('.user-avatar');
-        if (token.picture && userAvatar) {
-            userAvatar.innerHTML = `<img src="${token.picture}" alt="${token.name || 'Usuario'}">`;
-        }
-    }
-    
-    initializeUserInterface() {
-        const userButton = document.getElementById('userButton');
-        const userDropdown = document.getElementById('userDropdown');
-        const logoutButton = document.getElementById('logoutButton');
-        
-        if (userButton && userDropdown && logoutButton) {
-            // Toggle del dropdown
-            userButton.addEventListener('click', function() {
-                userDropdown.classList.toggle('show');
-            });
-            
-            // Cerrar dropdown al hacer clic fuera
-            document.addEventListener('click', function(event) {
-                if (!userButton.contains(event.target)) {
-                    userDropdown.classList.remove('show');
-                }
-            });
-            
-                                    // Logout
-                        logoutButton.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            // Limpiar caché antes de cerrar sesión
-                            this.clearCache();
-                            this.auth0.logout({
-                                returnTo: window.location.origin + '/login.html'
-                            });
-                        }.bind(this));
-        }
-    }
+
 
                     showError(message) {
                     const contentContainer = document.getElementById('contentContainer');
