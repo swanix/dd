@@ -106,19 +106,7 @@ class ProtectedContentLoader {
         }
     }
 
-    // Función de logout usando el manejador robusto
-    async logout() {
-        try {
-            const logoutHandler = new LogoutHandler(this.auth0);
-            await logoutHandler.performLogout();
-        } catch (error) {
-            console.error('Error en logout:', error);
-            // Fallback: limpiar todo y redirigir
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.replace('/');
-        }
-    }
+    // El logout se maneja directamente con performSimpleLogout() desde el user menu
 
                     async loadProtectedContent() {
                     try {
