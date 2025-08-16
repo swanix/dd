@@ -32,24 +32,33 @@ function createConfigFile(envVars, environment) {
         AUTH0_DOMAIN: envVars.AUTH0_DOMAIN || '',
         AUTH0_CLIENT_ID: envVars.AUTH0_CLIENT_ID || '',
         BASE_URL: environment === 'production' 
-            ? (envVars.NETLIFY_URL || '')
+            ? (envVars.NETLIFY_URL || envVars.URL || '')
             : (envVars.LOCAL_URL || 'http://localhost:8888')
     };
+    
+    // Verificar que las variables requeridas estén presentes
+    const requiredVars = ['AUTH0_DOMAIN', 'AUTH0_CLIENT_ID'];
+    const missingVars = requiredVars.filter(varName => !config[varName]);
+    
+    if (missingVars.length > 0) {
+        console.warn(`⚠️  Variables faltantes: ${missingVars.join(', ')}`);
+        console.warn('💡 Asegúrate de configurar las variables de entorno en Netlify');
+    }
     
     const configContent = `// ===== CONFIGURACIÓN GENERADA AUTOMÁTICAMENTE =====
 // NO EDITAR MANUALMENTE - Se genera desde variables de entorno
 
 window.ENV_CONFIG = {
-  "AUTH0_DOMAIN": "${config.AUTH0_DOMAIN}",
-  "AUTH0_CLIENT_ID": "${config.AUTH0_CLIENT_ID}",
-  "BASE_URL": "${config.BASE_URL}"
+  "AUTH0_DOMAIN": "${config.AUTH0_DOMAIN || 'CONFIGURAR_EN_NETLIFY'}",
+  "AUTH0_CLIENT_ID": "${config.AUTH0_CLIENT_ID || 'CONFIGURAR_EN_NETLIFY'}",
+  "BASE_URL": "${config.BASE_URL || ''}"
 };
 
 // ===== CONFIGURACIÓN DE AUTH0 =====
 window.AUTH0_CONFIG = {
     domain: window.ENV_CONFIG.AUTH0_DOMAIN,
     client_id: window.ENV_CONFIG.AUTH0_CLIENT_ID,
-    redirect_uri: window.ENV_CONFIG.BASE_URL + '/',
+    redirect_uri: window.ENV_CONFIG.BASE_URL || window.location.origin + '/',
     cacheLocation: 'localstorage'
 };
 `;
