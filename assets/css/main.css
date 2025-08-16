@@ -1346,12 +1346,21 @@ body {
 }
 
 .logout-button {
-    color: #dc3545;
+    color: #6c757d;
 }
 
 .logout-button:hover {
-    background: #fff5f5;
-    color: #c53030;
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.logout-button.neutral {
+    color: #6c757d;
+}
+
+.logout-button.neutral:hover {
+    background: #f8f9fa;
+    color: #495057;
 }
 
 .logout-icon {

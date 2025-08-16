@@ -79,21 +79,12 @@ class UserMenuGenerator {
                         
                         <div class="user-dropdown-divider"></div>
                         
-                        <div class="user-dropdown-content">
-                            <div class="user-dropdown-item">
-                                <span class="user-dropdown-label">ID:</span>
-                                <span class="user-dropdown-value" id="userId">-</span>
-                            </div>
-                            <div class="user-dropdown-item">
-                                <span class="user-dropdown-label">Estado:</span>
-                                <span class="user-dropdown-value verified">Verificado</span>
-                            </div>
-                        </div>
+                        <!-- Información del usuario simplificada - sin ID por seguridad -->
                         
                         <div class="user-dropdown-divider"></div>
                         
                         <div class="user-dropdown-actions">
-                            <button class="user-dropdown-action logout-button" onclick="performSimpleLogout()">
+                            <button class="user-dropdown-action logout-button neutral" onclick="performSimpleLogout()">
                                 <svg class="logout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                     <polyline points="16,17 21,12 16,7"></polyline>
@@ -136,8 +127,7 @@ class UserMenuGenerator {
             userPictureDropdown: document.getElementById('userPictureDropdown'),
             userInitialDropdown: document.getElementById('userInitialDropdown'),
             userName: document.getElementById('userName'),
-            userEmail: document.getElementById('userEmail'),
-            userId: document.getElementById('userId')
+            userEmail: document.getElementById('userEmail')
         };
     }
 
@@ -266,7 +256,6 @@ class ProtectedContentLoader {
             const userInitialDropdown = document.getElementById('userInitialDropdown');
             const userName = document.getElementById('userName');
             const userEmail = document.getElementById('userEmail');
-            const userId = document.getElementById('userId');
             
             if (user.picture) {
                 // Mostrar foto de perfil
@@ -293,7 +282,6 @@ class ProtectedContentLoader {
             // Información del usuario
             if (userName) userName.textContent = user.name || 'Usuario';
             if (userEmail) userEmail.textContent = user.email || 'usuario@email.com';
-            if (userId) userId.textContent = user.sub || '-';
             
         } catch (error) {
             console.error('Error cargando información del usuario:', error);
