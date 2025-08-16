@@ -6,14 +6,14 @@ const path = require('path');
 // Configuración
 const config = {
     development: {
-        domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-        client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-        base_url: 'http://localhost:8888'
+        domain: process.env.AUTH0_DOMAIN || '',
+        client_id: process.env.AUTH0_CLIENT_ID || '',
+        base_url: process.env.LOCAL_URL || 'http://localhost:8888'
     },
     production: {
-        domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-        client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
-        base_url: 'https://swanixdd.netlify.app'
+        domain: process.env.AUTH0_DOMAIN || '',
+        client_id: process.env.AUTH0_CLIENT_ID || '',
+        base_url: process.env.NETLIFY_URL || ''
     }
 };
 
@@ -62,7 +62,7 @@ function main() {
                     'index.html',
                     'login.html',
                     'app/index.html',
-                    'access-denied.html'
+                    'forbidden.html'
                 ];
     
     files.forEach(file => updateFile(file, env));
@@ -71,17 +71,17 @@ function main() {
     console.log(`\n🔗 Allowed Callback URLs:`);
     console.log(`${config[env].base_url}/`);
     console.log(`${config[env].base_url}/app/`);
-    console.log(`${config[env].base_url}/access-denied.html`);
+    console.log(`${config[env].base_url}/forbidden.html`);
     
     console.log(`\n🔗 Allowed Logout URLs:`);
     console.log(`${config[env].base_url}/login.html`);
-    console.log(`${config[env].base_url}/access-denied.html`);
+    console.log(`${config[env].base_url}/forbidden.html`);
     
     console.log(`\n🔗 Allowed Web Origins:`);
     console.log(`${config[env].base_url}`);
     
     if (env === 'production') {
-        console.log('\n✅ Dominio de producción configurado: https://swanixdd.netlify.app');
+        console.log('\n✅ Dominio de producción configurado:', config[env].base_url);
     }
 }
 

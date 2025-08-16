@@ -1,13 +1,14 @@
 {
-  "name": "auth0-netlify-protected-content",
+  "name": "template-auth0-netlify-protected-content",
   "version": "1.0.0",
-  "description": "Contenido HTML estático protegido con Auth0 y Netlify Functions",
+  "description": "Template reutilizable para proteger contenido HTML estático con Auth0 y Netlify Functions",
   "main": "index.html",
   "scripts": {
     "dev": "node scripts/inject-env.js development && netlify dev",
     "build": "node scripts/inject-env.js production",
     "build:dev": "node scripts/inject-env.js development",
-    "deploy": "netlify deploy --prod"
+    "deploy": "netlify deploy --prod",
+    "setup": "node scripts/setup.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",

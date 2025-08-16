@@ -1,5 +1,5 @@
-/* Access Denied Page Styles */
-.access-denied-container {
+/* Forbidden Page Styles */
+.forbidden-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -8,7 +8,7 @@
     padding: 20px;
 }
 
-.access-denied-card {
+.forbidden-card {
     background: white;
     border-radius: 16px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -18,7 +18,7 @@
     text-align: center;
 }
 
-.access-denied-icon {
+.forbidden-icon {
     font-size: 64px;
     margin-bottom: 20px;
     animation: shake 0.5s ease-in-out;
@@ -30,19 +30,19 @@
     75% { transform: translateX(5px); }
 }
 
-.access-denied-card h1 {
+.forbidden-card h1 {
     color: #e74c3c;
     font-size: 2.5rem;
     margin-bottom: 20px;
     font-weight: 700;
 }
 
-.access-denied-message {
+.forbidden-message {
     text-align: left;
     margin-bottom: 30px;
 }
 
-.access-denied-message p {
+.forbidden-message p {
     font-size: 1.1rem;
     color: #2c3e50;
     margin-bottom: 25px;
@@ -128,7 +128,7 @@
     font-weight: 500;
 }
 
-.access-denied-actions {
+.forbidden-actions {
     display: flex;
     gap: 15px;
     justify-content: center;
@@ -171,13 +171,13 @@
     transform: translateY(-2px);
 }
 
-.access-denied-footer {
+.forbidden-footer {
     border-top: 1px solid #ecf0f1;
     padding-top: 20px;
     margin-top: 20px;
 }
 
-.access-denied-footer p {
+.forbidden-footer p {
     color: #7f8c8d;
     font-size: 0.9rem;
     margin: 0;
@@ -185,16 +185,16 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .access-denied-card {
+    .forbidden-card {
         padding: 30px 20px;
         margin: 10px;
     }
     
-    .access-denied-card h1 {
+    .forbidden-card h1 {
         font-size: 2rem;
     }
     
-    .access-denied-actions {
+    .forbidden-actions {
         flex-direction: column;
     }
     

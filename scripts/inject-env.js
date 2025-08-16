@@ -29,10 +29,10 @@ function loadEnvFile(filePath) {
 // Función para crear archivo de configuración
 function createConfigFile(envVars, environment) {
     const config = {
-        AUTH0_DOMAIN: envVars.AUTH0_DOMAIN || 'dev-7kj3jxtxwwirocri.us.auth0.com',
-        AUTH0_CLIENT_ID: envVars.AUTH0_CLIENT_ID || 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+        AUTH0_DOMAIN: envVars.AUTH0_DOMAIN || '',
+        AUTH0_CLIENT_ID: envVars.AUTH0_CLIENT_ID || '',
         BASE_URL: environment === 'production' 
-            ? (envVars.NETLIFY_URL || 'https://swanixdd.netlify.app')
+            ? (envVars.NETLIFY_URL || '')
             : (envVars.LOCAL_URL || 'http://localhost:8888')
     };
     

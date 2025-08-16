@@ -3,156 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Aplicación - Auth0 + Netlify Functions</title>
+    <title>Cargando... - Mi Aplicación</title>
     
     <!-- CSS Files -->
     <link rel="stylesheet" href="/assets/css/main.css">
     <link rel="stylesheet" href="/assets/css/layout.css">
     <link rel="stylesheet" href="/assets/css/components.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
+    
+    <style>
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <!-- Auth Overlay -->
-    <div id="authOverlay" class="auth-overlay" style="display: none;">
-        <div class="auth-modal">
-            <h2>🔒 Acceso Requerido</h2>
-            <p>Para acceder a esta aplicación, necesitas iniciar sesión con tu cuenta.</p>
-            <button id="loginButton" class="auth-button">🔑 Iniciar Sesión</button>
-        </div>
-    </div>
-
-    <!-- App Container -->
-    <div class="app-container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <h2>🚀 Mi App</h2>
-            </div>
-            <ul class="sidebar-nav">
-                <li><a href="/app/" class="active"><i>📊</i> Aplicación</a></li>
-                <li><a href="/app/dashboard.html"><i>📈</i> Dashboard</a></li>
-                <li><a href="#"><i>📝</i> Artículos</a></li>
-                <li><a href="#"><i>👥</i> Usuarios</a></li>
-                <li><a href="#"><i>⚙️</i> Configuración</a></li>
-                <li><a href="#"><i>📈</i> Reportes</a></li>
-                <li><a href="#"><i>💬</i> Mensajes</a></li>
-                <li><a href="#"><i>🔔</i> Notificaciones</a></li>
-            </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Topbar -->
-            <header class="topbar">
-                <div class="topbar-left">
-                    <h1>Aplicación</h1>
-                </div>
-                <div class="topbar-right">
-                    <div class="user-menu">
-                        <button id="userButton" class="user-button" style="display: none;">
-                            <div class="user-avatar" id="userAvatar">
-                                <span id="userInitial">U</span>
-                                <img id="userPicture" src="" alt="Foto de perfil" style="display: none;">
-                            </div>
-                            <span id="userName">Usuario</span>
-                            <i>▼</i>
-                        </button>
-                        <div class="user-dropdown" id="userDropdown">
-                            <div class="user-dropdown-item">
-                                <i>👤</i>
-                                <span id="userEmail">usuario@email.com</span>
-                            </div>
-                            <div class="user-dropdown-item">
-                                <i>🆔</i>
-                                <span id="userId">ID del usuario</span>
-                            </div>
-                            <div class="user-dropdown-item">
-                                <i>✅</i>
-                                <span id="userVerified">Email verificado</span>
-                            </div>
-                            <div class="user-dropdown-item">
-                                <i>⚙️</i>
-                                <span>Configuración</span>
-                            </div>
-                            <a href="#" class="user-dropdown-item logout" id="logoutButton">
-                                <i>🚪</i>
-                                <span>Cerrar Sesión</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <main class="content-area">
-                <div class="content-header">
-                    <h2>Bienvenido a tu Aplicación</h2>
-                    <p>Aquí puedes gestionar tu contenido y configuraciones.</p>
-                </div>
-
-                <div class="article">
-                    <h3>📰 Artículo de Ejemplo: Protección de Contenido con Auth0</h3>
-                    
-                    <p>Este es un artículo de ejemplo que demuestra cómo funciona la protección de contenido en nuestra aplicación. Solo los usuarios autenticados pueden ver este contenido.</p>
-                    
-                    <div class="highlight">
-                        <strong>🎯 Punto Clave:</strong> La autenticación con Auth0 asegura que solo usuarios autorizados puedan acceder a contenido sensible.
-                    </div>
-                    
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                    
-                    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-                    
-                    <h3>🔧 Características Implementadas</h3>
-                    <ul style="margin: 15px 0; padding-left: 20px;">
-                        <li>Autenticación segura con Auth0</li>
-                        <li>Protección de contenido con JWT tokens</li>
-                        <li>Interfaz moderna y responsive</li>
-                        <li>Manejo de sesiones persistente</li>
-                        <li>Backend serverless con Netlify Functions</li>
-                    </ul>
-                    
-                    <p>Esta implementación demuestra las mejores prácticas para proteger contenido HTML estático usando tecnologías modernas y seguras.</p>
-                </div>
-
-                <!-- Server Data Section -->
-                <div id="serverData" style="margin-top: 30px; display: none;">
-                    <div class="article">
-                        <h3>📡 Datos del Servidor</h3>
-                        <div id="serverDataContent">
-                            <p>Cargando datos del servidor...</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <!-- Loading Screen -->
+    <div class="loading-container">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <h2>🔄 Cargando Contenido Protegido</h2>
+            <p>Verificando autenticación...</p>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js"></script>
-    <script src="/assets/js/utils.js"></script>
-    <script src="/assets/js/auth.js"></script>
-    
-    <script>
-        // Inicializar elementos del DOM
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obtener referencias a elementos del DOM
-            authOverlay = document.getElementById('authOverlay');
-            loginButton = document.getElementById('loginButton');
-            userButton = document.getElementById('userButton');
-            userDropdown = document.getElementById('userDropdown');
-            logoutButton = document.getElementById('logoutButton');
-            userName = document.getElementById('userName');
-            userEmail = document.getElementById('userEmail');
-            userId = document.getElementById('userId');
-            userVerified = document.getElementById('userVerified');
-            serverData = document.getElementById('serverData');
-            serverDataContent = document.getElementById('serverDataContent');
-            
-            // Inicializar Auth0
-            AuthManager.initAuth0();
-        });
-    </script>
+    <script src="/assets/js/protected-content.js"></script>
 </body>
 </html>

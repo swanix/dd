@@ -3,8 +3,8 @@
 // ===== CONFIGURACIÓN DE AUTH0 =====
 // La configuración se carga desde env-config.js generado automáticamente
 const auth0Config = window.AUTH0_CONFIG || {
-    domain: 'dev-7kj3jxtxwwirocri.us.auth0.com',
-    client_id: 'BORj4AB79Rho5yP5uSavuP4sern8pemZ',
+    domain: window.AUTH0_CONFIG?.domain || '',
+    client_id: window.AUTH0_CONFIG?.client_id || '',
     redirect_uri: window.location.origin + '/',
     cacheLocation: 'localstorage'
 };
@@ -21,7 +21,7 @@ function checkForErrors() {
     
     if (error === 'access_denied') {
         console.log('🚫 [INDEX] Error de acceso denegado detectado ANTES de inicializar, redirigiendo inmediatamente');
-        window.location.replace('/access-denied.html');
+        window.location.replace('/forbidden.html');
         return true; // Indica que hay error
     }
     return false; // No hay error
@@ -52,8 +52,8 @@ async function initAuth0() {
                 
                 // Verificar si es error de acceso denegado
                 if (error.error === 'access_denied') {
-                    console.log('🚫 [INDEX] Error de acceso denegado detectado, redirigiendo a /access-denied.html');
-                    window.location.replace('/access-denied.html');
+                    console.log('🚫 [INDEX] Error de acceso denegado detectado, redirigiendo a /forbidden.html');
+                    window.location.replace('/forbidden.html');
                     return;
                 }
                 

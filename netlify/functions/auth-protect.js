@@ -3,17 +3,22 @@ const jwksClient = require('jwks-rsa');
 const { rateLimitMiddleware } = require('./rate-limiter');
 
 // ===== CONFIGURACIÓN DE AUTH0 =====
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || 'dev-7kj3jxtxwwirocri.us.auth0.com';
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
 
-// ===== CLIENTE JWKS =====
+// ===== ⚡ CLIENTE JWKS OPTIMIZADO =====
 const client = jwksClient({
   jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`,
   cache: true,
-  cacheMaxEntries: 5,
-  cacheMaxAge: 600000, // 10 minutos
+  cacheMaxEntries: 10, // ⚡ Aumentado para mejor cache
+  cacheMaxAge: 3600000, // ⚡ 1 hora (aumentado de 10 min)
   rateLimit: true,
-  jwksRequestsPerMinute: 5
+  jwksRequestsPerMinute: 10, // ⚡ Aumentado para más requests
+  requestAgent: undefined // ⚡ Usar agente por defecto
 });
+
+// ===== ⚡ CACHE DE TOKENS VALIDADOS =====
+const tokenCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos
 
 // ===== FUNCIÓN PARA OBTENER CLAVE PÚBLICA =====
 function getKey(header, callback) {
@@ -27,89 +32,71 @@ function getKey(header, callback) {
   });
 }
 
-// ===== VALIDACIÓN ROBUSTA DE TOKENS =====
+// ===== ⚡ VALIDACIÓN SIMPLIFICADA DE TOKENS =====
 function validateTokenClaims(decodedToken) {
   const now = Math.floor(Date.now() / 1000);
-  const errors = [];
-
-  // Verificar expiración
-  if (!decodedToken.exp) {
-    errors.push('Token no tiene claim de expiración');
-  } else if (decodedToken.exp < now) {
-    errors.push('Token expirado');
+  
+  // ⚡ Validaciones críticas solo
+  if (!decodedToken.exp || decodedToken.exp < now) {
+    return { isValid: false, errors: ['Token expirado'] };
   }
-
-  // Verificar issuer
+  
   const expectedIssuer = `https://${AUTH0_DOMAIN}/`;
   if (!decodedToken.iss || decodedToken.iss !== expectedIssuer) {
-    errors.push('Issuer inválido');
+    return { isValid: false, errors: ['Issuer inválido'] };
   }
-
-  // Verificar issued at
-  if (!decodedToken.iat) {
-    errors.push('Token no tiene claim de issued at');
-  } else if (decodedToken.iat > now) {
-    errors.push('Token emitido en el futuro');
-  }
-
-  // Verificar subject
+  
   if (!decodedToken.sub) {
-    errors.push('Token no tiene subject');
+    return { isValid: false, errors: ['Token no tiene subject'] };
   }
-
-  // Verificar email (opcional pero recomendado)
-  if (!decodedToken.email) {
-    errors.push('Token no tiene email');
-  }
-
-  return {
-    isValid: errors.length === 0,
-    errors
-  };
+  
+  return { isValid: true, errors: [] };
 }
 
-// ===== LOGGING SEGURO =====
+// ===== ⚡ LOGGING OPTIMIZADO =====
 function logAuthEvent(event, userInfo = null, error = null) {
-  const logData = {
-    timestamp: new Date().toISOString(),
-    ip: event.headers['client-ip'] || event.headers['x-forwarded-for'] || 'unknown',
-    userAgent: event.headers['user-agent'] || 'unknown',
-    method: event.httpMethod,
-    path: event.path
-  };
-
-  if (userInfo) {
-    logData.user = {
-      sub: userInfo.sub,
-      email: userInfo.email ? `${userInfo.email.substring(0, 3)}***@${userInfo.email.split('@')[1]}` : 'no-email',
-      hasName: !!userInfo.name
+  // ⚡ Solo log en desarrollo o errores críticos
+  if (process.env.NODE_ENV === 'development' || error) {
+    const logData = {
+      timestamp: new Date().toISOString(),
+      ip: event.headers['client-ip'] || event.headers['x-forwarded-for'] || 'unknown',
+      method: event.httpMethod,
+      path: event.path
     };
-  }
 
-  if (error) {
-    logData.error = {
-      type: error.name,
-      message: error.message
-    };
-  }
+    if (userInfo) {
+      logData.user = {
+        sub: userInfo.sub,
+        email: userInfo.email ? `${userInfo.email.substring(0, 3)}***@${userInfo.email.split('@')[1]}` : 'no-email',
+        hasName: !!userInfo.name
+      };
+    }
 
-  console.log('🔐 [AUTH] Evento de autenticación:', JSON.stringify(logData));
+    if (error) {
+      logData.error = {
+        type: error.name,
+        message: error.message
+      };
+    }
+
+    console.log('🔐 [AUTH] Evento de autenticación:', JSON.stringify(logData));
+  }
 }
 
-// ===== FUNCIÓN PRINCIPAL DE NETLIFY =====
+// ===== ⚡ FUNCIÓN PRINCIPAL OPTIMIZADA =====
 const authHandler = async (event, context) => {
   // ===== CONFIGURAR CORS SEGURO =====
   const allowedOrigins = [
     'http://localhost:8888',
-    'https://swanixdd.netlify.app'
+                process.env.NETLIFY_URL || ''
   ];
-  
+
   const origin = event.headers.origin || event.headers.Origin;
   const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
 
   const headers = {
     'Access-Control-Allow-Origin': corsOrigin,
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Max-Age': '86400',
     'X-Content-Type-Options': 'nosniff',
@@ -128,7 +115,7 @@ const authHandler = async (event, context) => {
   try {
     // ===== OBTENER Y VALIDAR TOKEN =====
     const authHeader = event.headers.authorization || event.headers.Authorization || '';
-    
+
     if (!authHeader.startsWith('Bearer ')) {
       logAuthEvent(event, null, { name: 'InvalidHeader', message: 'Header de autorización inválido' });
       return {
@@ -155,7 +142,24 @@ const authHandler = async (event, context) => {
       };
     }
 
-    // ===== VERIFICAR TOKEN JWT =====
+    // ===== ⚡ VERIFICAR CACHE DE TOKEN =====
+    const cacheKey = token.substring(0, 20); // Usar parte del token como clave
+    const cachedResult = tokenCache.get(cacheKey);
+    
+    if (cachedResult && cachedResult.expiry > Date.now()) {
+      logAuthEvent(event, cachedResult.user);
+      return {
+        statusCode: 200,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+          'X-Cache': 'HIT' // ⚡ Indicar que viene del cache
+        },
+        body: JSON.stringify(cachedResult.response)
+      };
+    }
+
+    // ===== ⚡ VERIFICAR TOKEN JWT OPTIMIZADO =====
     const decodedToken = await new Promise((resolve, reject) => {
       jwt.verify(token, getKey, {
         issuer: `https://${AUTH0_DOMAIN}/`,
@@ -171,15 +175,15 @@ const authHandler = async (event, context) => {
       });
     });
 
-    // ===== VALIDAR CLAIMS ADICIONALES =====
+    // ===== ⚡ VALIDAR CLAIMS SIMPLIFICADO =====
     const validation = validateTokenClaims(decodedToken);
-    
+
     if (!validation.isValid) {
-      logAuthEvent(event, decodedToken, { 
-        name: 'InvalidClaims', 
-        message: `Claims inválidos: ${validation.errors.join(', ')}` 
+      logAuthEvent(event, decodedToken, {
+        name: 'InvalidClaims',
+        message: `Claims inválidos: ${validation.errors.join(', ')}`
       });
-      
+
       return {
         statusCode: 401,
         headers: { ...headers, 'Content-Type': 'application/json' },
@@ -191,6 +195,42 @@ const authHandler = async (event, context) => {
       };
     }
 
+    // ===== ⚡ PREPARAR RESPUESTA =====
+    const response = {
+      message: 'Acceso concedido al contenido protegido',
+      user: {
+        sub: decodedToken.sub,
+        email: decodedToken.email,
+        name: decodedToken.name,
+        email_verified: decodedToken.email_verified || false
+      },
+      token_info: {
+        issued_at: new Date(decodedToken.iat * 1000).toISOString(),
+        expires_at: new Date(decodedToken.exp * 1000).toISOString(),
+        issuer: decodedToken.iss
+      },
+      permissions: decodedToken.permissions || [],
+      scope: decodedToken.scope || '',
+      timestamp: new Date().toISOString()
+    };
+
+    // ===== ⚡ GUARDAR EN CACHE =====
+    tokenCache.set(cacheKey, {
+      user: decodedToken,
+      response: response,
+      expiry: Date.now() + CACHE_TTL
+    });
+
+    // ===== ⚡ LIMPIAR CACHE PERIÓDICAMENTE =====
+    if (Math.random() < 0.01) { // 1% de probabilidad
+      const now = Date.now();
+      for (const [key, value] of tokenCache.entries()) {
+        if (value.expiry < now) {
+          tokenCache.delete(key);
+        }
+      }
+    }
+
     // ===== TOKEN VÁLIDO - LOGGING Y RESPUESTA =====
     logAuthEvent(event, decodedToken);
 
@@ -198,31 +238,16 @@ const authHandler = async (event, context) => {
       statusCode: 200,
       headers: {
         ...headers,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-Cache': 'MISS' // ⚡ Indicar que no vino del cache
       },
-      body: JSON.stringify({
-        message: 'Acceso concedido al contenido protegido',
-        user: {
-          sub: decodedToken.sub,
-          email: decodedToken.email,
-          name: decodedToken.name,
-          email_verified: decodedToken.email_verified || false
-        },
-        token_info: {
-          issued_at: new Date(decodedToken.iat * 1000).toISOString(),
-          expires_at: new Date(decodedToken.exp * 1000).toISOString(),
-          issuer: decodedToken.iss
-        },
-        permissions: decodedToken.permissions || [],
-        scope: decodedToken.scope || '',
-        timestamp: new Date().toISOString()
-      })
+      body: JSON.stringify(response)
     };
 
   } catch (error) {
     // ===== MANEJO DE ERRORES MEJORADO =====
     logAuthEvent(event, null, error);
-    
+
     let statusCode = 401;
     let errorCode = 'token_invalid';
     let message = 'Token inválido o expirado';

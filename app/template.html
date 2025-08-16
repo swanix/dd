@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Página - Mi Aplicación</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/css/layout.css">
+    <link rel="stylesheet" href="/assets/css/components.css">
+    <link rel="stylesheet" href="/assets/css/auth.css">
+</head>
+<body>
+    <!-- Auth Overlay -->
+    <div id="authOverlay" class="auth-overlay" style="display: none;">
+        <div class="auth-modal">
+            <h2>🔒 Acceso Requerido</h2>
+            <p>Para acceder a esta aplicación, necesitas iniciar sesión con tu cuenta.</p>
+            <button id="loginButton" class="auth-button">🔑 Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Mi App</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/app/" class="nav-link">🏠 Aplicación</a></li>
+                    <li><a href="/app/dashboard.html" class="nav-link">📊 Dashboard</a></li>
+                    <li><a href="/app/articles.html" class="nav-link">📝 Artículos</a></li>
+                    <li><a href="/app/users.html" class="nav-link">👥 Usuarios</a></li>
+                    <li><a href="/app/settings.html" class="nav-link">⚙️ Configuración</a></li>
+                    <li><a href="/app/reports.html" class="nav-link">📈 Reportes</a></li>
+                    <li><a href="/app/messages.html" class="nav-link">💬 Mensajes</a></li>
+                    <li><a href="/app/notifications.html" class="nav-link">🔔 Notificaciones</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1>Nueva Página</h1>
+                </div>
+                
+                <div class="topbar-right">
+                    <div id="userButton" class="user-button" style="display: none;">
+                        <img id="userPicture" class="user-picture" src="" alt="Foto de perfil" style="display: none;">
+                        <div id="userInitial" class="user-initial" style="display: none;">U</div>
+                        
+                        <div id="userDropdown" class="user-dropdown">
+                            <div class="user-info">
+                                <p><strong id="userName">Usuario</strong></p>
+                                <p id="userEmail">usuario@email.com</p>
+                                <p><small>ID: <span id="userId">user_id</span></small></p>
+                                <p><small>Verificado: <span id="userVerified">No</span></small></p>
+                            </div>
+                            <button id="logoutButton" class="logout-button">🚪 Cerrar Sesión</button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <main class="content">
+                <div class="article">
+                    <h2>Contenido de la Nueva Página</h2>
+                    <p>Este es el contenido de tu nueva página protegida.</p>
+                    
+                    <div class="content-section">
+                        <h3>Características de Seguridad</h3>
+                        <ul>
+                            <li>✅ Validación inmediata de autenticación</li>
+                            <li>✅ Redirección automática al login si no está autenticado</li>
+                            <li>✅ Protección de todas las páginas en `/app/`</li>
+                            <li>✅ No se muestra contenido sin autenticación</li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+    <script src="/assets/js/env-config.js"></script>
+    <script src="/assets/js/app-protection.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/auth.js"></script>
+    
+    <script>
+        // ===== INICIALIZACIÓN DESPUÉS DE PROTECCIÓN =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Solo inicializar si la protección pasó
+            if (window.APP_PROTECTION_PASSED) {
+                // Obtener referencias a elementos del DOM
+                authOverlay = document.getElementById('authOverlay');
+                loginButton = document.getElementById('loginButton');
+                userButton = document.getElementById('userButton');
+                userDropdown = document.getElementById('userDropdown');
+                logoutButton = document.getElementById('logoutButton');
+                userName = document.getElementById('userName');
+                userEmail = document.getElementById('userEmail');
+                userId = document.getElementById('userId');
+                userVerified = document.getElementById('userVerified');
+                
+                // Inicializar Auth0
+                AuthManager.initAuth0();
+            }
+        });
+    </script>
+</body>
+</html>
