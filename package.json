@@ -13,7 +13,8 @@
     "restore-cache": "node scripts/restore-cache.js",
     "deploy-with-cache-fix": "npm run version-assets && npm run deploy && npm run restore-cache",
     "docs:list": "node scripts/cleanup-docs.js list",
-    "docs:clean": "node scripts/cleanup-docs.js clean"
+    "docs:clean": "node scripts/cleanup-docs.js clean",
+    "fix-env": "node scripts/fix-env-config.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
