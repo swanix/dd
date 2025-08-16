@@ -1,4 +1,5 @@
 [build]
+  command = "node scripts/inject-env.js production"
   publish = "."
   functions = "netlify/functions"
 
