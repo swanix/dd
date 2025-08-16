@@ -54,9 +54,9 @@ npm run dev
 ## 📁 Estructura del Proyecto
 
 ```
-├── app/                    # Contenido protegido
-│   └── index.html         # Página principal protegida
-├── assets/                # Recursos estáticos
+├── app/                  # Contenido protegido
+│   └── index.html        # Página principal protegida
+├── assets/               # Recursos estáticos
 │   ├── css/              # Estilos
 │   ├── js/               # Scripts
 │   └── img/              # Imágenes
