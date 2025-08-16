@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
-    "jwks-rsa": "^3.0.1",
-    "marked": "^9.1.0"
+    "jwks-rsa": "^3.0.1"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"

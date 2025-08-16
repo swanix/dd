@@ -11,6 +11,7 @@ function cleanupTemporaryDocs() {
     const tempDir = 'docs/temporary';
     const filesToRemove = [
         'CACHE-FIX-GUIDE.md'
+        // NETLIFY-ENV-SETUP.md se mantiene como referencia útil
     ];
     
     let removedCount = 0;
