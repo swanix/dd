@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ejemplo de Contenido Protegido</title>
+    <title>Contenido Protegido</title>
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
     <div class="app-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Contenido</h2>
+                <h2>Aplicación</h2>
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li><a href="#" class="nav-link" data-content="dashboard">Dashboard</a></li>
-                    <li><a href="#" class="nav-link" data-content="documentos">Documentos</a></li>
-                    <li><a href="#" class="nav-link" data-content="configuracion">Configuración</a></li>
+                    <li><a href="/app/" class="nav-link">Inicio</a></li>
+                    <li><a href="/app/content.html" class="nav-link active">Content</a></li>
                 </ul>
             </nav>
         </aside>
@@ -24,7 +23,7 @@
         <div class="main-content">
             <header class="topbar">
                 <div class="topbar-left">
-                    <h1>Contenido Protegido</h1>
+                    <h1>Dashboard</h1>
                 </div>
                 <div class="topbar-right">
                     <div class="user-menu">
@@ -51,6 +50,17 @@
             </header>
             
             <main class="content-area">
+                <!-- Menú horizontal para subsecciones -->
+                <div class="horizontal-nav">
+                    <nav class="sub-nav">
+                        <ul>
+                            <li><a href="#" class="sub-nav-link active" data-content="dashboard">Dashboard</a></li>
+                            <li><a href="#" class="sub-nav-link" data-content="documentos">Documentos</a></li>
+                            <li><a href="#" class="sub-nav-link" data-content="configuracion">Configuración</a></li>
+                        </ul>
+                    </nav>
+                </div>
+
                 <div class="content-header">
                     <h2>Bienvenido</h2>
                     <p>Selecciona una sección para ver el contenido protegido</p>
@@ -186,7 +196,7 @@
             }
 
             setupNavigation() {
-                const navLinks = document.querySelectorAll('.nav-link[data-content]');
+                const navLinks = document.querySelectorAll('.sub-nav-link[data-content]');
                 const contentContainer = document.getElementById('contentContainer');
                 
                 navLinks.forEach(link => {

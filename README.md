@@ -1,114 +1,183 @@
-# 🔐 Template: Contenido HTML Protegido con Auth0 + Netlify
+# Swanix Wall
 
-Un template reutilizable para proteger contenido HTML estático usando **Auth0** para autenticación y **Netlify Functions** para autorización.
+Template de autenticación y protección de contenido para aplicaciones web.
 
-## ✨ Características
+## Descripción
 
-- 🔐 **Autenticación segura** con Auth0
-- 🛡️ **Autorización** con Netlify Functions
-- 📧 **Restricción por email/dominio**
-- ⚡ **Optimizado para velocidad**
-- 🔒 **Seguridad robusta** (JWT, rate limiting, headers)
-- 📱 **Diseño responsive**
-- 🚀 **Deploy automático** a Netlify
+Swanix Wall es un template completo para implementar autenticación y protección de contenido en aplicaciones web. Proporciona una base sólida con Auth0, Netlify Functions y Google OAuth.
 
-## 🚀 Inicio Rápido
+## Características
 
-### 1. Clonar el template
-```bash
-git clone <tu-repositorio>
-cd template-auth0-netlify-protected-content
+- 🔐 **Autenticación Auth0**: Integración completa con Auth0
+- 🛡️ **Protección de rutas**: Middleware para proteger páginas HTML
+- 🌐 **Integración Netlify**: Funciones serverless para autenticación
+- 🔑 **Google OAuth**: Soporte para login con Google
+- 📱 **Responsive**: Diseño adaptativo para todos los dispositivos
+- ⚡ **Ligero**: Sin dependencias pesadas
+- 🔒 **Seguro**: Rate limiting y validación de tokens
+
+## Estructura del Proyecto
+
+```
+swanix-wall/
+├── app/
+│   ├── index.html          # Página principal protegida
+│   └── protected.html      # Ejemplo de página protegida
+├── assets/
+│   ├── css/
+│   │   └── main.css        # Estilos base
+│   └── js/
+│       ├── auth.js         # Configuración Auth0
+│       ├── protected-content.js
+│       ├── login.js        # Lógica de login
+│       ├── index.js        # Lógica principal
+│       └── utils.js        # Utilidades
+├── netlify/
+│   ├── functions/
+│   │   ├── auth-protect.js # Protección de rutas
+│   │   └── protect-html.js # Middleware HTML
+│   └── utils/
+│       └── rate-limiter.js # Rate limiting
+├── login.html              # Página de login
+├── forbidden.html          # Página de acceso denegado
+├── netlify.toml           # Configuración Netlify
+└── env.example            # Variables de entorno
 ```
 
-### 2. Instalar dependencias
-```bash
-npm install
-```
+## Instalación
 
-### 3. Configurar variables de entorno
-```bash
-cp .env.example .env.local
-# Editar .env.local con tus credenciales
-```
+1. **Clonar el repositorio**
+   ```bash
+   git clone <repository-url>
+   cd swanix-wall
+   ```
 
-### 4. Ejecutar en desarrollo
-```bash
-npm run dev
-```
+2. **Configurar variables de entorno**
+   ```bash
+   cp env.example .env
+   # Editar .env con tus credenciales de Auth0
+   ```
 
-## ⚙️ Configuración
+3. **Configurar Auth0**
+   - Crear aplicación en Auth0
+   - Configurar URLs de callback
+   - Agregar Google OAuth (opcional)
+
+4. **Desplegar en Netlify**
+   - Conectar repositorio
+   - Configurar variables de entorno
+   - Desplegar
+
+## Configuración
+
+### Variables de Entorno
+
+```env
+AUTH0_DOMAIN=tu-dominio.auth0.com
+AUTH0_CLIENT_ID=tu-client-id
+AUTH0_CLIENT_SECRET=tu-client-secret
+AUTH0_AUDIENCE=tu-audience
+GOOGLE_CLIENT_ID=tu-google-client-id
+GOOGLE_CLIENT_SECRET=tu-google-client-secret
+```
 
 ### Auth0 Setup
 
-1. **Crear aplicación SPA** en Auth0 Dashboard
-2. **Configurar URLs** de callback y logout
-3. **Crear Action** para restricción de emails
-4. **Configurar Google OAuth**
+1. Crear aplicación Single Page Application
+2. Configurar URLs permitidas:
+   - `http://localhost:8888`
+   - `https://tu-dominio.netlify.app`
+3. Configurar URLs de callback:
+   - `http://localhost:8888/callback`
+   - `https://tu-dominio.netlify.app/callback`
 
-### Netlify Setup
+## Uso
 
-1. **Conectar repositorio** a Netlify
-2. **Configurar variables** de entorno
-3. **Configurar dominio** personalizado (opcional)
+### Páginas Protegidas
 
-## 📁 Estructura del Proyecto
+Para proteger una página HTML, agregar el atributo `data-protected`:
 
-```
-├── app/                  # Contenido protegido
-│   └── index.html        # Página principal protegida
-├── assets/               # Recursos estáticos
-│   ├── css/              # Estilos
-│   ├── js/               # Scripts
-│   └── img/              # Imágenes
-├── netlify/              # Funciones serverless
-│   └── functions/
-├── scripts/              # Utilidades
-├── .env.example          # Variables de ejemplo
-├── netlify.toml          # Configuración Netlify
-└── README.md             # Esta documentación
+```html
+<!DOCTYPE html>
+<html data-protected="true">
+<head>
+    <title>Página Protegida</title>
+</head>
+<body>
+    <!-- Contenido protegido -->
+</body>
+</html>
 ```
 
-## 🎨 Personalización
+### API Protegida
 
-### Cambiar contenido protegido
-- Editar `app/index.html`
-- Agregar más páginas en `app/`
+Para proteger rutas de API, usar el middleware:
 
-### Personalizar estilos
-- Modificar `assets/css/main.css`
-- Cambiar variables CSS en `:root`
+```javascript
+// En Netlify Functions
+const { protectRoute } = require('./utils/auth');
 
-### Configurar restricciones
-- Editar Auth0 Action para emails/dominios
-- Modificar lógica en `netlify/functions/auth-protect.js`
+exports.handler = async (event, context) => {
+    const authResult = await protectRoute(event);
+    if (!authResult.authenticated) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: 'No autorizado' })
+        };
+    }
+    
+    // Lógica de la API
+};
+```
 
-## 🔧 Scripts Disponibles
+## Integración con Swanix CMX
 
-- `npm run dev` - Desarrollo local
-- `npm run build` - Build para producción
-- `npm run deploy` - Deploy a Netlify
+Swanix Wall puede integrarse con [Swanix CMX](https://github.com/tu-usuario/swanix-cmx) para:
 
-## 📚 Documentación
+- Proteger contenido del CMS
+- Autenticación de usuarios
+- Control de acceso por roles
+- Logs de actividad
 
-- [Configuración de Auth0](docs/SETUP.md)
-- [Personalización](docs/CUSTOMIZATION.md)
-- [Deploy a producción](docs/DEPLOYMENT.md)
-- [Solución de problemas](docs/TROUBLESHOOTING.md)
+## Desarrollo
 
-## 🤝 Contribuir
+### Scripts Disponibles
+
+```bash
+# Instalar dependencias
+npm install
+
+# Desarrollo local
+npm run dev
+
+# Construir para producción
+npm run build
+
+# Tests
+npm test
+```
+
+### Estructura de Archivos
+
+- `app/`: Páginas de la aplicación
+- `assets/`: Recursos estáticos (CSS, JS, imágenes)
+- `netlify/functions/`: Funciones serverless
+- `scripts/`: Scripts de utilidad
+
+## Contribuir
 
 1. Fork el proyecto
-2. Crear rama para feature (`git checkout -b feature/AmazingFeature`)
-3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir Pull Request
+2. Crear rama para feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Crear Pull Request
 
-## 📄 Licencia
+## Licencia
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+MIT License - ver [LICENSE](LICENSE) para detalles.
 
-## 🙏 Agradecimientos
+## Soporte
 
-- [Auth0](https://auth0.com/) por la plataforma de autenticación
-- [Netlify](https://netlify.com/) por el hosting y funciones serverless
-- [Google OAuth](https://developers.google.com/identity/protocols/oauth2) por la autenticación social
+- 📧 Email: soporte@swanix.com
+- 📖 Documentación: [docs/](docs/)
+- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/swanix-wall/issues)

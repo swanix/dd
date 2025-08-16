@@ -1,344 +1,380 @@
-# 🔧 Solución de Problemas
+# 🚨 Solución de Problemas - Swanix Wall
 
-## 🚨 Errores Comunes
+## 📋 Descripción
 
-### **1. Error: "Callback URL mismatch"**
+Esta guía te ayudará a resolver problemas comunes que pueden surgir al usar Swanix Wall.
+
+## 🔐 Problemas de Autenticación
+
+### Error: "Callback URL mismatch"
 
 **Síntomas:**
-- Error después del login con Google
-- Redirección fallida
-- Mensaje de error en Auth0
-
-**Causas:**
-- URLs no configuradas en Auth0 Dashboard
-- URLs mal escritas
-- Protocolo incorrecto (http vs https)
+- Error al intentar hacer login
+- Mensaje "Callback URL mismatch" en Auth0
 
 **Solución:**
-1. Ir a [Auth0 Dashboard](https://manage.auth0.com/)
-2. **Applications** → **Settings**
-3. Verificar **Allowed Callback URLs**:
+1. Verificar URLs en Auth0 Dashboard:
+   - **Applications** → **Settings** → **Allowed Callback URLs**
+   - Asegurar que coincidan exactamente con tu dominio
+
+2. URLs típicas para agregar:
    ```
    http://localhost:8888/,
    http://localhost:8888/app/,
-   https://tu-dominio.com/,
-   https://tu-dominio.com/app/
-   ```
-4. Verificar **Allowed Web Origins**:
-   ```
-   http://localhost:8888,
-   https://tu-dominio.com
+   https://tu-sitio.netlify.app/,
+   https://tu-sitio.netlify.app/app/
    ```
 
-### **2. Error: "jwt malformed"**
+3. Verificar que no haya espacios extra o caracteres especiales
+
+### Error: "Invalid client"
 
 **Síntomas:**
-- Error 401 en funciones de Netlify
-- Token inválido
-- Acceso denegado
-
-**Causas:**
-- Token expirado
-- Token malformado
-- Configuración incorrecta de Auth0
+- Error "Invalid client" al intentar autenticación
+- La aplicación no puede conectarse a Auth0
 
 **Solución:**
-1. Limpiar localStorage del navegador
-2. Recargar página
-3. Volver a autenticar
-4. Verificar configuración de Auth0
+1. Verificar variables de entorno:
+   ```env
+   AUTH0_DOMAIN=tu-dominio.auth0.com
+   AUTH0_CLIENT_ID=tu-client-id
+   ```
 
-### **3. Error: "CORS error"**
+2. Verificar que el Client ID sea correcto en Auth0 Dashboard
+
+3. Asegurar que la aplicación esté configurada como "Single Page Application"
+
+### Error: "Access denied"
 
 **Síntomas:**
-- Error en consola del navegador
-- Requests bloqueados
-- Funciones no responden
-
-**Causas:**
-- Configuración CORS incorrecta
-- URLs no permitidas
-- Headers faltantes
+- Usuario autenticado pero acceso denegado
+- Redirección a página de forbidden
 
 **Solución:**
-1. Verificar configuración CORS en `netlify/functions/auth-protect.js`
-2. Asegurar que URLs estén en `allowedOrigins`
-3. Verificar headers de respuesta
+1. Verificar Action de Auth0:
+   - **Auth Pipeline** → **Actions**
+   - Revisar reglas de restricción
 
-### **4. Error: "Rate limit exceeded"**
+2. Verificar emails/dominios permitidos:
+   ```javascript
+   // Ejemplo de Action
+   const allowedDomains = ['@tuempresa.com'];
+   const userEmail = event.user.email;
+   
+   if (!allowedDomains.some(domain => userEmail.endsWith(domain))) {
+       api.access.deny('Dominio no autorizado');
+   }
+   ```
+
+3. Verificar logs en Auth0 Dashboard
+
+## 🌐 Problemas de Red y CORS
+
+### Error: "CORS policy"
 
 **Síntomas:**
-- Error 429 (Too Many Requests)
-- Funciones no responden
-- Performance lenta
-
-**Causas:**
-- Demasiados requests simultáneos
-- Rate limiting muy restrictivo
-- Ataque de spam
+- Error de CORS en la consola del navegador
+- Requests bloqueados por política de CORS
 
 **Solución:**
-1. Esperar unos minutos
-2. Ajustar configuración de rate limiting
-3. Verificar logs de requests
+1. Verificar configuración de CORS en funciones Netlify:
+   ```javascript
+   return {
+       statusCode: 200,
+       headers: {
+           'Access-Control-Allow-Origin': '*',
+           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+           'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS'
+       },
+       body: JSON.stringify(data)
+   };
+   ```
 
-## 🔍 Debugging
+2. Verificar URLs permitidas en Auth0:
+   - **Allowed Web Origins**
+   - **Allowed Callback URLs**
 
-### **1. Verificar Variables de Entorno**
+3. Verificar configuración de Netlify:
+   - Headers de seguridad en `netlify.toml`
 
-```bash
-# Verificar .env.local
-cat .env.local
-
-# Verificar variables en Netlify
-netlify env:list
-```
-
-### **2. Verificar Logs de Netlify**
-
-```bash
-# Ver logs de funciones
-netlify functions:invoke auth-protect --no-identity
-
-# Ver logs del sitio
-netlify logs
-```
-
-### **3. Verificar Configuración de Auth0**
-
-```javascript
-// En consola del navegador
-console.log('Auth0 Config:', window.AUTH0_CONFIG);
-console.log('User:', await auth0.getUser());
-```
-
-### **4. Verificar Tokens JWT**
-
-```javascript
-// Decodificar token (solo para debug)
-const token = await auth0.getIdTokenClaims();
-console.log('Token claims:', token);
-```
-
-## 🛠️ Herramientas de Debug
-
-### **1. Netlify CLI**
-
-```bash
-# Instalar
-npm install -g netlify-cli
-
-# Login
-netlify login
-
-# Ver información del sitio
-netlify status
-
-# Ver logs en tiempo real
-netlify logs --tail
-```
-
-### **2. Auth0 Debugger**
-
-1. Ir a [Auth0 Debugger](https://jwt.io/)
-2. Pegar token JWT
-3. Verificar claims y firma
-
-### **3. Browser DevTools**
-
-```javascript
-// En consola del navegador
-// Verificar localStorage
-console.log('localStorage:', localStorage);
-
-// Verificar sessionStorage
-console.log('sessionStorage:', sessionStorage);
-
-// Verificar cookies
-console.log('cookies:', document.cookie);
-```
-
-## 🔧 Problemas de Desarrollo Local
-
-### **1. Puerto ocupado**
-
-**Error:** `EADDRINUSE: address already in use`
-
-**Solución:**
-```bash
-# Matar proceso en puerto 8888
-lsof -ti:8888 | xargs kill -9
-
-# O cambiar puerto en netlify.toml
-[dev]
-  port = 8889
-```
-
-### **2. Variables de entorno no cargan**
-
-**Error:** Variables undefined
-
-**Solución:**
-```bash
-# Verificar archivo .env.local
-ls -la .env.local
-
-# Regenerar configuración
-npm run build:dev
-```
-
-### **3. Funciones no cargan**
-
-**Error:** Function not found
-
-**Solución:**
-```bash
-# Reiniciar servidor de desarrollo
-npm run dev
-
-# Verificar estructura de archivos
-ls -la netlify/functions/
-```
-
-## 🌐 Problemas de Producción
-
-### **1. Deploy fallido**
+### Error: "Network error"
 
 **Síntomas:**
-- Build error
-- Deploy no completa
-- Sitio no funciona
+- Errores de red al cargar la aplicación
+- Timeouts en requests
 
 **Solución:**
-1. Verificar logs de build en Netlify
-2. Verificar variables de entorno
-3. Verificar configuración de build
+1. Verificar conectividad de red
+2. Verificar que las funciones Netlify estén funcionando:
+   ```bash
+   netlify functions:list
+   netlify functions:invoke auth-protect
+   ```
 
-### **2. Dominio no funciona**
+3. Verificar logs de Netlify:
+   ```bash
+   netlify logs --site=tu-sitio-id
+   ```
+
+## 🔧 Problemas de Configuración
+
+### Error: "Environment variables not found"
 
 **Síntomas:**
-- DNS error
-- Página no carga
-- SSL error
+- Variables de entorno no disponibles
+- Configuración faltante
 
 **Solución:**
-1. Verificar configuración DNS
-2. Verificar certificado SSL
-3. Verificar configuración de dominio en Netlify
+1. Verificar archivo `.env` local:
+   ```bash
+   cp env.example .env
+   # Editar .env con tus credenciales
+   ```
 
-### **3. Performance lenta**
+2. Verificar variables en Netlify:
+   - **Site settings** → **Environment variables**
+   - Agregar todas las variables necesarias
+
+3. Variables requeridas:
+   ```env
+   AUTH0_DOMAIN=tu-dominio.auth0.com
+   AUTH0_CLIENT_ID=tu-client-id
+   AUTH0_CLIENT_SECRET=tu-client-secret
+   AUTH0_AUDIENCE=tu-audience
+   ```
+
+### Error: "Function not found"
 
 **Síntomas:**
-- Tiempo de carga alto
-- Funciones lentas
-- Timeout errors
+- Error 404 al acceder a funciones Netlify
+- Funciones no disponibles
 
 **Solución:**
-1. Optimizar imágenes
-2. Minificar CSS/JS
-3. Implementar caching
-4. Optimizar funciones serverless
+1. Verificar estructura de archivos:
+   ```
+   netlify/
+   └── functions/
+       ├── auth-protect.js
+       └── protect-html.js
+   ```
+
+2. Verificar que las funciones estén en el directorio correcto
+
+3. Verificar configuración en `netlify.toml`:
+   ```toml
+   [functions]
+     directory = "netlify/functions"
+   ```
+
+## 🚀 Problemas de Despliegue
+
+### Error: "Build failed"
+
+**Síntomas:**
+- Build fallido en Netlify
+- Errores de compilación
+
+**Solución:**
+1. Verificar logs de build en Netlify Dashboard
+
+2. Probar build local:
+   ```bash
+   npm run build
+   ```
+
+3. Verificar dependencias:
+   ```bash
+   npm install
+   npm audit fix
+   ```
+
+4. Verificar configuración de build en Netlify:
+   - **Build command**: `npm run build` (o vacío)
+   - **Publish directory**: `.`
+
+### Error: "Page not found"
+
+**Síntomas:**
+- Páginas no encontradas después del despliegue
+- Rutas que no funcionan
+
+**Solución:**
+1. Verificar configuración de redirecciones en `netlify.toml`:
+   ```toml
+   [[redirects]]
+     from = "/app/*"
+     to = "/.netlify/functions/protect-html"
+     status = 200
+     force = true
+   ```
+
+2. Verificar que los archivos estén en el directorio correcto
+
+3. Verificar configuración de publish directory en Netlify
 
 ## 🔒 Problemas de Seguridad
 
-### **1. Headers de seguridad faltantes**
+### Error: "Rate limit exceeded"
 
-**Verificar:**
-```bash
-# Verificar headers
-curl -I https://tu-dominio.com
+**Síntomas:**
+- Demasiadas requests en poco tiempo
+- Usuario bloqueado temporalmente
 
-# Debería incluir:
-# X-Frame-Options: DENY
-# X-Content-Type-Options: nosniff
-# X-XSS-Protection: 1; mode=block
-```
+**Solución:**
+1. Verificar configuración de rate limiting:
+   ```javascript
+   const rateLimit = {
+       windowMs: 15 * 60 * 1000, // 15 minutos
+       max: 100 // máximo 100 requests por ventana
+   };
+   ```
 
-### **2. Rate limiting no funciona**
+2. Ajustar límites según necesidades:
+   - Aumentar `max` para más requests
+   - Aumentar `windowMs` para ventana más larga
 
-**Verificar:**
-```javascript
-// En netlify/functions/auth-protect.js
-const { rateLimitMiddleware } = require('./rate-limiter');
-exports.handler = rateLimitMiddleware(authHandler);
-```
+3. Verificar si hay bots o scripts haciendo requests excesivos
 
-### **3. CORS mal configurado**
+### Error: "Invalid token"
 
-**Verificar:**
-```javascript
-// En funciones de Netlify
-const allowedOrigins = [
-  'http://localhost:8888',
-  'https://tu-dominio.com'
-];
-```
+**Síntomas:**
+- Tokens JWT inválidos
+- Sesiones expiradas
 
-## 📊 Monitoreo y Alertas
+**Solución:**
+1. Verificar configuración de Auth0:
+   - **Applications** → **Settings** → **Token Endpoint Authentication Method**
+   - Asegurar que sea "Post"
 
-### **1. Configurar Alertas de Auth0**
+2. Verificar expiración de tokens:
+   ```javascript
+   const config = {
+       cacheExpirationInSeconds: 3600, // 1 hora
+       useRefreshTokens: true
+   };
+   ```
 
-1. **Logs** → **Streams**
-2. **Create Stream**
-3. **Configure alerts** para:
-   - Failed logins
-   - Rate limit exceeded
-   - Suspicious activity
+3. Verificar que el usuario esté autenticado:
+   ```javascript
+   const isAuthenticated = await auth0.isAuthenticated();
+   if (!isAuthenticated) {
+       // Redirigir a login
+   }
+   ```
 
-### **2. Configurar Alertas de Netlify**
+## 📱 Problemas de Responsive
 
-1. **Site settings** → **Notifications**
-2. **Configure** para:
-   - Deploy failures
-   - Function errors
-   - Performance issues
+### Error: "Layout broken on mobile"
 
-### **3. Logs de Error**
+**Síntomas:**
+- Layout roto en dispositivos móviles
+- Elementos fuera de lugar
 
-```javascript
-// Agregar en assets/js/auth.js
-window.addEventListener('error', (event) => {
-    // Enviar a servicio de logging
-    console.error('Error:', {
-        message: event.message,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno,
-        error: event.error
-    });
-});
-```
+**Solución:**
+1. Verificar CSS responsive en `assets/css/main.css`:
+   ```css
+   @media (max-width: 768px) {
+       .app-container {
+           flex-direction: column;
+       }
+       
+       .sidebar {
+           width: 100%;
+           height: auto;
+       }
+   }
+   ```
 
-## 🆘 Contacto y Soporte
+2. Verificar viewport meta tag:
+   ```html
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   ```
 
-### **1. Recursos Útiles**
+3. Probar en diferentes dispositivos y navegadores
+
+## 🔍 Debugging
+
+### Habilitar Logs Detallados
+
+1. En desarrollo local:
+   ```javascript
+   // En assets/js/auth.js
+   const config = {
+       domain: process.env.AUTH0_DOMAIN,
+       clientId: process.env.AUTH0_CLIENT_ID,
+       debug: true // Habilitar logs detallados
+   };
+   ```
+
+2. En Netlify Functions:
+   ```javascript
+   console.log('Debug info:', {
+       event: event,
+       user: user,
+       timestamp: new Date().toISOString()
+   });
+   ```
+
+### Verificar Estado de la Aplicación
+
+1. Verificar autenticación:
+   ```javascript
+   console.log('Auth state:', await auth0.isAuthenticated());
+   console.log('User:', await auth0.getUser());
+   ```
+
+2. Verificar tokens:
+   ```javascript
+   const token = await auth0.getTokenSilently();
+   console.log('Token valid:', !!token);
+   ```
+
+### Herramientas de Debug
+
+1. **Netlify CLI**:
+   ```bash
+   npm install -g netlify-cli
+   netlify dev
+   ```
+
+2. **Auth0 Debug**:
+   - Habilitar debug en configuración de Auth0
+   - Revisar logs en Auth0 Dashboard
+
+3. **Browser DevTools**:
+   - Console para errores JavaScript
+   - Network para requests HTTP
+   - Application para localStorage/sessionStorage
+
+## 📞 Obtener Ayuda
+
+### Información Necesaria
+
+Al reportar un problema, incluir:
+
+1. **Descripción del problema**
+2. **Pasos para reproducir**
+3. **Configuración actual**:
+   - Variables de entorno (sin valores sensibles)
+   - Configuración de Auth0
+   - Versión de Node.js
+   - Navegador y versión
+
+4. **Logs de error**:
+   - Console del navegador
+   - Logs de Netlify
+   - Logs de Auth0
+
+### Canales de Soporte
+
+- 📧 **Email**: soporte@swanix.com
+- 📖 **Documentación**: [docs/](docs/)
+- 🐛 **GitHub Issues**: [Issues](https://github.com/tu-usuario/swanix-wall/issues)
+- 💬 **Auth0 Support**: [support.auth0.com](https://support.auth0.com)
+- 💬 **Netlify Support**: [support.netlify.com](https://support.netlify.com)
+
+### Recursos Adicionales
 
 - [Auth0 Documentation](https://auth0.com/docs)
-- [Netlify Documentation](https://docs.netlify.com/)
-- [JWT.io Debugger](https://jwt.io/)
-
-### **2. Comunidades**
-
-- [Auth0 Community](https://community.auth0.com/)
-- [Netlify Community](https://community.netlify.com/)
-- [Stack Overflow](https://stackoverflow.com/)
-
-### **3. Logs y Debugging**
-
-```bash
-# Comando completo para debugging
-npm run dev 2>&1 | tee debug.log
-```
-
-## 📋 Checklist de Troubleshooting
-
-- [ ] Verificar variables de entorno
-- [ ] Verificar configuración de Auth0
-- [ ] Verificar logs de Netlify
-- [ ] Verificar CORS
-- [ ] Verificar rate limiting
-- [ ] Verificar headers de seguridad
-- [ ] Verificar DNS y SSL
-- [ ] Verificar performance
-- [ ] Configurar alertas
-- [ ] Documentar solución
+- [Netlify Documentation](https://docs.netlify.com)
+- [Swanix Wall Documentation](docs/)

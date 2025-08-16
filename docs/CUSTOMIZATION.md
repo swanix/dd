@@ -1,248 +1,399 @@
-# 🎨 Guía de Personalización
+# 🎨 Personalización - Swanix Wall
 
-## 🎯 Personalización Básica
+## 📋 Descripción
 
-### **1. Cambiar Títulos y Contenido**
+Esta guía te ayudará a personalizar Swanix Wall para adaptarlo a tus necesidades específicas de autenticación y protección de contenido.
 
-#### **Página Principal (`index.html`)**
-```html
-<title>Mi Aplicación Protegida</title>
-<h1>Bienvenido a Mi Aplicación</h1>
-```
+## 🎨 Personalización Visual
 
-#### **Página de Login (`login.html`)**
-```html
-<title>Iniciar Sesión - Mi Aplicación</title>
-<h1>Acceso a Mi Aplicación</h1>
-```
+### Cambiar Colores
 
-#### **Aplicación Protegida (`app/index.html`)**
-```html
-<title>Dashboard - Mi Aplicación</title>
-<h1>Panel de Control</h1>
-```
+Editar las variables CSS en `assets/css/main.css`:
 
-**Nota**: Todas las páginas en `/app/` incluyen protección automática que redirige al login si el usuario no está autenticado.
-
-### **2. Personalizar Colores y Estilos**
-
-#### **Variables CSS (`assets/css/main.css`)**
 ```css
 :root {
-  /* Colores principales */
-  --primary-color: #667eea;
-  --secondary-color: #764ba2;
-  --accent-color: #f093fb;
-  
-  /* Colores de estado */
-  --success-color: #4ade80;
-  --error-color: #f87171;
-  --warning-color: #fbbf24;
-  
-  /* Colores de fondo */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-dark: #1e293b;
-  
-  /* Tipografía */
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-size-base: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 24px;
-  
-  /* Espaciado */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  
-  /* Bordes */
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
-  --border-width: 1px;
-  
-  /* Sombras */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    /* Colores principales */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    
+    /* Colores de fondo */
+    --background-color: #ffffff;
+    --sidebar-bg: #f8f9fa;
+    --topbar-bg: #ffffff;
+    
+    /* Colores de texto */
+    --text-color: #000000;
+    --text-muted: #6c757d;
+    --link-color: #007bff;
+    
+    /* Bordes */
+    --border-color: #e9ecef;
+    --border-radius: 6px;
+    
+    /* Sombras */
+    --shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --shadow-lg: 0 4px 8px rgba(0,0,0,0.15);
 }
 ```
 
-### **3. Cambiar Logo e Imágenes**
+### Cambiar Tipografía
 
-#### **Logo Principal**
-```html
-<!-- En header o sidebar -->
-<img src="/assets/img/logo.svg" alt="Mi Aplicación" class="logo">
+```css
+:root {
+    /* Fuente principal */
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Tamaños de fuente */
+    --font-size-sm: 12px;
+    --font-size-base: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 24px;
+    
+    /* Pesos de fuente */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+}
 ```
 
-#### **Favicon**
-```html
-<link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
+### Personalizar Layout
+
+```css
+:root {
+    /* Dimensiones del sidebar */
+    --sidebar-width: 250px;
+    --sidebar-padding: 20px;
+    
+    /* Dimensiones del topbar */
+    --topbar-height: 80px;
+    --topbar-padding: 20px;
+    
+    /* Espaciado general */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
 ```
 
-## 🔧 Personalización Avanzada
+## 🔒 Configuración de Seguridad
 
-### **1. Modificar Restricciones de Acceso**
+### Restricciones por Email
 
-#### **Auth0 Action Personalizado**
+Editar el Action de Auth0 para configurar restricciones:
+
 ```javascript
 exports.onExecutePostLogin = async (event, api) => {
-    // Tu lógica personalizada aquí
     const userEmail = event.user.email;
     
-    // Ejemplo: Solo emails corporativos
-    if (!userEmail.endsWith('@miempresa.com')) {
-        api.access.deny('Solo empleados autorizados');
+    // Solo emails corporativos
+    if (!userEmail.endsWith('@tuempresa.com')) {
+        api.access.deny('Solo emails corporativos permitidos');
+        return;
     }
     
-    // Ejemplo: Lista específica de usuarios
-    const allowedUsers = [
-        'admin@miempresa.com',
-        'usuario1@miempresa.com'
+    // Lista específica de emails
+    const allowedEmails = [
+        'admin@tuempresa.com',
+        'usuario1@tuempresa.com',
+        'usuario2@tuempresa.com'
     ];
     
-    if (!allowedUsers.includes(userEmail)) {
-        api.access.deny('Usuario no autorizado');
+    if (!allowedEmails.includes(userEmail)) {
+        api.access.deny('Email no autorizado');
+        return;
     }
 };
 ```
 
-### **2. Agregar Funcionalidades**
+### Restricciones por Dominio
 
-#### **Nuevas Páginas Protegidas**
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+    const userEmail = event.user.email;
+    
+    // Múltiples dominios permitidos
+    const allowedDomains = [
+        '@tuempresa.com',
+        '@sucursal.com',
+        '@partner.com'
+    ];
+    
+    const isAllowed = allowedDomains.some(domain => 
+        userEmail.endsWith(domain)
+    );
+    
+    if (!isAllowed) {
+        api.access.deny('Dominio no autorizado');
+        return;
+    }
+};
+```
+
+### Restricciones por Rol
+
+```javascript
+exports.onExecutePostLogin = async (event, api) => {
+    const userEmail = event.user.email;
+    
+    // Asignar roles basados en email
+    if (userEmail.endsWith('@admin.tuempresa.com')) {
+        api.accessToken.setCustomClaim('role', 'admin');
+    } else if (userEmail.endsWith('@tuempresa.com')) {
+        api.accessToken.setCustomClaim('role', 'user');
+    } else {
+        api.access.deny('Rol no autorizado');
+        return;
+    }
+};
+```
+
+## 🏗️ Estructura de Archivos
+
+### Agregar Nuevas Páginas Protegidas
+
+1. Crear archivo HTML en `app/`:
+
 ```html
-<!-- app/dashboard.html -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-protected="true">
 <head>
-    <title>Dashboard - Mi Aplicación</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Página Protegida</title>
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
-    <!-- Contenido del dashboard -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Mi Aplicación</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="/app/" class="nav-link">Inicio</a></li>
+                    <li><a href="/app/nueva-pagina.html" class="nav-link active">Nueva Página</a></li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Contenido principal -->
+        <div class="main-content">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <h1>Nueva Página</h1>
+                </div>
+                <div class="topbar-right">
+                    <!-- Menú de usuario -->
+                </div>
+            </header>
+            
+            <main class="content-area">
+                <div class="content-header">
+                    <h2>Bienvenido</h2>
+                    <p>Contenido de la nueva página protegida</p>
+                </div>
+                
+                <div id="contentContainer">
+                    <!-- Contenido dinámico -->
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+    <script src="/assets/js/env-config.js"></script>
+    <script src="/assets/js/protected-content.js"></script>
 </body>
 </html>
 ```
 
-#### **Nuevos Scripts**
-```javascript
-// assets/js/dashboard.js
-document.addEventListener('DOMContentLoaded', () => {
-    // Lógica específica del dashboard
-});
+2. Configurar redirección en `netlify.toml`:
+
+```toml
+[[redirects]]
+  from = "/app/nueva-pagina.html"
+  to = "/.netlify/functions/protect-html"
+  status = 200
+  force = true
 ```
 
-### **3. Personalizar Netlify Functions**
+### Agregar Nuevas Funciones Netlify
 
-#### **Nueva Función de Autorización**
+1. Crear archivo en `netlify/functions/`:
+
 ```javascript
-// netlify/functions/custom-auth.js
+const { protectRoute } = require('../utils/auth');
+
 exports.handler = async (event, context) => {
-    // Tu lógica personalizada de autorización
+    // Verificar autenticación
+    const authResult = await protectRoute(event);
+    if (!authResult.authenticated) {
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: 'No autorizado' })
+        };
+    }
+    
+    // Lógica de la función
+    const user = authResult.user;
+    
     return {
         statusCode: 200,
-        body: JSON.stringify({ message: 'Autorizado' })
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        },
+        body: JSON.stringify({
+            message: 'Función protegida ejecutada',
+            user: user.email
+        })
     };
 };
 ```
 
-## 🎨 Temas y Variantes
+## 🔧 Configuración Avanzada
 
-### **1. Tema Oscuro**
-```css
-/* assets/css/dark-theme.css */
-[data-theme="dark"] {
-    --bg-primary: #1e293b;
-    --bg-secondary: #334155;
-    --text-primary: #f1f5f9;
-    --text-secondary: #cbd5e1;
-}
+### Rate Limiting Personalizado
+
+Editar `netlify/utils/rate-limiter.js`:
+
+```javascript
+const rateLimit = {
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // máximo 100 requests por ventana
+    message: {
+        error: 'Demasiadas requests, intenta más tarde'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+};
 ```
 
-### **2. Tema Corporativo**
-```css
-/* assets/css/corporate-theme.css */
-:root {
-    --primary-color: #1e40af;
-    --secondary-color: #1e3a8a;
-    --accent-color: #3b82f6;
-}
-```
+### Headers de Seguridad
 
-## 📱 Responsive Design
+Agregar en `netlify.toml`:
 
-### **Breakpoints Personalizados**
-```css
-/* assets/css/responsive.css */
-@media (max-width: 768px) {
-    /* Estilos para móviles */
-}
-
-@media (max-width: 1024px) {
-    /* Estilos para tablets */
-}
-
-@media (min-width: 1025px) {
-    /* Estilos para desktop */
-}
-```
-
-## 🔒 Seguridad Personalizada
-
-### **1. Headers de Seguridad**
 ```toml
-# netlify.toml
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com;"
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com; style-src 'self' 'unsafe-inline';"
 ```
 
-### **2. Rate Limiting Personalizado**
+### Logging Personalizado
+
 ```javascript
-// netlify/functions/rate-limiter.js
-const rateLimit = {
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100 // máximo 100 requests por ventana
+// En funciones Netlify
+const logActivity = (user, action, details) => {
+    console.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        user: user.email,
+        action: action,
+        details: details,
+        ip: event.headers['client-ip']
+    }));
+};
+
+// Usar en funciones
+logActivity(user, 'page_access', { page: 'dashboard' });
+```
+
+## 🎯 Casos de Uso Comunes
+
+### Aplicación Corporativa
+
+```javascript
+// Configuración para empresa
+const config = {
+    allowedDomains: ['@tuempresa.com', '@sucursal.com'],
+    adminEmails: ['admin@tuempresa.com'],
+    sessionTimeout: 8 * 60 * 60 * 1000, // 8 horas
+    requireMFA: true
+};
+```
+
+### Portal de Clientes
+
+```javascript
+// Configuración para clientes
+const config = {
+    allowedEmails: [
+        'cliente1@empresa.com',
+        'cliente2@empresa.com'
+    ],
+    sessionTimeout: 24 * 60 * 60 * 1000, // 24 horas
+    requireMFA: false
+};
+```
+
+### Aplicación Interna
+
+```javascript
+// Configuración interna
+const config = {
+    allowedDomains: ['@tuempresa.com'],
+    sessionTimeout: 4 * 60 * 60 * 1000, // 4 horas
+    requireMFA: true,
+    logAllActivity: true
 };
 ```
 
 ## 🚀 Optimización
 
-### **1. Lazy Loading**
+### Caché de Tokens
+
 ```javascript
-// Cargar componentes bajo demanda
+// En auth.js
+const cacheConfig = {
+    cacheLocation: 'localstorage',
+    cacheExpirationInSeconds: 3600, // 1 hora
+    useRefreshTokens: true
+};
+```
+
+### Lazy Loading
+
+```javascript
+// Cargar componentes solo cuando se necesiten
 const loadComponent = async (componentName) => {
-    const module = await import(`/assets/js/components/${componentName}.js`);
+    const module = await import(`./components/${componentName}.js`);
     return module.default;
 };
 ```
 
-### **2. Caching**
-```javascript
-// Cache de datos del usuario
-const userCache = new Map();
-const cacheUserData = (userId, data) => {
-    userCache.set(userId, {
-        data,
-        timestamp: Date.now()
-    });
-};
+### Compresión
+
+Agregar en `netlify.toml`:
+
+```toml
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Encoding = "gzip"
+    
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Encoding = "gzip"
 ```
 
-## 📋 Checklist de Personalización
+## 📞 Soporte
 
-- [ ] Cambiar títulos y contenido
-- [ ] Personalizar colores y estilos
-- [ ] Reemplazar logo e imágenes
-- [ ] Configurar restricciones de acceso
-- [ ] Agregar nuevas páginas
-- [ ] Personalizar funciones de Netlify
-- [ ] Implementar temas
-- [ ] Optimizar para móviles
-- [ ] Configurar seguridad
-- [ ] Implementar caching
+Para ayuda con personalización:
+- 📧 Email: desarrollo@swanix.com
+- 📖 Documentación: [docs/](docs/)
+- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/swanix-wall/issues)

@@ -1,255 +1,365 @@
-# 🚀 Guía de Deploy a Producción
+# 🚀 Guía de Despliegue - Swanix Wall
 
-## 📋 Prerrequisitos
+## 📋 Descripción
 
-- Repositorio configurado en GitHub/GitLab
-- Cuenta en Netlify
-- Configuración de Auth0 completada
-- Variables de entorno preparadas
+Esta guía te ayudará a desplegar Swanix Wall en diferentes entornos, desde desarrollo local hasta producción en Netlify.
 
-## 🌐 Deploy a Netlify
+## 🏠 Desarrollo Local
 
-### **1. Conectar Repositorio**
+### Prerrequisitos
 
-1. Ve a [Netlify Dashboard](https://app.netlify.com/)
-2. **New site from Git**
-3. **Choose your Git provider** (GitHub, GitLab, Bitbucket)
-4. **Select repository** (tu template)
-5. **Configure build settings**:
-   - **Build command**: `npm run build`
-   - **Publish directory**: `.` (raíz del proyecto)
-6. **Deploy site**
+- Node.js 16+ instalado
+- Git configurado
+- Cuenta en Auth0 configurada
 
-### **2. Configurar Variables de Entorno**
-
-En **Site settings** → **Environment variables**:
+### 1. Clonar el Repositorio
 
 ```bash
+git clone https://github.com/tu-usuario/swanix-wall.git
+cd swanix-wall
+```
+
+### 2. Instalar Dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar Variables de Entorno
+
+```bash
+cp env.example .env
+```
+
+Editar `.env` con tus credenciales:
+
+```env
 # Auth0 Configuration
 AUTH0_DOMAIN=tu-dominio.auth0.com
 AUTH0_CLIENT_ID=tu-client-id
+AUTH0_CLIENT_SECRET=tu-client-secret
+AUTH0_AUDIENCE=tu-audience
+
+# Google OAuth (opcional)
+GOOGLE_CLIENT_ID=tu-google-client-id
+GOOGLE_CLIENT_SECRET=tu-google-client-secret
 
 # URLs
-NETLIFY_URL=https://tu-sitio.netlify.app
 LOCAL_URL=http://localhost:8888
-
-# APIs (opcional)
-SHEETBEST_API_KEY=tu-api-key
 ```
 
-### **3. Configurar Dominio Personalizado**
+### 4. Ejecutar Servidor Local
 
-1. **Domain settings** → **Custom domains**
-2. **Add custom domain**
-3. **Enter domain**: `tu-dominio.com`
-4. **Configure DNS** según instrucciones de Netlify
+```bash
+npm run dev
+```
 
-## 🔧 Configuración de Auth0 para Producción
+### 5. Acceder a la Aplicación
 
-### **1. Actualizar URLs en Auth0**
+- **URL principal**: `http://localhost:8888`
+- **Login**: `http://localhost:8888/login.html`
+- **Página protegida**: `http://localhost:8888/app/`
 
-En **Applications** → **Settings**:
+## 🌐 Despliegue en Netlify
+
+### 1. Preparar el Repositorio
+
+Asegúrate de que tu repositorio esté listo:
+
+```bash
+# Verificar que todo esté committeado
+git status
+git add .
+git commit -m "Preparar para despliegue"
+git push origin main
+```
+
+### 2. Conectar a Netlify
+
+1. Ve a [Netlify](https://netlify.com/)
+2. **New site from Git**
+3. Conectar tu repositorio de GitHub
+4. Configurar build settings:
+   - **Build command**: `npm run build` (o dejar vacío)
+   - **Publish directory**: `.` (raíz del proyecto)
+
+### 3. Configurar Variables de Entorno
+
+En **Site settings** → **Environment variables**:
+
+```env
+AUTH0_DOMAIN=tu-dominio.auth0.com
+AUTH0_CLIENT_ID=tu-client-id
+AUTH0_CLIENT_SECRET=tu-client-secret
+AUTH0_AUDIENCE=tu-audience
+GOOGLE_CLIENT_ID=tu-google-client-id
+GOOGLE_CLIENT_SECRET=tu-google-client-secret
+```
+
+### 4. Configurar Auth0
+
+Actualizar URLs en Auth0 Dashboard:
 
 **Allowed Callback URLs:**
 ```
-https://tu-dominio.com/,
-https://tu-dominio.com/app/,
-https://tu-dominio.com/forbidden.html
+https://tu-sitio.netlify.app/,
+https://tu-sitio.netlify.app/app/,
+https://tu-sitio.netlify.app/forbidden.html
 ```
 
 **Allowed Logout URLs:**
 ```
-https://tu-dominio.com/login.html,
-https://tu-dominio.com/forbidden.html
+https://tu-sitio.netlify.app/login.html,
+https://tu-sitio.netlify.app/forbidden.html
 ```
 
 **Allowed Web Origins:**
 ```
-https://tu-dominio.com
+https://tu-sitio.netlify.app
 ```
 
-### **2. Configurar Google OAuth**
+### 5. Verificar Despliegue
 
-1. **Authentication** → **Social** → **Google**
-2. **Authorized redirect URIs**:
-   ```
-   https://tu-dominio.auth0.com/login/callback
-   ```
+1. **Build logs**: Revisar que el build sea exitoso
+2. **Funciones**: Verificar que las Netlify Functions estén funcionando
+3. **Autenticación**: Probar el flujo de login/logout
+4. **Protección**: Verificar que las páginas protegidas funcionen
 
-## 🔄 Deploy Automático
+## 🔧 Configuración de Dominio Personalizado
 
-### **1. Configurar Webhooks**
+### 1. Agregar Dominio en Netlify
 
-Netlify se conecta automáticamente a tu repositorio y hace deploy en cada push.
+1. **Domain management** → **Add custom domain**
+2. Ingresar tu dominio: `app.tuempresa.com`
+3. Configurar DNS según las instrucciones de Netlify
 
-### **2. Branch Deploy**
+### 2. Configurar SSL
 
-Para testing antes de producción:
+Netlify proporciona SSL automático, pero puedes configurar:
 
-1. **Site settings** → **Build & deploy**
-2. **Branch deploy**: `develop` o `staging`
-3. **Preview URLs** automáticas
+1. **Domain management** → **HTTPS**
+2. **Verify DNS configuration**
+3. **Force HTTPS** (recomendado)
 
-### **3. Deploy Manual**
+### 3. Actualizar Auth0
 
-```bash
-# Build local
-npm run build
+Actualizar URLs en Auth0 con el nuevo dominio:
 
-# Deploy a Netlify
-npm run deploy
+**Allowed Callback URLs:**
+```
+https://app.tuempresa.com/,
+https://app.tuempresa.com/app/,
+https://app.tuempresa.com/forbidden.html
+```
+
+**Allowed Logout URLs:**
+```
+https://app.tuempresa.com/login.html,
+https://app.tuempresa.com/forbidden.html
+```
+
+**Allowed Web Origins:**
+```
+https://app.tuempresa.com
 ```
 
 ## 🔒 Configuración de Seguridad
 
-### **1. Headers de Seguridad**
+### Headers de Seguridad
 
-Verificar que `netlify.toml` incluya:
+Agregar en `netlify.toml`:
 
 ```toml
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com;"
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com; style-src 'self' 'unsafe-inline';"
 ```
 
-### **2. Rate Limiting**
+### Rate Limiting
 
-Verificar que las funciones incluyan rate limiting:
+Configurar en `netlify/utils/rate-limiter.js`:
 
 ```javascript
-// netlify/functions/auth-protect.js
-const { rateLimitMiddleware } = require('./rate-limiter');
-exports.handler = rateLimitMiddleware(authHandler);
+const rateLimit = {
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // máximo 100 requests por ventana
+    message: {
+        error: 'Demasiadas requests, intenta más tarde'
+    }
+};
 ```
+
+### Logs de Acceso
+
+Habilitar logs en Netlify:
+
+1. **Site settings** → **Functions**
+2. **Function logs** → **Enable**
+3. Configurar alertas si es necesario
 
 ## 📊 Monitoreo y Analytics
 
-### **1. Netlify Analytics**
+### 1. Netlify Analytics
 
 1. **Site settings** → **Analytics**
 2. **Enable analytics**
-3. **View metrics** en dashboard
+3. Revisar métricas de rendimiento
 
-### **2. Auth0 Logs**
+### 2. Auth0 Logs
 
 1. **Logs** → **Streams**
-2. **Configure** para monitorear autenticación
-3. **Set up alerts** para eventos críticos
+2. Configurar webhook para logs
+3. Monitorear intentos de acceso
 
-### **3. Error Tracking**
+### 3. Custom Logging
+
+Agregar logging personalizado en funciones:
 
 ```javascript
-// Agregar en assets/js/auth.js
-window.addEventListener('error', (event) => {
-    // Enviar a servicio de tracking
-    console.error('Error:', event.error);
-});
+// En netlify/functions/auth-protect.js
+const logAccess = (user, action, success) => {
+    console.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        user: user?.email || 'anonymous',
+        action: action,
+        success: success,
+        ip: event.headers['client-ip']
+    }));
+};
 ```
 
-## 🧪 Testing en Producción
+## 🔄 Actualizaciones y Mantenimiento
 
-### **1. Verificar Funcionalidad**
-
-- [ ] Login con Google funciona
-- [ ] Redirección después del login
-- [ ] Contenido protegido se muestra
-- [ ] Logout funciona correctamente
-- [ ] Acceso denegado para usuarios no autorizados
-
-### **2. Verificar Seguridad**
-
-- [ ] Headers de seguridad presentes
-- [ ] Rate limiting activo
-- [ ] CORS configurado correctamente
-- [ ] JWT tokens válidos
-
-### **3. Verificar Performance**
-
-- [ ] Tiempo de carga < 3 segundos
-- [ ] Funciones serverless responden rápido
-- [ ] Assets optimizados
-
-## 🔄 Rollback y Recuperación
-
-### **1. Deploy Anterior**
-
-1. **Deploys** → **Select deploy**
-2. **Publish deploy** para rollback
-
-### **2. Variables de Entorno**
-
-1. **Environment variables** → **Edit**
-2. **Restore** valores anteriores
-
-### **3. Auth0 Rollback**
-
-1. **Actions** → **Select action**
-2. **Deploy** versión anterior
-
-## 📈 Optimización Post-Deploy
-
-### **1. Performance**
+### 1. Actualizar Dependencias
 
 ```bash
-# Verificar Lighthouse score
-npm install -g lighthouse
-lighthouse https://tu-dominio.com
+# Verificar dependencias desactualizadas
+npm outdated
+
+# Actualizar dependencias
+npm update
+
+# Actualizar dependencias mayores
+npm audit fix
 ```
 
-### **2. SEO**
+### 2. Despliegue Automático
 
-```html
-<!-- Agregar meta tags -->
-<meta name="description" content="Descripción de tu aplicación">
-<meta name="keywords" content="palabras, clave, relevantes">
-<meta property="og:title" content="Título de tu aplicación">
+Configurar GitHub Actions para despliegue automático:
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to Netlify
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v1.2
+        with:
+          publish-dir: '.'
+          production-branch: main
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 ```
 
-### **3. PWA (Progressive Web App)**
+### 3. Backup y Recuperación
 
-```json
-// public/manifest.json
-{
-  "name": "Mi Aplicación",
-  "short_name": "App",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#667eea"
-}
+1. **Backup de configuración**:
+   - Variables de entorno
+   - Configuración de Auth0
+   - Archivos de configuración
+
+2. **Recuperación**:
+   - Restaurar variables de entorno
+   - Verificar configuración de Auth0
+   - Probar funcionalidad
+
+## 🚨 Solución de Problemas
+
+### Error de Build
+
+```bash
+# Verificar logs de build
+netlify logs --site=tu-sitio-id
+
+# Build local para debug
+npm run build
 ```
 
-## 🚨 Troubleshooting
+### Error de Autenticación
 
-### **Error: "Callback URL mismatch"**
-- Verificar URLs en Auth0 Dashboard
-- Asegurar que coincidan exactamente
+1. Verificar variables de entorno
+2. Revisar configuración de Auth0
+3. Comprobar URLs de callback
+4. Verificar CORS settings
 
-### **Error: "Function not found"**
-- Verificar que funciones estén en `netlify/functions/`
-- Revisar logs en Netlify Functions
+### Error de Funciones Netlify
 
-### **Error: "CORS error"**
-- Verificar configuración de CORS en funciones
-- Revisar headers de respuesta
+```bash
+# Verificar logs de funciones
+netlify functions:list
+netlify functions:invoke auth-protect
 
-### **Error: "Rate limit exceeded"**
-- Ajustar configuración de rate limiting
-- Revisar logs de requests
+# Debug local
+netlify dev
+```
 
-## 📋 Checklist de Deploy
+### Error de CORS
 
-- [ ] Repositorio conectado a Netlify
-- [ ] Variables de entorno configuradas
-- [ ] URLs de Auth0 actualizadas
-- [ ] Dominio personalizado configurado
-- [ ] Headers de seguridad verificados
-- [ ] Rate limiting activo
-- [ ] Testing completo realizado
-- [ ] Analytics configurado
-- [ ] Monitoreo activo
-- [ ] Documentación actualizada
+1. Verificar URLs permitidas en Auth0
+2. Revisar configuración de Netlify
+3. Comprobar headers de respuesta
+
+## 📈 Optimización de Rendimiento
+
+### 1. Compresión
+
+Agregar en `netlify.toml`:
+
+```toml
+[[headers]]
+  for = "*.js"
+  [headers.values]
+    Content-Encoding = "gzip"
+    
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Content-Encoding = "gzip"
+```
+
+### 2. Caché
+
+```toml
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+```
+
+### 3. CDN
+
+Netlify proporciona CDN automático, pero puedes configurar:
+
+1. **Site settings** → **Build & deploy**
+2. **Asset optimization**
+3. **Enable asset optimization**
+
+## 📞 Soporte
+
+Para ayuda con despliegue:
+- 📧 Email: soporte@swanix.com
+- 📖 Documentación: [docs/](docs/)
+- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/swanix-wall/issues)
+- 💬 Netlify Support: [support.netlify.com](https://support.netlify.com)
