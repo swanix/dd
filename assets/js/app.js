@@ -224,7 +224,70 @@ class AppBrandGenerator {
 }
 
 // =============================================================================
-// 3. GENERADOR DE USER MENU DINÁMICO
+// 3. GENERADOR DE AUTH THEME TOGGLE DINÁMICO
+// =============================================================================
+
+class AuthThemeToggleGenerator {
+    constructor() {
+        this.toggleContainer = null;
+    }
+
+    // Generar el HTML del theme toggle para auth pages
+    generateAuthThemeToggleHTML() {
+        return `
+            <button class="auth-theme-toggle" onclick="toggleTheme()">
+                <svg class="auth-theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="auth-theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        `;
+    }
+
+    // Insertar el theme toggle en el DOM
+    insertAuthThemeToggle() {
+        try {
+            // Verificar si ya existe
+            if (document.querySelector('.auth-theme-toggle')) {
+                return;
+            }
+
+            // Crear el elemento
+            const toggleHTML = this.generateAuthThemeToggleHTML();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = toggleHTML;
+            const toggleElement = tempDiv.firstElementChild;
+
+            // Insertar al inicio del body
+            document.body.insertBefore(toggleElement, document.body.firstChild);
+
+        } catch (error) {
+            console.error('Error insertando auth theme toggle:', error);
+        }
+    }
+
+    // Inicializar el auth theme toggle
+    init() {
+        try {
+            this.insertAuthThemeToggle();
+        } catch (error) {
+            console.error('Error inicializando auth theme toggle:', error);
+        }
+    }
+}
+
+// =============================================================================
+// 4. GENERADOR DE USER MENU DINÁMICO
 // =============================================================================
 
 class UserMenuGenerator {
@@ -593,6 +656,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar app brand en todas las páginas
     const appBrand = new AppBrandGenerator();
     appBrand.init();
+    
+    // Inicializar auth theme toggle en páginas de auth (login.html y forbidden.html)
+    if (window.location.pathname === '/login.html' || window.location.pathname === '/forbidden.html') {
+        const authThemeToggle = new AuthThemeToggleGenerator();
+        authThemeToggle.init();
+    }
     
     // Solo inicializar ProtectedContentLoader en la página principal (app/index.html)
     if (window.location.pathname === '/app/' || window.location.pathname === '/app/index.html') {

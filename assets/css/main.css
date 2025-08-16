@@ -778,7 +778,7 @@ body {
 }
 
 .error-button:hover {
-    background-color: #333333;
+    background-color: var(--bg-secondary);
 }
 
 .retry-button {
@@ -794,7 +794,7 @@ body {
 }
 
 .retry-button:hover {
-    background-color: #333333;
+    background-color: var(--bg-secondary);
 }
 
 /* ===== CANVAS EN BLANCO CON USER MENU FLOTANTE ===== */
@@ -817,7 +817,7 @@ body {
 .placeholder-text {
     font-size: 1.5rem;
     font-weight: 300;
-    color: #cccccc;
+    color: var(--text-muted);
     opacity: 0.6;
     letter-spacing: 0.5px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -1127,8 +1127,11 @@ body {
     position: relative;
 }
 
-/* Transiciones suaves para todos los elementos */
-* {
+/* Transiciones suaves para elementos específicos */
+.user-dropdown,
+.user-dropdown *,
+.theme-toggle-btn,
+.user-avatar-button {
     transition: var(--theme-transition);
 }
 
@@ -1226,39 +1229,4 @@ body {
     }
 }
 
-/* Dark mode support para el diseño minimal */
-@media (prefers-color-scheme: dark) {
-    .user-dropdown {
-        background: #2d2d2d;
-        border-color: #444;
-    }
-    
-    .user-name {
-        color: #fff;
-    }
-    
-    .user-email {
-        color: #ccc;
-    }
-    
-    .user-dropdown-label {
-        color: #ccc;
-    }
-    
-    .user-dropdown-value {
-        color: #fff;
-    }
-    
-    .user-dropdown-action {
-        color: #fff;
-    }
-    
-    .logout-button:hover {
-        background: #3a1a1a;
-        color: #ff6b6b;
-    }
-    
-    .user-dropdown-divider {
-        background: #444;
-    }
-}
+
