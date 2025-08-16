@@ -30,12 +30,17 @@ function checkForErrors() {
 // ===== INICIALIZAR AUTH0 Y VERIFICAR AUTENTICACIÓN =====
 async function initAuth0() {
     try {
+        console.log('🚀 [INDEX] Iniciando verificación de autenticación...');
+        console.log('🔧 [INDEX] Configuración Auth0:', auth0Config);
+        
         // Verificar errores ANTES de cualquier inicialización
         if (checkForErrors()) {
             return; // Salir si hay error
         }
         
+        console.log('🔄 [INDEX] Creando cliente Auth0...');
         auth0 = await createAuth0Client(auth0Config);
+        console.log('✅ [INDEX] Cliente Auth0 creado exitosamente');
         
         // Manejar redirección después del login
         if (window.location.search.includes('code=')) {
@@ -62,18 +67,23 @@ async function initAuth0() {
         }
 
         // Verificar estado de autenticación
+        console.log('🔍 [INDEX] Verificando estado de autenticación...');
         const isAuthenticated = await auth0.isAuthenticated();
+        console.log('📊 [INDEX] Estado de autenticación:', isAuthenticated);
         
         if (isAuthenticated) {
             // Usuario autenticado - redirigir a la app
+            console.log('✅ [INDEX] Usuario autenticado, redirigiendo a /app/');
             window.location.href = '/app/';
         } else {
             // Usuario no autenticado - redirigir al login
+            console.log('🔐 [INDEX] Usuario no autenticado, redirigiendo a /login.html');
             window.location.href = '/login.html';
         }
         
     } catch (error) {
-        console.error('Error verificando autenticación:', error);
+        console.error('❌ [INDEX] Error verificando autenticación:', error);
+        console.error('🔧 [INDEX] Configuración actual:', auth0Config);
         showError();
     }
 }

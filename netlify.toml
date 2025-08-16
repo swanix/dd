@@ -6,6 +6,7 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# ===== HEADERS DE SEGURIDAD GLOBALES =====
 [[headers]]
   for = "/*"
   [headers.values]
@@ -14,48 +15,111 @@
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.auth0.com https://*.netlify.app; frame-ancestors 'none';"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.auth0.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.auth0.com https://*.netlify.app; frame-src 'self' https://*.auth0.com; frame-ancestors 'none';"
 
+# ===== OPTIMIZACIÓN DE CACHÉ Y COMPRESIÓN =====
+# JavaScript - Caché largo + compresión (COMENTADO PARA DESARROLLO LOCAL)
 [[headers]]
-  for = "/assets/*"
+  for = "*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    # Content-Encoding = "gzip"  # Comentado para desarrollo local
+    X-Content-Type-Options = "nosniff"
+
+# CSS - Caché largo + compresión (COMENTADO PARA DESARROLLO LOCAL)
+[[headers]]
+  for = "*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    # Content-Encoding = "gzip"  # Comentado para desarrollo local
+    X-Content-Type-Options = "nosniff"
+
+# Imágenes - Caché largo
+[[headers]]
+  for = "*.png"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
 [[headers]]
-  for = "/netlify/functions/*"
+  for = "*.jpg"
   [headers.values]
-    Cache-Control = "no-cache, no-store, must-revalidate"
-    Pragma = "no-cache"
-    Expires = "0"
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
 
+[[headers]]
+  for = "*.jpeg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.gif"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# Fuentes - Caché largo
+[[headers]]
+  for = "*.woff"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.woff2"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.ttf"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "*.eot"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# HTML - Caché corto (para actualizaciones)
+[[headers]]
+  for = "*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+    # Content-Encoding = "gzip"  # Comentado para desarrollo local
+    X-Content-Type-Options = "nosniff"
+
+# ===== REDIRECCIONES =====
 [[redirects]]
-  from = "/app"
-  to = "/app/"
-  status = 301
+  from = "/app/*"
+  to = "/app/index.html"
+  status = 200
 
 [[redirects]]
   from = "/login"
   to = "/login.html"
-  status = 301
+  status = 200
 
 [[redirects]]
   from = "/forbidden"
   to = "/forbidden.html"
-  status = 301
-
-# ===== PROTECCIÓN DE ARCHIVOS HTML =====
-# Interceptar requests a archivos HTML en /app/ y validar autenticación
-# NOTA: Solo protege archivos dentro de /app/, no afecta páginas públicas
-[[redirects]]
-  from = "/app/*.html"
-  to = "/.netlify/functions/protect-html"
   status = 200
-  force = true
 
-# Proteger también la ruta /app/ sin extensión
-[[redirects]]
-  from = "/app/"
-  to = "/.netlify/functions/protect-html"
-  status = 200
-  force = true
+# ===== FUNCIONES SERVERLESS =====
+[functions]
+  directory = "netlify/functions"

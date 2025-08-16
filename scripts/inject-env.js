@@ -39,7 +39,11 @@ function createConfigFile(envVars, environment) {
     const configContent = `// ===== CONFIGURACIÓN GENERADA AUTOMÁTICAMENTE =====
 // NO EDITAR MANUALMENTE - Se genera desde variables de entorno
 
-window.ENV_CONFIG = ${JSON.stringify(config, null, 2)};
+window.ENV_CONFIG = {
+  "AUTH0_DOMAIN": "${config.AUTH0_DOMAIN}",
+  "AUTH0_CLIENT_ID": "${config.AUTH0_CLIENT_ID}",
+  "BASE_URL": "${config.BASE_URL}"
+};
 
 // ===== CONFIGURACIÓN DE AUTH0 =====
 window.AUTH0_CONFIG = {
