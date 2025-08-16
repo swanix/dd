@@ -15,11 +15,19 @@ function performSimpleLogout() {
     console.log('Iniciando logout simple...');
     
     try {
-        // 1. Limpiar todos los datos
+        // 1. Preservar el tema actual antes de limpiar
+        const currentTheme = localStorage.getItem('theme');
+        
+        // 2. Limpiar todos los datos
         localStorage.clear();
         sessionStorage.clear();
         
-        // 2. Limpiar cookies de Auth0
+        // 3. Restaurar el tema
+        if (currentTheme) {
+            localStorage.setItem('theme', currentTheme);
+        }
+        
+        // 4. Limpiar cookies de Auth0
         const cookies = document.cookie.split(';');
         cookies.forEach(cookie => {
             const eqPos = cookie.indexOf('=');
@@ -30,7 +38,7 @@ function performSimpleLogout() {
             }
         });
         
-        // 3. Redirigir a la página principal
+        // 5. Redirigir a la página principal
         console.log('Logout simple completado, redirigiendo...');
         window.location.replace('/');
         
@@ -45,7 +53,178 @@ function performSimpleLogout() {
 window.performSimpleLogout = performSimpleLogout;
 
 // =============================================================================
-// 2. GENERADOR DE USER MENU DINÁMICO
+// SISTEMA DE TEMA (DARK/LIGHT MODE)
+// =============================================================================
+
+// Función para cambiar el tema
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Aplicar nuevo tema
+    document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Guardar preferencia
+    localStorage.setItem('theme', newTheme);
+    
+    // Actualizar el toggle
+    updateThemeToggle(newTheme);
+}
+
+// Función para actualizar el estado del toggle
+function updateThemeToggle(theme) {
+    // Actualizar toggles del user menu (página principal)
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+    
+    if (sunIcon && moonIcon) {
+        if (theme === 'dark') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+    
+    // Actualizar toggles de auth pages
+    const authSunIcons = document.querySelectorAll('.auth-theme-toggle .sun-icon');
+    const authMoonIcons = document.querySelectorAll('.auth-theme-toggle .moon-icon');
+    
+    authSunIcons.forEach(icon => {
+        icon.style.display = theme === 'dark' ? 'none' : 'block';
+    });
+    
+    authMoonIcons.forEach(icon => {
+        icon.style.display = theme === 'dark' ? 'block' : 'none';
+    });
+}
+
+// Función para inicializar el tema
+function initializeTheme() {
+    // Obtener tema guardado o preferencia del sistema
+    const savedTheme = localStorage.getItem('theme');
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const theme = savedTheme || systemTheme;
+    
+    // Aplicar tema
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Actualizar toggle después de que el DOM esté listo
+    setTimeout(() => {
+        updateThemeToggle(theme);
+    }, 100);
+    
+    console.log(`Tema inicializado: ${theme} (guardado: ${savedTheme}, sistema: ${systemTheme})`);
+}
+
+// Inicializar tema inmediatamente (solo aplicar tema, sin toggle en páginas de auth)
+const savedTheme = localStorage.getItem('theme');
+const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const theme = savedTheme || systemTheme;
+
+// Aplicar tema inmediatamente para evitar flash
+document.documentElement.setAttribute('data-theme', theme);
+
+// Solo inicializar toggle si estamos en la página principal
+if (window.location.pathname === '/app/' || window.location.pathname === '/app/index.html') {
+    setTimeout(() => {
+        updateThemeToggle(theme);
+    }, 100);
+}
+
+// Escuchar cambios en la preferencia del sistema
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+        const newTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        
+        // Solo actualizar toggle si estamos en la página principal
+        if (window.location.pathname === '/app/' || window.location.pathname === '/app/index.html') {
+            updateThemeToggle(newTheme);
+        }
+    }
+});
+
+// Exportar funciones globales
+window.toggleTheme = toggleTheme;
+window.initializeTheme = initializeTheme;
+
+// =============================================================================
+// 2. GENERADOR DE APP BRAND DINÁMICO
+// =============================================================================
+
+class AppBrandGenerator {
+    constructor() {
+        this.appName = 'My App'; // Configuración centralizada del nombre de la app
+        this.appLogo = '/assets/img/logo.svg';
+    }
+
+    // Generar el HTML del app brand
+    generateAppBrandHTML() {
+        return `
+            <div class="app-brand">
+                <img src="${this.appLogo}" alt="Logo de la aplicación" class="app-brand-logo">
+                <span class="app-brand-name">${this.appName}</span>
+            </div>
+        `;
+    }
+
+    // Insertar el app brand en el DOM
+    insertAppBrand() {
+        try {
+            // Verificar si ya existe
+            if (document.querySelector('.app-brand')) {
+                return;
+            }
+
+            // Crear el elemento
+            const appBrandHTML = this.generateAppBrandHTML();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = appBrandHTML;
+            const appBrandElement = tempDiv.firstElementChild;
+
+            // Insertar al inicio del body
+            document.body.insertBefore(appBrandElement, document.body.firstChild);
+
+        } catch (error) {
+            console.error('Error insertando app brand:', error);
+        }
+    }
+
+    // Inicializar el app brand
+    init() {
+        try {
+            this.insertAppBrand();
+            this.updatePageTitles();
+        } catch (error) {
+            console.error('Error inicializando app brand:', error);
+        }
+    }
+
+    // Actualizar títulos en páginas de auth
+    updatePageTitles() {
+        try {
+            // Actualizar título en login.html
+            const appTitle = document.getElementById('appTitle');
+            if (appTitle) {
+                appTitle.textContent = this.appName;
+            }
+
+            // Actualizar título de la página
+            if (document.title === 'Login - Aplicación' || document.title === 'Loading...') {
+                document.title = `${this.appName} - Login`;
+            } else if (document.title === 'Aplicación') {
+                document.title = this.appName;
+            }
+        } catch (error) {
+            console.error('Error actualizando títulos:', error);
+        }
+    }
+}
+
+// =============================================================================
+// 3. GENERADOR DE USER MENU DINÁMICO
 // =============================================================================
 
 class UserMenuGenerator {
@@ -73,6 +252,22 @@ class UserMenuGenerator {
                                     <div class="user-email" id="userEmail">usuario@email.com</div>
                                 </div>
                             </div>
+                            <button class="theme-toggle-btn" onclick="toggleTheme()">
+                                <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="5"></circle>
+                                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                </svg>
+                                <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                </svg>
+                            </button>
                         </div>
                         
                         <div class="user-dropdown-divider"></div>
@@ -217,7 +412,6 @@ class ProtectedContentLoader {
             this.setupUserMenu();
             
             // El contenido se cargará dinámicamente según la aplicación
-            console.log('Usuario autenticado, canvas listo para contenido');
             
         } catch (error) {
             console.error('Error inicializando contenido protegido:', error);
@@ -396,8 +590,14 @@ class ProtectedContentLoader {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar el cargador de contenido protegido
-    new ProtectedContentLoader();
+    // Inicializar app brand en todas las páginas
+    const appBrand = new AppBrandGenerator();
+    appBrand.init();
+    
+    // Solo inicializar ProtectedContentLoader en la página principal (app/index.html)
+    if (window.location.pathname === '/app/' || window.location.pathname === '/app/index.html') {
+        new ProtectedContentLoader();
+    }
 });
 
 // =============================================================================

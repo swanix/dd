@@ -1,18 +1,43 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Denegado - Aplicación</title>
+    <title>Contenido protegido - My App</title>
     <link rel="stylesheet" href="/assets/css/main.css">
 </head>
 <body>
+    <!-- Theme Toggle para páginas de auth -->
+    <button class="auth-theme-toggle" onclick="toggleTheme()">
+        <svg class="auth-theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="auth-theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
     <div class="auth-container">
         <div class="auth-card">
-            <h1 class="danger">Acceso Denegado</h1>
-            <p>No tienes permisos para acceder a este contenido</p>
-            <a href="/login.html" class="auth-button">Volver al Login</a>
+            <svg class="lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <circle cx="12" cy="16" r="1"></circle>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <h1>Contenido protegido</h1>
+            <p>Si consideras que debes tener permisos para acceder a esta sección, ponte en contacto con el administrador.</p>
+            <a href="/login.html" class="btn">Volver al Login</a>
         </div>
     </div>
+    
+    <script src="/assets/js/app.js?v=1755364408331"></script>
 </body>
 </html>

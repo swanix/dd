@@ -9,26 +9,36 @@
     --danger-color: #dc3545;
     --info-color: #17a2b8;
     
-    /* Colores de fondo */
+    /* Colores de fondo - Light Mode */
     --bg-primary: #ffffff;
     --bg-secondary: #f8f9fa;
     --bg-tertiary: #e9ecef;
     --bg-dark: #343a40;
     
-    /* Colores de texto */
+    /* Colores de texto - Light Mode */
     --text-primary: #000000;
     --text-secondary: #495057;
     --text-muted: #6c757d;
     --text-light: #ffffff;
     
-    /* Colores de bordes */
+    /* Colores de bordes - Light Mode */
     --border-color: #e9ecef;
     --border-light: #f0f0f0;
     
-    /* Colores de sombras */
+    /* Colores de sombras - Light Mode */
     --shadow-light: rgba(0, 0, 0, 0.05);
     --shadow-medium: rgba(0, 0, 0, 0.08);
     --shadow-heavy: rgba(0, 0, 0, 0.12);
+    
+    /* Filtros para light mode */
+    --logo-filter: none;
+    --endorsement-filter: opacity(0.2);
+    --endorsement-text-opacity: 0.3;
+    --endorsement-text-display: block;
+    --endorsement-display: flex;
+    
+    /* Transiciones para cambio de tema */
+    --theme-transition: all 0.3s ease;
     
     /* Espaciado */
     --spacing-xs: 4px;
@@ -62,6 +72,68 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    
+    /* ===== VARIABLES DEL BOTÓN DE GOOGLE ===== */
+    --google-button-gap: var(--spacing-md);
+    --google-button-width: 100%;
+    --google-button-padding: var(--spacing-md) var(--spacing-lg);
+    --google-button-bg: var(--bg-primary);
+    --google-button-border: 1px solid var(--border-color);
+    --google-button-radius: var(--border-radius-md);
+    --google-button-font-size: var(--font-size-md);
+    --google-button-font-weight: var(--font-weight-medium);
+    --google-button-color: var(--text-primary);
+    --google-button-transition: all var(--transition-fast);
+    --google-button-hover-bg: var(--bg-secondary);
+    --google-button-hover-border: var(--border-color);
+    --google-button-active-bg: var(--bg-tertiary);
+    --google-icon-size: 20px;
+    
+    /* Variables para botones genéricos */
+    --btn-gap: var(--google-button-gap);
+    --btn-width: var(--google-button-width);
+    --btn-padding: var(--google-button-padding);
+    --btn-bg: var(--google-button-bg);
+    --btn-border: var(--google-button-border);
+    --btn-radius: var(--google-button-radius);
+    --btn-font-size: var(--google-button-font-size);
+    --btn-font-weight: var(--google-button-font-weight);
+    --btn-color: var(--google-button-color);
+    --btn-transition: var(--google-button-transition);
+    --btn-hover-bg: var(--google-button-hover-bg);
+    --btn-hover-border: var(--google-button-hover-border);
+    --btn-active-bg: var(--google-button-active-bg);
+}
+
+/* ===== DARK MODE ===== */
+[data-theme="dark"] {
+    /* Colores de fondo - Dark Mode */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+    --bg-dark: #000000;
+    
+    /* Colores de texto - Dark Mode */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #b0b0b0;
+    --text-light: #ffffff;
+    
+    /* Colores de bordes - Dark Mode */
+    --border-color: #404040;
+    --border-light: #333333;
+    
+    /* Colores de sombras - Dark Mode */
+    --shadow-light: rgba(0, 0, 0, 0.3);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+    --shadow-heavy: rgba(0, 0, 0, 0.7);
+    
+    /* Filtros para dark mode */
+    --logo-filter: invert(1) brightness(0.8);
+    --endorsement-filter: opacity(0.3) invert(1);
+    --endorsement-text-opacity: 0.5;
+    --endorsement-text-display: block;
+    --endorsement-display: flex;
 }
 
 /* ===== RESET Y ESTILOS GLOBALES ===== */
@@ -79,6 +151,7 @@ body {
     font-size: var(--font-size-sm);
     overflow-y: scroll;
     min-height: 100vh;
+    transition: var(--theme-transition);
 }
 
 /* ===== LAYOUT PRINCIPAL ===== */
@@ -325,6 +398,7 @@ body {
 /* ===== PÁGINAS DE AUTENTICACIÓN ===== */
 .auth-container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
@@ -344,7 +418,7 @@ body {
 .auth-card h1 {
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
 }
 
 .auth-card h1.danger {
@@ -356,22 +430,181 @@ body {
     margin-bottom: 30px;
 }
 
-.auth-button {
-    background-color: var(--text-primary);
-    color: var(--text-light);
-    border: none;
-    padding: var(--spacing-md) var(--spacing-xxl);
-    border-radius: var(--border-radius-sm);
+
+
+/* ===== BOTONES GENÉRICOS ===== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--btn-gap);
+    width: var(--btn-width);
+    padding: var(--btn-padding);
+    background: var(--btn-bg);
+    border: var(--btn-border);
+    border-radius: var(--btn-radius);
     cursor: pointer;
-    font-size: var(--font-size-md);
-    font-weight: var(--font-weight-medium);
+    font-size: var(--btn-font-size);
+    font-weight: var(--btn-font-weight);
+    color: var(--btn-color);
+    transition: var(--btn-transition);
     text-decoration: none;
-    display: inline-block;
-    transition: background-color var(--transition-fast);
+    font-family: inherit;
 }
 
-.auth-button:hover {
-    background-color: #333333;
+.btn:hover {
+    background: var(--btn-hover-bg);
+    border-color: var(--btn-hover-border);
+}
+
+.btn:active {
+    background: var(--btn-active-bg);
+}
+
+/* ===== BOTÓN DE GOOGLE ===== */
+.google-auth-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--google-button-gap);
+    width: var(--google-button-width);
+    padding: var(--google-button-padding);
+    background: var(--google-button-bg);
+    border: var(--google-button-border);
+    border-radius: var(--google-button-radius);
+    cursor: pointer;
+    font-size: var(--google-button-font-size);
+    font-weight: var(--google-button-font-weight);
+    color: var(--google-button-color);
+    transition: var(--google-button-transition);
+    text-decoration: none;
+}
+
+.google-auth-button:hover {
+    background: var(--google-button-hover-bg);
+    border-color: var(--google-button-hover-border);
+}
+
+.google-auth-button:active {
+    background: var(--google-button-active-bg);
+}
+
+.google-icon {
+    width: var(--google-icon-size);
+    height: var(--google-icon-size);
+    flex-shrink: 0;
+}
+
+/* ===== THEME TOGGLE PARA PÁGINAS DE AUTH ===== */
+.auth-theme-toggle {
+    position: fixed;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--theme-transition);
+    color: var(--text-secondary);
+    z-index: 1000;
+    box-shadow: var(--shadow-medium);
+}
+
+.auth-theme-toggle:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.auth-theme-icon {
+    width: 20px;
+    height: 20px;
+    transition: var(--theme-transition);
+}
+
+.auth-theme-toggle .sun-icon {
+    display: block;
+}
+
+.auth-theme-toggle .moon-icon {
+    display: none;
+}
+
+/* ===== ENDORSEMENT ===== */
+.endorsement {
+    display: var(--endorsement-display);
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-xl);
+    width: 100%;
+}
+
+.endorsement-text {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: var(--font-weight-normal);
+    opacity: var(--endorsement-text-opacity);
+    display: var(--endorsement-text-display);
+}
+
+.endorsement-logo {
+    height: 20px;
+    width: auto;
+    filter: var(--endorsement-filter);
+}
+
+.lock-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-lg);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.app-logo {
+    width: 64px;
+    height: 64px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    filter: var(--logo-filter);
+}
+
+/* ===== APP BRAND FLOTANTE ===== */
+.app-brand {
+    position: fixed;
+    top: var(--spacing-lg);
+    left: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    z-index: 1000;
+    box-shadow: var(--shadow-medium);
+    backdrop-filter: blur(10px);
+}
+
+.app-brand-logo {
+    width: 24px;
+    height: 24px;
+    filter: var(--logo-filter);
+}
+
+.app-brand-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
 }
 
 /* ===== PÁGINA INDEX ===== */
@@ -381,6 +614,35 @@ body {
     align-items: center;
     min-height: 100vh;
     background-color: var(--bg-secondary);
+}
+
+/* ===== LOADING Y REDIRECT ===== */
+.redirect-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-secondary);
+}
+
+.loading-content {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--text-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .index-card {
@@ -588,8 +850,8 @@ body {
 }
 
 .user-avatar {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--border-radius-full);
     background: var(--bg-tertiary);
     display: flex;
@@ -621,7 +883,7 @@ body {
 
 .user-initial {
     color: var(--text-muted);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     opacity: 0;
@@ -645,9 +907,9 @@ body {
 /* User Dropdown */
 .user-dropdown {
     position: absolute;
-    top: 60px;
+    top: 50px;
     right: 0;
-    width: 320px;
+    width: 280px;
     background: var(--bg-primary);
     border-radius: var(--border-radius-lg);
     box-shadow: 0 4px 20px var(--shadow-medium);
@@ -665,7 +927,7 @@ body {
 }
 
 .user-dropdown-header {
-    padding: var(--spacing-xl);
+    padding: var(--spacing-lg);
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -676,8 +938,8 @@ body {
 }
 
 .user-picture-small {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--border-radius-full);
     object-fit: cover;
     object-position: center;
@@ -694,15 +956,15 @@ body {
 }
 
 .user-initial-small {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: var(--border-radius-full);
     background: var(--bg-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     text-transform: uppercase;
     border: 1px solid var(--border-color);
@@ -730,21 +992,22 @@ body {
 }
 
 .user-name {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 1px;
 }
 
 .user-email {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     word-break: break-all;
 }
 
 .user-dropdown-divider {
-    height: 1px;
+    height: 0.25px;
     background: var(--border-light);
+    opacity: 0.5;
     margin: 0;
 }
 
@@ -776,20 +1039,20 @@ body {
 }
 
 .user-dropdown-actions {
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .user-dropdown-action {
     width: 100%;
     background: none;
     border: none;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     border-radius: var(--border-radius-md);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
     transition: all var(--transition-fast);
     color: var(--text-primary);
@@ -816,6 +1079,57 @@ body {
 .logout-icon {
     width: 16px;
     height: 16px;
+    transition: var(--theme-transition);
+}
+
+
+
+/* ===== TOGGLE DE TEMA ===== */
+.theme-toggle-btn {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--theme-transition);
+    color: var(--text-secondary);
+}
+
+.theme-toggle-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.theme-icon {
+    width: 14px;
+    height: 14px;
+    transition: var(--theme-transition);
+}
+
+.sun-icon {
+    display: block;
+}
+
+.moon-icon {
+    display: none;
+}
+
+/* Posicionamiento del header para el botón */
+.user-dropdown-header {
+    position: relative;
+}
+
+/* Transiciones suaves para todos los elementos */
+* {
+    transition: var(--theme-transition);
 }
 
 /* Loading States - Neutros */
