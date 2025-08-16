@@ -45,9 +45,17 @@ async function validateToken(token) {
 // ===== HANDLER PRINCIPAL =====
 exports.handler = async (event, context) => {
     try {
-        // ===== CONFIGURAR CORS =====
+        // ===== CONFIGURAR CORS SEGURO =====
+        const allowedOrigins = [
+            'http://localhost:8888',
+            process.env.NETLIFY_URL || ''
+        ];
+
+        const origin = event.headers.origin || event.headers.Origin;
+        const corsOrigin = allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+
         const headers = {
-            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Origin': corsOrigin,
             'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             'Access-Control-Allow-Methods': 'GET, OPTIONS'
         };
@@ -84,11 +92,11 @@ exports.handler = async (event, context) => {
                 throw new Error('AUTH0_DOMAIN no configurado');
             }
             decoded = await validateToken(token);
-            console.log('✅ Token válido para usuario:', decoded.sub);
-            console.log('📸 Información del usuario:', {
+            console.log('Token válido para usuario:', decoded.sub);
+            console.log('Información del usuario:', {
                 name: decoded.name,
-                email: decoded.email,
-                picture: decoded.picture,
+                email: decoded.email ? `${decoded.email.substring(0, 3)}***@${decoded.email.split('@')[1]}` : 'no-email',
+                hasPicture: !!decoded.picture,
                 sub: decoded.sub
             });
         } catch (error) {
