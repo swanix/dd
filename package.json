@@ -8,7 +8,12 @@
     "build": "node scripts/inject-env.js production",
     "build:dev": "node scripts/inject-env.js development",
     "deploy": "netlify deploy --prod",
-    "setup": "node scripts/setup.js"
+    "setup": "node scripts/setup.js",
+    "version-assets": "node scripts/version-assets.js",
+    "restore-cache": "node scripts/restore-cache.js",
+    "deploy-with-cache-fix": "npm run version-assets && npm run deploy && npm run restore-cache",
+    "docs:list": "node scripts/cleanup-docs.js list",
+    "docs:clean": "node scripts/cleanup-docs.js clean"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
