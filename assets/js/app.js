@@ -61,7 +61,6 @@ class UserMenuGenerator {
                     <button id="userButton" class="user-avatar-button" aria-label="Menú de usuario">
                         <div class="user-avatar">
                             <img id="userPicture" src="" alt="Foto de perfil" class="user-picture">
-                            <span id="userInitial" class="user-initial">U</span>
                         </div>
                     </button>
                     
@@ -69,7 +68,6 @@ class UserMenuGenerator {
                         <div class="user-dropdown-header">
                             <div class="user-info">
                                 <img id="userPictureDropdown" src="" alt="Foto de perfil" class="user-picture-small">
-                                <span id="userInitialDropdown" class="user-initial-small">U</span>
                                 <div class="user-details">
                                     <div class="user-name" id="userName">Usuario</div>
                                     <div class="user-email" id="userEmail">usuario@email.com</div>
@@ -249,33 +247,44 @@ class ProtectedContentLoader {
             
             // Elementos del avatar principal
             const userPicture = document.getElementById('userPicture');
-            const userInitial = document.getElementById('userInitial');
+            const userAvatar = document.querySelector('.user-avatar');
             
             // Elementos del dropdown
             const userPictureDropdown = document.getElementById('userPictureDropdown');
-            const userInitialDropdown = document.getElementById('userInitialDropdown');
+            const userInfo = document.querySelector('.user-info');
             const userName = document.getElementById('userName');
             const userEmail = document.getElementById('userEmail');
             
             if (user.picture) {
-                // Mostrar foto de perfil
+                // Mostrar foto de perfil con fade-in
                 if (userPicture) {
+                    userPicture.onload = () => {
+                        userPicture.classList.add('show');
+                    };
                     userPicture.src = user.picture;
-                    userPicture.classList.add('show');
-                    userInitial.classList.add('hide');
                 }
                 if (userPictureDropdown) {
+                    userPictureDropdown.onload = () => {
+                        userPictureDropdown.classList.add('show');
+                    };
                     userPictureDropdown.src = user.picture;
-                    userPictureDropdown.classList.add('show');
-                    userInitialDropdown.classList.add('hide');
                 }
             } else {
-                // Mostrar inicial
-                if (userInitial) {
+                // Crear y mostrar inicial solo si no hay foto
+                if (userAvatar && !document.getElementById('userInitial')) {
+                    const userInitial = document.createElement('span');
+                    userInitial.id = 'userInitial';
+                    userInitial.className = 'user-initial show';
                     userInitial.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                    userAvatar.appendChild(userInitial);
                 }
-                if (userInitialDropdown) {
+                
+                if (userInfo && !document.getElementById('userInitialDropdown')) {
+                    const userInitialDropdown = document.createElement('span');
+                    userInitialDropdown.id = 'userInitialDropdown';
+                    userInitialDropdown.className = 'user-initial-small show';
                     userInitialDropdown.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                    userInfo.insertBefore(userInitialDropdown, userInfo.firstChild);
                 }
             }
             
@@ -292,38 +301,24 @@ class ProtectedContentLoader {
 
     async loadProtectedContent() {
         try {
-            // Obtener token
-            const token = await this.auth0.getIdTokenClaims();
+            // Por ahora, solo mostrar el canvas vacío
+            // En el futuro, aquí se puede cargar contenido dinámico desde load-content.js
+            console.log('Canvas listo para contenido dinámico');
             
-                    // Verificar si hay contenido en caché
-        const cachedContent = this.getCachedContent();
-        if (cachedContent) {
-            this.displayContent(cachedContent);
-            return;
-        }
-        
-        // Cargar contenido desde el servidor
-        const response = await fetch('/.netlify/functions/protect-html', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token.__raw}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            
-            // Guardar en caché local
-            this.cacheContent(data);
-            
-            // Mostrar contenido
-            this.displayContent(data);
-        } else {
-            const errorData = await response.json();
-            console.error('Error del servidor:', errorData);
-            throw new Error(`Error ${response.status}: ${errorData.message}`);
-        }
+            // Ejemplo de cómo cargar contenido dinámico en el futuro:
+            // const token = await this.auth0.getIdTokenClaims();
+            // const response = await fetch('/.netlify/functions/load-content', {
+            //     method: 'GET',
+            //     headers: {
+            //         'Authorization': `Bearer ${token.__raw}`,
+            //         'Content-Type': 'application/json'
+            //     }
+            // });
+            // 
+            // if (response.ok) {
+            //     const data = await response.json();
+            //     this.displayDynamicContent(data.content);
+            // }
             
         } catch (error) {
             console.error('Error cargando contenido protegido:', error);
@@ -331,46 +326,8 @@ class ProtectedContentLoader {
         }
     }
 
-    // Método para obtener contenido del caché
-    getCachedContent() {
-        try {
-            const cached = localStorage.getItem('protected_content_cache');
-            if (!cached) return null;
-            
-            const data = JSON.parse(cached);
-            const cacheTime = data.timestamp || 0;
-            const now = Date.now();
-            const cacheAge = now - cacheTime;
-            
-                    // Caché válido por 5 minutos
-        if (cacheAge > 5 * 60 * 1000) {
-            localStorage.removeItem('protected_content_cache');
-            return null;
-        }
-            
-            return data;
-        } catch (error) {
-            console.error('Error leyendo caché:', error);
-            localStorage.removeItem('protected_content_cache');
-            return null;
-        }
-    }
-
-    // Método para guardar contenido en caché
-    cacheContent(data) {
-        try {
-            const cacheData = {
-                ...data,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('protected_content_cache', JSON.stringify(cacheData));
-        } catch (error) {
-            console.error('Error guardando en caché:', error);
-        }
-    }
-
-    // Método para mostrar contenido
-    displayContent(data) {
+    // Método para mostrar contenido dinámico (para uso futuro)
+    displayDynamicContent(content) {
         try {
             const container = document.querySelector('.canvas-container');
             if (!container) {
@@ -381,20 +338,36 @@ class ProtectedContentLoader {
             // Limpiar contenido existente
             container.innerHTML = '';
 
-            // Crear y mostrar el contenido
-            if (data.html) {
-                container.innerHTML = data.html;
-            } else if (data.content) {
-                container.innerHTML = `<div class="content">${data.content}</div>`;
-            } else {
-                container.innerHTML = '<div class="content-placeholder"><div class="placeholder-text">Contenido no disponible</div></div>';
-            }
+            // Aquí puedes renderizar el contenido dinámico
+            // Ejemplo básico:
+            container.innerHTML = `
+                <div class="dynamic-content">
+                    <h2>${content.title}</h2>
+                    <p>${content.content.welcome}</p>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span class="stat-number">${content.content.stats.totalItems}</span>
+                            <span class="stat-label">Total Items</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">${content.content.stats.pendingTasks}</span>
+                            <span class="stat-label">Pendientes</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">${content.content.stats.completedTasks}</span>
+                            <span class="stat-label">Completadas</span>
+                        </div>
+                    </div>
+                </div>
+            `;
 
         } catch (error) {
-            console.error('Error mostrando contenido:', error);
-            this.showError('Error mostrando contenido');
+            console.error('Error mostrando contenido dinámico:', error);
+            this.showError('Error mostrando contenido dinámico');
         }
     }
+
+
 
     // Método para mostrar errores
     showError(message) {
