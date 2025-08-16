@@ -75,28 +75,43 @@ window.AUTH0_CONFIG = {
 
 // Función principal
 function main() {
-    const environment = process.argv[2] || 'development';
-    console.log(`🔄 Generando configuración para entorno: ${environment}`);
-    
-    // Cargar variables de entorno
-    let envVars = {};
-    
-    if (environment === 'production') {
-        // En producción, usar variables de entorno del sistema
-        envVars = {
-            AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
-            AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
-            NETLIFY_URL: process.env.NETLIFY_URL
-        };
-    } else {
-        // En desarrollo, cargar desde archivo .env.local
-        envVars = loadEnvFile(path.join(__dirname, '..', '.env.local'));
+    try {
+        const environment = process.argv[2] || 'development';
+        console.log(`🔄 Generando configuración para entorno: ${environment}`);
+        
+        // Cargar variables de entorno
+        let envVars = {};
+        
+        if (environment === 'production') {
+            // En producción, usar variables de entorno del sistema
+            console.log('📋 Cargando variables de entorno de producción...');
+            envVars = {
+                AUTH0_DOMAIN: process.env.AUTH0_DOMAIN,
+                AUTH0_CLIENT_ID: process.env.AUTH0_CLIENT_ID,
+                NETLIFY_URL: process.env.NETLIFY_URL || process.env.URL
+            };
+            
+            console.log('🔍 Variables de entorno disponibles:');
+            console.log(`  - AUTH0_DOMAIN: ${envVars.AUTH0_DOMAIN ? '✅ Configurada' : '❌ No configurada'}`);
+            console.log(`  - AUTH0_CLIENT_ID: ${envVars.AUTH0_CLIENT_ID ? '✅ Configurada' : '❌ No configurada'}`);
+            console.log(`  - NETLIFY_URL: ${envVars.NETLIFY_URL ? '✅ Configurada' : '❌ No configurada'}`);
+        } else {
+            // En desarrollo, cargar desde archivo .env.local
+            console.log('📋 Cargando variables de entorno de desarrollo...');
+            envVars = loadEnvFile(path.join(__dirname, '..', '.env.local'));
+        }
+        
+        // Crear archivo de configuración
+        const config = createConfigFile(envVars, environment);
+        
+        console.log('✅ Configuración completada exitosamente');
+        process.exit(0); // Asegurar que el script termine exitosamente
+        
+    } catch (error) {
+        console.error('❌ Error en el script de configuración:', error.message);
+        console.error('📋 Stack trace:', error.stack);
+        process.exit(1); // Terminar con error
     }
-    
-    // Crear archivo de configuración
-    const config = createConfigFile(envVars, environment);
-    
-    console.log('✅ Configuración completada');
 }
 
 // Ejecutar si se llama directamente

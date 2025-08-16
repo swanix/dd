@@ -1,11 +1,19 @@
 # 🔧 Configuración de Variables de Entorno en Netlify
 
 ## 🚨 **Problema:**
-Los deploys están fallando porque faltan las variables de entorno en Netlify.
+Los deploys están fallando por dos razones:
+1. **Dependencia faltante**: El módulo `marked` no estaba en `package.json`
+2. **Variables de entorno**: Pueden faltar variables en Netlify
 
 ## ✅ **Solución:**
 
-### **1. Variables Requeridas en Netlify:**
+### **1. Dependencia Agregada:**
+```bash
+# La dependencia 'marked' ya fue agregada al package.json
+npm install
+```
+
+### **2. Variables Requeridas en Netlify:**
 
 Ve a tu [Netlify Dashboard](https://app.netlify.com/) y configura estas variables:
 
