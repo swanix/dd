@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Dinámica - SheetBest Data</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <style>
+        /* Estilos específicos para esta página */
+        .dynamic-content {
+            padding: 20px;
+            padding-top: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .data-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .data-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .data-field {
+            margin-bottom: 8px;
+        }
+        
+        .data-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .data-value {
+            color: #333;
+            margin-top: 2px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- User Menu Flotante -->
+    <div class="floating-user-menu">
+        <div class="user-menu-container">
+            <button class="user-avatar-button" id="userMenuButton">
+                <div class="user-avatar">
+                    <img class="user-picture" id="userPicture" alt="Foto de perfil">
+                    <div class="user-initial" id="userInitial">U</div>
+                </div>
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-dropdown-header">
+                    <div class="user-info">
+                        <img class="user-picture-small" id="userPictureSmall" alt="Foto de perfil">
+                        <div class="user-initial-small" id="userInitialSmall">U</div>
+                        <div>
+                            <div class="user-name" id="userName">Usuario</div>
+                            <div class="user-email" id="userEmail">usuario@ejemplo.com</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-dropdown-actions">
+                    <button class="dropdown-action" onclick="logout()">
+                        <span class="action-icon">🚪</span>
+                        <span class="action-text">Cerrar Sesión</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dynamic-content">
+        <h1>Mi Página Dinámica Personalizada</h1>
+        <p>Esta página carga datos dinámicos de SheetBest y los muestra de manera personalizada.</p>
+        
+        <div id="loading" class="loading">
+            <p>🔄 Cargando datos dinámicos...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <p>❌ Error cargando datos: <span id="errorMessage"></span></p>
+        </div>
+        
+        <div id="content" style="display: none;">
+            <h2>Datos de SheetBest</h2>
+            <div class="data-grid" id="dataGrid">
+                <!-- Los datos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/env-config.js"></script>
+    <script src="../assets/js/auth-router.js"></script>
+    <script>
+        // Configuración de la página
+        const PAGE_CONFIG = {
+            title: 'Mi Página Dinámica',
+            description: 'Página personalizada con datos de SheetBest',
+            dataEndpoint: '/.netlify/functions/load-content'
+        };
+
+        // Clase para manejar datos dinámicos
+        class DynamicDataManager {
+            constructor() {
+                this.data = null;
+                this.isLoading = false;
+            }
+
+            async loadData() {
+                try {
+                    this.isLoading = true;
+                    this.showLoading();
+
+                    const token = await getAccessToken();
+                    if (!token) {
+                        throw new Error('No hay token de autenticación');
+                    }
+
+                    const response = await fetch(PAGE_CONFIG.dataEndpoint, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    this.data = result.content.items || [];
+                    
+                    this.hideLoading();
+                    this.renderData();
+                    
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                    this.showError(error.message);
+                } finally {
+                    this.isLoading = false;
+                }
+            }
+
+            showLoading() {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('content').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+            }
+
+            hideLoading() {
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            showError(message) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('errorMessage').textContent = message;
+            }
+
+            renderData() {
+                const grid = document.getElementById('dataGrid');
+                const content = document.getElementById('content');
+                
+                if (!this.data || this.data.length === 0) {
+                    grid.innerHTML = '<p>No hay datos disponibles</p>';
+                    content.style.display = 'block';
+                    return;
+                }
+
+                // Renderizar los primeros 10 elementos como ejemplo
+                const itemsToShow = this.data.slice(0, 10);
+                
+                grid.innerHTML = itemsToShow.map(item => `
+                    <div class="data-card">
+                        <h3>${item.Name || 'Sin nombre'}</h3>
+                        <div class="data-field">
+                            <div class="data-label">ID</div>
+                            <div class="data-value">${item.ID || 'N/A'}</div>
+                        </div>
+                        <div class="data-field">
+                            <div class="data-label">Tipo</div>
+                            <div class="data-value">${item.Type || 'N/A'}</div>
+                        </div>
+                        <div class="data-field">
+                            <div class="data-label">País</div>
+                            <div class="data-value">${item.Country || 'N/A'}</div>
+                        </div>
+                        <div class="data-field">
+                            <div class="data-label">Tecnología</div>
+                            <div class="data-value">${item.Technology || 'N/A'}</div>
+                        </div>
+                        ${item.URL ? `
+                        <div class="data-field">
+                            <div class="data-label">URL</div>
+                            <div class="data-value">
+                                <a href="${item.URL}" target="_blank">${item.URL}</a>
+                            </div>
+                        </div>
+                        ` : ''}
+                        ${item.Description ? `
+                        <div class="data-field">
+                            <div class="data-label">Descripción</div>
+                            <div class="data-value">${item.Description}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+
+                content.style.display = 'block';
+            }
+
+            // Método para obtener datos filtrados
+            getFilteredData(filter) {
+                if (!this.data) return [];
+                
+                return this.data.filter(item => {
+                    if (filter.type && item.Type !== filter.type) return false;
+                    if (filter.country && item.Country !== filter.country) return false;
+                    if (filter.search && !item.Name.toLowerCase().includes(filter.search.toLowerCase())) return false;
+                    return true;
+                });
+            }
+
+            // Método para obtener estadísticas
+            getStats() {
+                if (!this.data) return {};
+                
+                return {
+                    total: this.data.length,
+                    types: [...new Set(this.data.map(item => item.Type).filter(Boolean))].length,
+                    countries: [...new Set(this.data.map(item => item.Country).filter(Boolean))].length,
+                    withUrls: this.data.filter(item => item.URL).length
+                };
+            }
+        }
+
+        // Inicializar cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inicializar autenticación
+            await initializeAuth();
+            
+            // Verificar si el usuario está autenticado
+            if (!isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Cargar datos dinámicos
+            const dataManager = new DynamicDataManager();
+            await dataManager.loadData();
+
+            // Hacer disponible globalmente para debugging
+            window.dataManager = dataManager;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3 Diagrama de Nodos</title>
+    <link rel="stylesheet" href="/assets/css/main.css?v=1755364408331">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <style>
+        .d3-container {
+            display: flex;
+            height: 100vh;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+        }
+
+        .sidebar {
+            width: 350px;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .main-content {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .data-input-section {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .data-input-section h3 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .input-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .input-group textarea,
+        .input-group input {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--font-size-sm);
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+
+        .input-group textarea {
+            min-height: 120px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .btn {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--primary-color);
+            color: var(--text-light);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            flex: 1;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-dark);
+        }
+
+        .controls-section {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .controls-section h3 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .control-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .control-item label {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .control-item input[type="range"] {
+            width: 120px;
+        }
+
+        .control-item input[type="number"] {
+            width: 60px;
+            padding: var(--spacing-xs);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--font-size-sm);
+        }
+
+        .status-section {
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-md);
+            padding: var(--spacing-lg);
+            border: 1px solid var(--border-color);
+            flex: 1;
+        }
+
+        .status-section h3 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .status-info {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .status-success {
+            color: var(--success-color);
+        }
+
+        .status-error {
+            color: var(--danger-color);
+        }
+
+        .d3-canvas {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+        }
+
+        .node {
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .node:hover {
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 12px;
+            font-weight: var(--font-weight-medium);
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .link {
+            stroke: var(--border-color);
+            stroke-width: 1px;
+            opacity: 0.6;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .sample-data {
+            font-size: var(--font-size-xs);
+            color: var(--text-muted);
+            margin-top: var(--spacing-xs);
+        }
+    </style>
+</head>
+<body>
+    <div class="d3-container">
+        <!-- Sidebar con controles -->
+        <div class="sidebar">
+            <!-- Sección de entrada de datos -->
+            <div class="data-input-section">
+                <h3>📊 Datos de Nodos</h3>
+                <div class="input-group">
+                    <label for="nodeData">Datos JSON de Nodos:</label>
+                    <textarea id="nodeData" placeholder='[{"id": "1", "name": "Nodo 1", "group": 1}, {"id": "2", "name": "Nodo 2", "group": 1}]'></textarea>
+                    <div class="sample-data">
+                        Formato: [{"id": "string", "name": "string", "group": number}]
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="linkData">Datos JSON de Enlaces:</label>
+                    <textarea id="linkData" placeholder='[{"source": "1", "target": "2", "value": 1}]'></textarea>
+                    <div class="sample-data">
+                        Formato: [{"source": "id_origen", "target": "id_destino", "value": number}]
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn" onclick="loadSampleData()">📋 Ejemplo</button>
+                    <button class="btn" onclick="loadData()">🔄 Cargar</button>
+                    <button class="btn btn-secondary" onclick="clearData()">🗑️ Limpiar</button>
+                </div>
+            </div>
+
+            <!-- Sección de controles -->
+            <div class="controls-section">
+                <h3>⚙️ Controles</h3>
+                
+                <div class="control-item">
+                    <label>Fuerza de Repulsión:</label>
+                    <input type="range" id="chargeStrength" min="-1000" max="-50" value="-300" onchange="updateSimulation()">
+                    <input type="number" id="chargeValue" value="-300" onchange="updateSimulation()">
+                </div>
+
+                <div class="control-item">
+                    <label>Distancia de Enlaces:</label>
+                    <input type="range" id="linkDistance" min="10" max="200" value="50" onchange="updateSimulation()">
+                    <input type="number" id="linkValue" value="50" onchange="updateSimulation()">
+                </div>
+
+                <div class="control-item">
+                    <label>Tamaño de Nodos:</label>
+                    <input type="range" id="nodeSize" min="5" max="30" value="10" onchange="updateNodes()">
+                    <input type="number" id="nodeSizeValue" value="10" onchange="updateNodes()">
+                </div>
+
+                <div class="control-item">
+                    <label>Mostrar Etiquetas:</label>
+                    <input type="checkbox" id="showLabels" checked onchange="toggleLabels()">
+                </div>
+            </div>
+
+            <!-- Sección de estado -->
+            <div class="status-section">
+                <h3>📈 Estado</h3>
+                <div id="statusInfo">
+                    <div class="status-info">Nodos: <span id="nodeCount">0</span></div>
+                    <div class="status-info">Enlaces: <span id="linkCount">0</span></div>
+                    <div class="status-info">Grupos: <span id="groupCount">0</span></div>
+                </div>
+                <div id="statusMessage" class="status-info"></div>
+            </div>
+        </div>
+
+        <!-- Contenido principal con el canvas de D3 -->
+        <div class="main-content">
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn()">+</button>
+                <button class="zoom-btn" onclick="zoomOut()">−</button>
+                <button class="zoom-btn" onclick="resetZoom()">⌂</button>
+            </div>
+            <div id="loadingIndicator" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text-secondary); font-size: var(--font-size-lg);">
+                Cargando D3.js...
+            </div>
+            <svg id="d3Canvas" class="d3-canvas"></svg>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let simulation;
+        let svg;
+        let g;
+        let zoom;
+        let nodes = [];
+        let links = [];
+        let nodeSize = 10;
+        let showLabels = true;
+
+        // Colores para grupos
+        const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar que D3 se haya cargado correctamente
+            if (typeof d3 === 'undefined') {
+                console.error('D3.js no se ha cargado correctamente');
+                showStatus('Error: D3.js no se pudo cargar. Verifica tu conexión a internet.', 'error');
+                return;
+            }
+            
+            console.log('D3.js cargado correctamente:', d3.version);
+            // Ocultar indicador de carga
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
+            initializeD3();
+            setupEventListeners();
+            loadSampleData();
+        });
+
+        function initializeD3() {
+            // Verificar que D3 esté disponible
+            if (typeof d3 === 'undefined') {
+                showStatus('D3.js no está disponible. Recargando página...', 'error');
+                setTimeout(() => window.location.reload(), 2000);
+                return;
+            }
+            
+            // Configurar SVG
+            svg = d3.select('#d3Canvas');
+            const width = svg.node().getBoundingClientRect().width;
+            const height = svg.node().getBoundingClientRect().height;
+            
+            svg.attr('width', width).attr('height', height);
+
+            // Configurar zoom
+            zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                });
+
+            svg.call(zoom);
+
+            // Crear grupo principal
+            g = svg.append('g');
+
+            // Configurar simulación
+            simulation = d3.forceSimulation()
+                .force('link', d3.forceLink().id(d => d.id).distance(50))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(d => nodeSize + 5));
+        }
+
+        function setupEventListeners() {
+            // Sincronizar sliders con inputs numéricos
+            document.getElementById('chargeStrength').addEventListener('input', function() {
+                document.getElementById('chargeValue').value = this.value;
+            });
+
+            document.getElementById('chargeValue').addEventListener('input', function() {
+                document.getElementById('chargeStrength').value = this.value;
+            });
+
+            document.getElementById('linkDistance').addEventListener('input', function() {
+                document.getElementById('linkValue').value = this.value;
+            });
+
+            document.getElementById('linkValue').addEventListener('input', function() {
+                document.getElementById('linkDistance').value = this.value;
+            });
+
+            document.getElementById('nodeSize').addEventListener('input', function() {
+                document.getElementById('nodeSizeValue').value = this.value;
+            });
+
+            document.getElementById('nodeSizeValue').addEventListener('input', function() {
+                document.getElementById('nodeSize').value = this.value;
+            });
+
+            // Redimensionar canvas cuando cambie el tamaño de la ventana
+            window.addEventListener('resize', function() {
+                const width = svg.node().getBoundingClientRect().width;
+                const height = svg.node().getBoundingClientRect().height;
+                svg.attr('width', width).attr('height', height);
+                simulation.force('center', d3.forceCenter(width / 2, height / 2));
+                simulation.alpha(1).restart();
+            });
+        }
+
+        function loadData() {
+            try {
+                const nodeDataText = document.getElementById('nodeData').value.trim();
+                const linkDataText = document.getElementById('linkData').value.trim();
+
+                if (!nodeDataText) {
+                    showStatus('Por favor ingresa datos de nodos', 'error');
+                    return;
+                }
+
+                // Parsear datos
+                const newNodes = JSON.parse(nodeDataText);
+                const newLinks = linkDataText ? JSON.parse(linkDataText) : [];
+
+                // Validar datos
+                if (!Array.isArray(newNodes)) {
+                    showStatus('Los datos de nodos deben ser un array', 'error');
+                    return;
+                }
+
+                if (newLinks.length > 0 && !Array.isArray(newLinks)) {
+                    showStatus('Los datos de enlaces deben ser un array', 'error');
+                    return;
+                }
+
+                // Actualizar datos
+                nodes = newNodes;
+                links = newLinks;
+
+                // Actualizar visualización
+                updateVisualization();
+                updateStatus();
+                showStatus('Datos cargados exitosamente', 'success');
+
+            } catch (error) {
+                showStatus('Error al parsear JSON: ' + error.message, 'error');
+            }
+        }
+
+        function updateVisualization() {
+            // Limpiar canvas
+            g.selectAll('*').remove();
+
+            if (nodes.length === 0) return;
+
+            // Crear enlaces
+            const link = g.append('g')
+                .attr('stroke', '#999')
+                .attr('stroke-opacity', 0.6)
+                .selectAll('line')
+                .data(links)
+                .join('line')
+                .attr('stroke-width', d => Math.sqrt(d.value) || 1)
+                .attr('class', 'link');
+
+            // Crear nodos
+            const node = g.append('g')
+                .attr('stroke', '#fff')
+                .attr('stroke-width', 1.5)
+                .selectAll('circle')
+                .data(nodes)
+                .join('circle')
+                .attr('r', nodeSize)
+                .attr('fill', d => colors(d.group))
+                .attr('class', 'node')
+                .call(drag(simulation));
+
+            // Crear etiquetas
+            if (showLabels) {
+                const label = g.append('g')
+                    .selectAll('text')
+                    .data(nodes)
+                    .join('text')
+                    .text(d => d.name || d.id)
+                    .attr('class', 'node-label')
+                    .attr('fill', 'var(--text-primary)')
+                    .attr('font-size', '12px')
+                    .attr('text-anchor', 'middle')
+                    .attr('dominant-baseline', 'middle');
+            }
+
+            // Actualizar simulación
+            simulation.nodes(nodes);
+            simulation.force('link').links(links);
+            simulation.alpha(1).restart();
+
+            // Eventos de simulación
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node
+                    .attr('cx', d => d.x)
+                    .attr('cy', d => d.y);
+
+                if (showLabels) {
+                    g.selectAll('.node-label')
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                }
+            });
+        }
+
+        function drag(simulation) {
+            function dragstarted(event) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            }
+
+            function dragged(event) {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            }
+
+            function dragended(event) {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            }
+
+            return d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended);
+        }
+
+        function updateSimulation() {
+            const chargeStrength = parseInt(document.getElementById('chargeStrength').value);
+            const linkDistance = parseInt(document.getElementById('linkDistance').value);
+
+            simulation.force('charge').strength(chargeStrength);
+            simulation.force('link').distance(linkDistance);
+            simulation.alpha(1).restart();
+        }
+
+        function updateNodes() {
+            nodeSize = parseInt(document.getElementById('nodeSize').value);
+            g.selectAll('.node').attr('r', nodeSize);
+            simulation.force('collision').radius(nodeSize + 5);
+            simulation.alpha(1).restart();
+        }
+
+        function toggleLabels() {
+            showLabels = document.getElementById('showLabels').checked;
+            if (showLabels) {
+                updateVisualization();
+            } else {
+                g.selectAll('.node-label').remove();
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('nodeCount').textContent = nodes.length;
+            document.getElementById('linkCount').textContent = links.length;
+            
+            const groups = new Set(nodes.map(n => n.group)).size;
+            document.getElementById('groupCount').textContent = groups;
+        }
+
+        function showStatus(message, type) {
+            const statusElement = document.getElementById('statusMessage');
+            statusElement.textContent = message;
+            statusElement.className = `status-info status-${type}`;
+            
+            setTimeout(() => {
+                statusElement.textContent = '';
+                statusElement.className = 'status-info';
+            }, 3000);
+        }
+
+        function loadSampleData() {
+            const sampleNodes = [
+                { id: "1", name: "Inicio", group: 1 },
+                { id: "2", name: "Proceso A", group: 2 },
+                { id: "3", name: "Proceso B", group: 2 },
+                { id: "4", name: "Decisión", group: 3 },
+                { id: "5", name: "Resultado 1", group: 4 },
+                { id: "6", name: "Resultado 2", group: 4 },
+                { id: "7", name: "Final", group: 1 }
+            ];
+
+            const sampleLinks = [
+                { source: "1", target: "2", value: 1 },
+                { source: "2", target: "3", value: 1 },
+                { source: "3", target: "4", value: 1 },
+                { source: "4", target: "5", value: 1 },
+                { source: "4", target: "6", value: 1 },
+                { source: "5", target: "7", value: 1 },
+                { source: "6", target: "7", value: 1 }
+            ];
+
+            document.getElementById('nodeData').value = JSON.stringify(sampleNodes, null, 2);
+            document.getElementById('linkData').value = JSON.stringify(sampleLinks, null, 2);
+            
+            loadData();
+        }
+
+        function clearData() {
+            document.getElementById('nodeData').value = '';
+            document.getElementById('linkData').value = '';
+            nodes = [];
+            links = [];
+            g.selectAll('*').remove();
+            updateStatus();
+            showStatus('Datos limpiados', 'success');
+        }
+
+        function zoomIn() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 1.5);
+            }
+        }
+
+        function zoomOut() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.scaleBy, 0.75);
+            }
+        }
+
+        function resetZoom() {
+            if (svg && zoom) {
+                svg.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+            }
+        }
+    </script>
+</body>
+</html>

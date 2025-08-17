@@ -21,7 +21,8 @@
     "debug-sheetbest": "node scripts/debug-sheetbest.js",
     "diagnostic": "node scripts/diagnostic.js",
     "test-design": "node scripts/test-table-design.js",
-    "test-spacing": "node scripts/test-spacing.js"
+    "test-spacing": "node scripts/test-spacing.js",
+    "test-dynamic-pages": "node scripts/test-dynamic-pages.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
