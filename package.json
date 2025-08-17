@@ -19,7 +19,9 @@
     "test-table": "node scripts/test-table.js",
     "switch-tab": "node scripts/switch-tab.js",
     "debug-sheetbest": "node scripts/debug-sheetbest.js",
-    "diagnostic": "node scripts/diagnostic.js"
+    "diagnostic": "node scripts/diagnostic.js",
+    "test-design": "node scripts/test-table-design.js",
+    "test-spacing": "node scripts/test-spacing.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
