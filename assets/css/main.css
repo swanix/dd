@@ -409,7 +409,7 @@ body {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    padding: 40px;
+    padding: 60px 40px;
     width: 100%;
     max-width: 400px;
     text-align: center;
@@ -567,6 +567,7 @@ body {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    opacity: 0.5;
 }
 
 .app-logo {
@@ -589,7 +590,7 @@ body {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-sm);
     z-index: 1000;
     box-shadow: var(--shadow-medium);
     backdrop-filter: blur(10px);
@@ -812,15 +813,18 @@ body {
 .content-placeholder {
     text-align: center;
     padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.placeholder-text {
-    font-size: 1.5rem;
-    font-weight: 300;
-    color: var(--text-muted);
-    opacity: 0.6;
-    letter-spacing: 0.5px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+.watermark-logo {
+    width: 300px;
+    height: 300px;
+    opacity: 0.03;
+    filter: var(--logo-filter);
+    pointer-events: none;
+    user-select: none;
 }
 
 /* User Menu Flotante */
