@@ -15,11 +15,17 @@
     "docs:list": "node scripts/cleanup-docs.js list",
     "docs:clean": "node scripts/cleanup-docs.js clean",
     "fix-env": "node scripts/fix-env-config.js",
-    "security-check": "node scripts/security-check.js"
+    "security-check": "node scripts/security-check.js",
+    "test-table": "node scripts/test-table.js",
+    "switch-tab": "node scripts/switch-tab.js",
+    "debug-sheetbest": "node scripts/debug-sheetbest.js",
+    "diagnostic": "node scripts/diagnostic.js"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
-    "jwks-rsa": "^3.0.1"
+    "jwks-rsa": "^3.0.1",
+    "node-fetch": "^2.6.7",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"

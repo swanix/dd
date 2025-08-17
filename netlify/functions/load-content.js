@@ -7,6 +7,9 @@ const jwksClient = require('jwks-rsa');
 
 // ===== CONFIGURACIÓN =====
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN;
+const SHEETBEST_API_KEY = process.env.SHEETBEST_API_KEY;
+const SHEETBEST_SHEET_ID = process.env.SHEETBEST_SHEET_ID || 'tu-sheet-id-aqui';
+const SHEETBEST_TAB_NAME = process.env.SHEETBEST_TAB_NAME || 'nombre-del-tab-aqui';
 
 // ===== CLIENTE JWKS =====
 const client = jwksClient({
@@ -41,6 +44,178 @@ async function validateToken(token) {
             }
         });
     });
+}
+
+// ===== CARGAR DATOS DESDE SHEETBEST =====
+async function loadSheetBestData() {
+    try {
+        if (!SHEETBEST_API_KEY) {
+            console.warn('⚠️ SHEETBEST_API_KEY no configurada, usando datos de ejemplo');
+            return getExampleData();
+        }
+
+        // Construir URL con el nombre del tab usando /tabs/
+        let url;
+        if (SHEETBEST_TAB_NAME && SHEETBEST_TAB_NAME.trim() !== '') {
+            url = `https://api.sheetbest.com/sheets/${SHEETBEST_SHEET_ID}/tabs/${encodeURIComponent(SHEETBEST_TAB_NAME)}`;
+            console.log(`🔄 Cargando datos desde tab: ${SHEETBEST_TAB_NAME}`);
+        } else {
+            url = `https://api.sheetbest.com/sheets/${SHEETBEST_SHEET_ID}`;
+            console.log(`🔄 Cargando datos desde tab por defecto`);
+        }
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Api-Key': SHEETBEST_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Datos cargados desde SheetBest:', data.length, 'registros');
+        return data;
+
+    } catch (error) {
+        console.error('❌ Error cargando datos desde SheetBest:', error.message);
+        console.log('🔄 Usando datos de ejemplo como fallback');
+        return getExampleData();
+    }
+}
+
+// ===== DATOS DE EJEMPLO (FALLBACK) =====
+function getExampleData() {
+    return [
+        {
+            id: 1,
+            titulo: 'Proyecto Alpha',
+            descripcion: 'Desarrollo de aplicación web moderna',
+            estado: 'En Progreso',
+            prioridad: 'Alta',
+            fecha_creacion: '2024-01-15',
+            responsable: 'Juan Pérez',
+            categoria: 'Desarrollo'
+        },
+        {
+            id: 2,
+            titulo: 'Diseño de UI/UX',
+            descripcion: 'Creación de interfaces de usuario',
+            estado: 'Completado',
+            prioridad: 'Media',
+            fecha_creacion: '2024-01-10',
+            responsable: 'María García',
+            categoria: 'Diseño'
+        },
+        {
+            id: 3,
+            titulo: 'Testing de Calidad',
+            descripcion: 'Pruebas de funcionalidad y rendimiento',
+            estado: 'Pendiente',
+            prioridad: 'Alta',
+            fecha_creacion: '2024-01-20',
+            responsable: 'Carlos López',
+            categoria: 'QA'
+        },
+        {
+            id: 4,
+            titulo: 'Documentación Técnica',
+            descripcion: 'Manuales y guías de usuario',
+            estado: 'En Progreso',
+            prioridad: 'Baja',
+            fecha_creacion: '2024-01-18',
+            responsable: 'Ana Rodríguez',
+            categoria: 'Documentación'
+        },
+        {
+            id: 5,
+            titulo: 'Optimización de Base de Datos',
+            descripcion: 'Mejora de consultas y rendimiento',
+            estado: 'Completado',
+            prioridad: 'Media',
+            fecha_creacion: '2024-01-12',
+            responsable: 'Luis Martínez',
+            categoria: 'Backend'
+        }
+    ];
+}
+
+// ===== PROCESAR DATOS DINÁMICOS =====
+function processDynamicContent(rawData) {
+    try {
+        // Filtrar datos válidos (con ID y Name)
+        const validData = rawData.filter(item => 
+            item.ID && item.Name && item.ID !== '' && item.Name !== ''
+        );
+
+        // Mantener la estructura original de los datos de Google Sheets
+        const mappedData = validData.map(item => ({
+            ID: item.ID,
+            Parent: item.Parent || '',
+            Name: item.Name,
+            Type: item.Type || '',
+            Layout: item.Layout || '',
+            URL: item.URL || '',
+            Country: item.Country || '',
+            Technology: item.Technology || '',
+            Responsive: item.Responsive || '',
+            Description: item.Description || '',
+            Img: item.Img || ''
+        }));
+
+        // Estadísticas simples
+        const stats = {
+            totalItems: mappedData.length,
+            tipos: [...new Set(mappedData.map(item => item.Type).filter(Boolean))].length,
+            layouts: [...new Set(mappedData.map(item => item.Layout).filter(Boolean))].length,
+            paises: [...new Set(mappedData.map(item => item.Country).filter(Boolean))].length
+        };
+
+        // Agrupar por tipo
+        const categorias = {};
+        mappedData.forEach(item => {
+            const tipo = item.Type || 'Sin Tipo';
+            if (!categorias[tipo]) {
+                categorias[tipo] = [];
+            }
+            categorias[tipo].push(item);
+        });
+
+        // Agrupar por país
+        const responsables = {};
+        mappedData.forEach(item => {
+            const pais = item.Country || 'Sin País';
+            if (!responsables[pais]) {
+                responsables[pais] = [];
+            }
+            responsables[pais].push(item);
+        });
+
+        // Actividad reciente (últimos 5 items)
+        const actividadReciente = mappedData
+            .slice(0, 5);
+
+        return {
+            stats,
+            categorias,
+            responsables,
+            actividadReciente,
+            items: mappedData
+        };
+
+    } catch (error) {
+        console.error('Error procesando datos dinámicos:', error);
+        return {
+            stats: { totalItems: 0, enProgreso: 0, completados: 0, pendientes: 0 },
+            categorias: {},
+            responsables: {},
+            actividadReciente: [],
+            items: []
+        };
+    }
 }
 
 // ===== HANDLER PRINCIPAL =====
@@ -103,34 +278,27 @@ exports.handler = async (event, context) => {
         const userName = decoded.name || 'Usuario';
         const userPicture = decoded.picture || null;
 
-        // ===== CARGAR CONTENIDO DINÁMICO =====
-        // Aquí puedes cargar contenido desde base de datos, archivos, APIs, etc.
-        const loadDynamicContent = () => {
-            // Ejemplo: contenido dinámico basado en el usuario
-            return {
-                type: 'dashboard',
-                title: 'Dashboard Personal',
-                content: {
-                    welcome: `Bienvenido ${userName}`,
-                    email: userEmail,
-                    lastLogin: new Date().toISOString(),
-                    stats: {
-                        totalItems: 42,
-                        pendingTasks: 5,
-                        completedTasks: 37
-                    },
-                    recentActivity: [
-                        { id: 1, action: 'Documento creado', timestamp: '2024-01-15T10:30:00Z' },
-                        { id: 2, action: 'Configuración actualizada', timestamp: '2024-01-15T09:15:00Z' },
-                        { id: 3, action: 'Notificación recibida', timestamp: '2024-01-15T08:45:00Z' }
-                    ]
-                }
-            };
+        // ===== CARGAR CONTENIDO DINÁMICO DESDE SHEETBEST =====
+        console.log('🔄 Cargando datos desde SheetBest...');
+        const rawData = await loadSheetBestData();
+        const processedData = processDynamicContent(rawData);
+
+        // ===== CONSTRUIR RESPUESTA =====
+        const content = {
+            type: 'table',
+            title: 'Tabla de Productos Alegra',
+            content: {
+                welcome: `Bienvenido ${userName}`,
+                email: userEmail,
+                lastLogin: new Date().toISOString(),
+                dataSource: SHEETBEST_API_KEY ? 'SheetBest API' : 'Datos de Ejemplo',
+                stats: processedData.stats,
+                headers: ['ID', 'Parent', 'Name', 'Type', 'Layout', 'URL', 'Country', 'Technology', 'Responsive', 'Description', 'Img'],
+                data: processedData.items
+            }
         };
 
         // ===== RESPONDER CON CONTENIDO =====
-        const content = loadDynamicContent();
-        
         return {
             statusCode: 200,
             headers: {
@@ -147,7 +315,8 @@ exports.handler = async (event, context) => {
                     picture: userPicture,
                     sub: decoded.sub
                 },
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                dataSource: SHEETBEST_API_KEY ? 'SheetBest API' : 'Example Data'
             })
         };
 

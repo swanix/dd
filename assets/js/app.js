@@ -474,7 +474,8 @@ class ProtectedContentLoader {
             // Configurar user menu
             this.setupUserMenu();
             
-            // El contenido se cargará dinámicamente según la aplicación
+            // Cargar contenido dinámico desde SheetBest
+            await this.loadProtectedContent();
             
         } catch (error) {
             console.error('Error inicializando contenido protegido:', error);
@@ -558,32 +559,35 @@ class ProtectedContentLoader {
 
     async loadProtectedContent() {
         try {
-            // Por ahora, solo mostrar el canvas vacío
-            // En el futuro, aquí se puede cargar contenido dinámico desde load-content.js
-            console.log('Canvas listo para contenido dinámico');
+            console.log('🔄 Cargando contenido dinámico desde SheetBest...');
             
-            // Ejemplo de cómo cargar contenido dinámico en el futuro:
-            // const token = await this.auth0.getIdTokenClaims();
-            // const response = await fetch('/.netlify/functions/load-content', {
-            //     method: 'GET',
-            //     headers: {
-            //         'Authorization': `Bearer ${token.__raw}`,
-            //         'Content-Type': 'application/json'
-            //     }
-            // });
-            // 
-            // if (response.ok) {
-            //     const data = await response.json();
-            //     this.displayDynamicContent(data.content);
-            // }
+            // Obtener token de Auth0
+            const token = await this.auth0.getIdTokenClaims();
+            
+            // Cargar contenido desde la función de Netlify
+            const response = await fetch('/.netlify/functions/load-content', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token.__raw}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Contenido cargado exitosamente:', data);
+                this.displayDynamicContent(data.content);
+            } else {
+                throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+            }
             
         } catch (error) {
-            console.error('Error cargando contenido protegido:', error);
+            console.error('❌ Error cargando contenido protegido:', error);
             this.showError(`Error cargando contenido: ${error.message}`);
         }
     }
 
-    // Método para mostrar contenido dinámico (para uso futuro)
+    // Método para mostrar contenido dinámico desde SheetBest
     displayDynamicContent(content) {
         try {
             const container = document.querySelector('.canvas-container');
@@ -592,36 +596,195 @@ class ProtectedContentLoader {
                 return;
             }
 
-            // Limpiar contenido existente
             container.innerHTML = '';
 
-            // Aquí puedes renderizar el contenido dinámico
-            // Ejemplo básico:
-            container.innerHTML = `
-                <div class="dynamic-content">
-                    <h2>${content.title}</h2>
-                    <p>${content.content.welcome}</p>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span class="stat-number">${content.content.stats.totalItems}</span>
-                            <span class="stat-label">Total Items</span>
+            if (content.type === 'table') {
+                container.innerHTML = `
+                    <div class="dynamic-table">
+                        <!-- Header de la Tabla -->
+                        <div class="table-header">
+                            <div class="table-title">
+                                <h1>${content.title}</h1>
+                                <p class="welcome-message">${content.content.welcome}</p>
+                                <p class="data-source">📊 Fuente de datos: ${content.content.dataSource}</p>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number">${content.content.stats.pendingTasks}</span>
-                            <span class="stat-label">Pendientes</span>
+
+                        <!-- Estadísticas Simples -->
+                        <div class="stats-simple">
+                            <div class="stat-item">
+                                <span class="stat-number">${content.content.stats.totalItems}</span>
+                                <span class="stat-label">Total Registros</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">${content.content.stats.tipos}</span>
+                                <span class="stat-label">Tipos Únicos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">${content.content.stats.layouts}</span>
+                                <span class="stat-label">Layouts Únicos</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number">${content.content.stats.paises}</span>
+                                <span class="stat-label">Países</span>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number">${content.content.stats.completedTasks}</span>
-                            <span class="stat-label">Completadas</span>
+
+                        <!-- Tabla de Datos -->
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        ${content.content.headers.map(header => `<th>${header}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${content.content.data.map(row => `
+                                        <tr>
+                                            <td>${row.ID || ''}</td>
+                                            <td>${row.Parent || ''}</td>
+                                            <td>${row.Name || ''}</td>
+                                            <td>${row.Type || ''}</td>
+                                            <td>${row.Layout || ''}</td>
+                                            <td>${row.URL ? `<a href="${row.URL}" target="_blank">${row.URL}</a>` : ''}</td>
+                                            <td>${row.Country || ''}</td>
+                                            <td>${row.Technology || ''}</td>
+                                            <td>${row.Responsive || ''}</td>
+                                            <td>${row.Description || ''}</td>
+                                            <td>${row.Img ? `<a href="${row.Img}" target="_blank">Ver Imagen</a>` : ''}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
+            } else {
+                // Mantener el dashboard original como fallback
+                container.innerHTML = `
+                    <div class="dynamic-dashboard">
+                        <h1>${content.title}</h1>
+                        <p>${content.content.welcome}</p>
+                        <p>📊 Fuente de datos: ${content.content.dataSource}</p>
+                    </div>
+                `;
+            }
 
         } catch (error) {
-            console.error('Error mostrando contenido dinámico:', error);
+            console.error('❌ Error mostrando contenido dinámico:', error);
             this.showError('Error mostrando contenido dinámico');
         }
+    }
+
+    // Renderizar actividad reciente
+    renderRecentActivity(actividad) {
+        if (!actividad || actividad.length === 0) {
+            return '<p class="no-data">No hay actividad reciente</p>';
+        }
+
+        return actividad.map(item => `
+            <div class="activity-item">
+                <div class="activity-icon ${this.getStatusIcon(item.estado)}">${this.getStatusEmoji(item.estado)}</div>
+                <div class="activity-content">
+                    <div class="activity-title">${item.titulo}</div>
+                    <div class="activity-meta">
+                        <span class="activity-responsible">👤 ${item.responsable}</span>
+                        <span class="activity-date">📅 ${new Date(item.fecha_creacion).toLocaleDateString('es-ES')}</span>
+                    </div>
+                </div>
+                <div class="activity-status ${this.getStatusClass(item.estado)}">${item.estado}</div>
+            </div>
+        `).join('');
+    }
+
+    // Renderizar lista de clientes
+    renderProjectsList(items) {
+        if (!items || items.length === 0) {
+            return '<p class="no-data">No hay clientes disponibles</p>';
+        }
+
+        return items.map(item => `
+            <div class="project-card">
+                <div class="project-header">
+                    <h3 class="project-title">${item.titulo}</h3>
+                    <div class="project-status ${this.getStatusClass(item.estado)}">${item.estado}</div>
+                </div>
+                <p class="project-description">${item.descripcion}</p>
+                <div class="project-meta">
+                    <span class="project-category">🏷️ ${item.categoria}</span>
+                    <span class="project-priority ${this.getPriorityClass(item.prioridad)}">${item.prioridad}</span>
+                </div>
+                <div class="project-footer">
+                    <span class="project-responsible">📧 ${item.responsable}</span>
+                    <span class="project-date">📅 ${new Date(item.fecha_creacion).toLocaleDateString('es-ES')}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Renderizar estadísticas por categoría
+    renderCategoriesStats(categorias) {
+        if (!categorias || Object.keys(categorias).length === 0) {
+            return '<p class="no-data">No hay categorías disponibles</p>';
+        }
+
+        return Object.entries(categorias).map(([categoria, items]) => `
+            <div class="category-card">
+                <div class="category-header">
+                    <h3 class="category-name">${categoria}</h3>
+                    <div class="category-count">${items.length} proyectos</div>
+                </div>
+                <div class="category-projects">
+                    ${items.slice(0, 3).map(item => `
+                        <div class="category-project">
+                            <span class="project-name">${item.titulo}</span>
+                            <span class="project-status ${this.getStatusClass(item.estado)}">${item.estado}</span>
+                        </div>
+                    `).join('')}
+                    ${items.length > 3 ? `<div class="more-projects">+${items.length - 3} más...</div>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Utilidades para estados y prioridades
+    getStatusEmoji(estado) {
+        const emojis = {
+            'Con Transacción': '💳',
+            'Sin Transacción': '⏳',
+            'Con Email': '📧',
+            'Sin Email': '❌'
+        };
+        return emojis[estado] || '👤';
+    }
+
+    getStatusIcon(estado) {
+        const icons = {
+            'Con Transacción': 'status-completed',
+            'Sin Transacción': 'status-pending',
+            'Con Email': 'status-completed',
+            'Sin Email': 'status-default'
+        };
+        return icons[estado] || 'status-default';
+    }
+
+    getStatusClass(estado) {
+        const classes = {
+            'Con Transacción': 'status-completed',
+            'Sin Transacción': 'status-pending',
+            'Con Email': 'status-completed',
+            'Sin Email': 'status-default'
+        };
+        return classes[estado] || 'status-default';
+    }
+
+    getPriorityClass(prioridad) {
+        const classes = {
+            'Alta': 'priority-high',
+            'Media': 'priority-medium',
+            'Baja': 'priority-low'
+        };
+        return classes[prioridad] || 'priority-default';
     }
 
 
