@@ -3,21 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación</title>
+    <title>Inspector - Protegido</title>
     <link rel="stylesheet" href="/assets/css/main.css?v=1755364408331">
+    <link href="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            color: #333;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            padding: 20px;
+        }
+        .redirect-button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .redirect-button:hover {
+            background: #2980b9;
+        }
+    </style>
 </head>
 <body>
     <!-- User Menu se genera dinámicamente -->
 
-    <!-- Canvas en Blanco -->
+    <!-- Canvas para XDiagrams -->
     <main class="canvas-container">
-        <div class="content-placeholder">
-            <img src="/assets/img/logo.svg" alt="Logo marca de agua" class="watermark-logo">
+        <div id="app">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Verificando autenticación...</p>
+            </div>
         </div>
     </main>
 
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
     <script src="/assets/js/env-config.js?v=1755364408331"></script>
     <script src="/assets/js/app.js?v=1755364408331"></script>
+    
+    <script>
+    // ===== VERIFICACIÓN DE AUTENTICACIÓN =====
+    async function checkAuth() {
+        try {
+            console.log('🔐 [AUTH] Verificando autenticación...');
+            
+            // Configuración de Auth0
+            const auth0Config = window.AUTH0_CONFIG || {
+                domain: window.AUTH0_CONFIG?.domain || '',
+                client_id: window.AUTH0_CONFIG?.client_id || '',
+                redirect_uri: window.location.origin + '/app/',
+                cacheLocation: 'localstorage'
+            };
+
+            // Crear cliente Auth0
+            const auth0 = await createAuth0Client(auth0Config);
+            
+            // Verificar autenticación
+            const isAuthenticated = await auth0.isAuthenticated();
+            
+            if (!isAuthenticated) {
+                console.log('❌ [AUTH] Usuario no autenticado');
+                showError('No estás autenticado. Debes iniciar sesión para acceder a esta página.');
+                return;
+            }
+
+            // Obtener ID token de Auth0 (JWT)
+            const token = await auth0.getIdTokenClaims();
+            
+            if (!token || !token.__raw) {
+                console.log('❌ [AUTH] No se pudo obtener ID token');
+                showError('Error obteniendo token de autenticación.');
+                return;
+            }
+
+            console.log('✅ [AUTH] ID Token obtenido de Auth0');
+
+            // Verificar token con el servidor
+            const response = await fetch('/.netlify/functions/auth-protect', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token.__raw}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                console.log('❌ [AUTH] Token inválido');
+                showError('Tu sesión ha expirado. Debes iniciar sesión nuevamente.');
+                return;
+            }
+
+            const authData = await response.json();
+            console.log('✅ [AUTH] Autenticación exitosa:', authData.user.email);
+
+            // Token válido, cargar xdiagrams
+            loadXDiagrams(token);
+            
+        } catch (error) {
+            console.error('❌ [AUTH] Error de autenticación:', error);
+            showError(`Error de autenticación: ${error.message}`);
+        }
+    }
+
+    // ===== CARGAR XDIAGRAMS =====
+    function loadXDiagrams(token) {
+        console.log('🔄 [XDIAGRAMS] Cargando diagrama...');
+        
+        // Actualizar mensaje de carga
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando Inspector...</p>
+            </div>
+        `;
+
+        // Interceptar fetch para agregar autenticación automáticamente
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            // Solo interceptar peticiones al proxy de xdiagrams
+            if (url.includes('/.netlify/functions/xdiagrams-proxy')) {
+                console.log('🔐 [FETCH] Agregando token a petición al proxy');
+                options.headers = {
+                    ...options.headers,
+                    'Authorization': `Bearer ${token}`
+                };
+            }
+            return originalFetch(url, options);
+        };
+
+        // Configurar xdiagrams
+        window.$xDiagrams = {
+            url: "/.netlify/functions/xdiagrams-proxy",
+            title: "Inspector - Protegido",
+            clustersPerRow: "6 3 7 6 3",
+            showThemeToggle: false 
+        };
+
+        console.log('✅ [XDIAGRAMS] Configuración aplicada');
+
+        // Cargar la librería xdiagrams
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = 'https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.js';
+        script.onload = () => {
+            console.log('✅ [XDIAGRAMS] Librería cargada correctamente');
+        };
+        script.onerror = () => {
+            console.error('❌ [XDIAGRAMS] Error cargando librería');
+            showError('Error cargando XDiagrams');
+        };
+        document.head.appendChild(script);
+    }
+
+    // ===== REDIRIGIR A LOGIN =====
+    function redirectToLogin() {
+        console.log('🔄 [AUTH] Redirigiendo a login...');
+        window.location.href = '/login.html';
+    }
+
+    // ===== MOSTRAR ERROR =====
+    function showError(message) {
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div class="error">
+                <h2>Error de Autenticación</h2>
+                <p>${message}</p>
+                <button onclick="redirectToLogin()" class="redirect-button">Ir al Login</button>
+            </div>
+        `;
+    }
+
+    // ===== INICIAR VERIFICACIÓN DESPUÉS DE QUE APP.JS SE CARGUE =====
+    // Esperar a que app.js configure la autenticación
+    window.addEventListener('load', () => {
+        // Dar un pequeño delay para que app.js termine de cargar
+        setTimeout(checkAuth, 500);
+    });
+    </script>
 </body>
 </html>

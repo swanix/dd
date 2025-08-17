@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación</title>
+    <link rel="stylesheet" href="/assets/css/main.css?v=1755364408331">
+</head>
+<body>
+    <!-- User Menu se genera dinámicamente -->
+
+    <!-- Canvas en Blanco -->
+    <main class="canvas-container">
+        <div class="content-placeholder">
+            <img src="/assets/img/logo.svg" alt="Logo marca de agua" class="watermark-logo">
+        </div>
+    </main>
+
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/1.13/auth0-spa-js.production.js"></script>
+    <script src="/assets/js/env-config.js?v=1755364408331"></script>
+    <script src="/assets/js/app.js?v=1755364408331"></script>
+</body>
+</html>

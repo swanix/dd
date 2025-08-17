@@ -811,7 +811,91 @@ class ProtectedContentLoader {
 }
 
 // =============================================================================
-// 4. INICIALIZACIÓN AUTOMÁTICA
+// 4. FUNCIÓN PARA SOLO GENERAR USER MENU (XDIAGRAMS)
+// =============================================================================
+
+// Función para inicializar solo el user menu sin cargar contenido
+async function initUserMenuOnly() {
+    try {
+        console.log('🔧 [USER MENU] Inicializando menú de usuario...');
+        
+        // Configuración de Auth0
+        const auth0Config = window.AUTH0_CONFIG || {
+            domain: window.AUTH0_CONFIG?.domain || '',
+            client_id: window.AUTH0_CONFIG?.client_id || '',
+            redirect_uri: window.location.origin + '/app/',
+            cacheLocation: 'localstorage'
+        };
+
+        // Crear cliente Auth0
+        const auth0 = await createAuth0Client(auth0Config);
+        
+        // Verificar autenticación
+        const isAuthenticated = await auth0.isAuthenticated();
+        
+        if (!isAuthenticated) {
+            console.log('❌ [USER MENU] Usuario no autenticado');
+            return;
+        }
+
+        // Configurar user menu
+        const userMenu = window.initUserMenu();
+        
+        // Cargar información del usuario
+        const user = await auth0.getUser();
+        
+        // Elementos del avatar principal
+        const userPicture = document.getElementById('userPicture');
+        const userAvatar = document.querySelector('.user-avatar');
+        
+        // Elementos del dropdown
+        const userPictureDropdown = document.getElementById('userPictureDropdown');
+        const userInfo = document.querySelector('.user-info');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        
+        if (user.picture) {
+            // Mostrar foto de perfil
+            if (userPicture) {
+                userPicture.onload = () => userPicture.classList.add('show');
+                userPicture.src = user.picture;
+            }
+            if (userPictureDropdown) {
+                userPictureDropdown.onload = () => userPictureDropdown.classList.add('show');
+                userPictureDropdown.src = user.picture;
+            }
+        } else {
+            // Crear inicial si no hay foto
+            if (userAvatar && !document.getElementById('userInitial')) {
+                const userInitial = document.createElement('span');
+                userInitial.id = 'userInitial';
+                userInitial.className = 'user-initial show';
+                userInitial.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                userAvatar.appendChild(userInitial);
+            }
+            
+            if (userAvatar && !document.getElementById('userInitialDropdown')) {
+                const userInitialDropdown = document.createElement('span');
+                userInitialDropdown.id = 'userInitialDropdown';
+                userInitialDropdown.className = 'user-initial show';
+                userInitialDropdown.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                userAvatar.appendChild(userInitialDropdown);
+            }
+        }
+        
+        // Actualizar información del usuario
+        if (userName) userName.textContent = user.name || 'Usuario';
+        if (userEmail) userEmail.textContent = user.email || 'usuario@email.com';
+        
+        console.log('✅ [USER MENU] Menú de usuario configurado correctamente');
+        
+    } catch (error) {
+        console.error('❌ [USER MENU] Error configurando menú de usuario:', error);
+    }
+}
+
+// =============================================================================
+// 5. INICIALIZACIÓN AUTOMÁTICA
 // =============================================================================
 
 // Inicializar cuando el DOM esté listo
@@ -827,8 +911,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Solo inicializar ProtectedContentLoader en la página principal (app/index.html)
+    // MODIFICADO PARA XDIAGRAMS - Solo generar menú de usuario
     if (window.location.pathname === '/app/' || window.location.pathname === '/app/index.html') {
-        new ProtectedContentLoader();
+        // Inicializar solo el user menu sin cargar contenido
+        initUserMenuOnly();
     }
 });
 

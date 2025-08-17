@@ -10,8 +10,8 @@
   <meta name="llm-context" content="data/context.md">
   <meta name="ai-context" content="data/context.md">
   <link rel="context" href="data/context.md" type="text/markdown">
-  <meta name="description" content="Diagrama interactivo de secciones. Contexto completo en data/context.md">
-  <title>Inspector</title>
+  <meta name="description" content="Diagrama interactivo de secciones protegido con autenticación. Contexto completo en data/context.md">
+  <title>Inspector - Protegido</title>
   <link href="https://cdn.jsdelivr.net/gh/swanix/diagrams@v0.9.1/dist/xdiagrams.min.css" rel="stylesheet" />
 </head>
 <body class="custom-theme">
@@ -20,8 +20,8 @@
 
 <script>
   window.$xDiagrams = {
-    url: "https://api.sheetbest.com/sheets/f4c2def0-403c-4197-8020-9f1c42e34515/tabs/All",
-    title: "Inspector",
+    url: "/.netlify/functions/xdiagrams-proxy",
+    title: "Inspector - Protegido",
     clustersPerRow: "6 3 7 6 3",
     showThemeToggle: false 
   };
